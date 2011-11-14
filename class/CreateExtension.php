@@ -149,8 +149,6 @@ class CreateExtension extends Controller
 				
 				$this->viewExtension->messageQueue()->create(Message::success,"新扩展 %s 已经安装到系统中",$sExtName) ;
 			}
-			
-			$this->viewExtension->hideForm() ;
 
 		}while(0) ;}
 	}
@@ -168,7 +166,7 @@ class CreateExtension extends Controller
 			$aFile = $this->application()->fileSystem()->createFile($sPath) ;
 			
 			UIFactory::singleton()->create()->display(
-				'development.toolkit:'.$sTemplate
+				'org.opencomb.development.toolkit:'.$sTemplate
 				, $arrVariables
 				, $aFile->openWriter()
 			) ;
@@ -187,7 +185,7 @@ class CreateExtension extends Controller
 	
 	static public function isExtensionNameValid($sName)
 	{
-		return preg_match("/^[\\w\\.\\-_]{".self::extname_minlen.",".self::extname_maxlen."}$/",$sName) ;
+		return preg_match("/^[\\w\\-_]{".self::extname_minlen.",".self::extname_maxlen."}$/",$sName) ;
 	}
 }
 
