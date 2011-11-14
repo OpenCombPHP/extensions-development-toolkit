@@ -1,0 +1,15 @@
+<Extension>
+
+	<name>{=$sExtName}</name>
+	<version>{=$sExtVersion}</version>
+	<title>{=$sExtTitle}</title>
+	
+<if $sClassNamespace> 
+	<class>{=$sClassNamespace}.{=$sClassName}</class>
+	<package folder="/class" namespace="{=$sClassNamespace}" />
+</if> 
+	<template folder="/template" />
+	
+	<publicFolder folder="/public" />
+	
+</Extension>
