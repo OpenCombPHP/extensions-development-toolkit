@@ -166,7 +166,7 @@ class CreateExtension extends Controller
 			$aFile = $this->application()->fileSystem()->createFile($sPath) ;
 			
 			UIFactory::singleton()->create()->display(
-				'org.opencomb.development.toolkit:'.$sTemplate
+				'development-toolkit:'.$sTemplate
 				, $arrVariables
 				, $aFile->openWriter()
 			) ;
