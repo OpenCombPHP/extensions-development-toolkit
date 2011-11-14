@@ -24,7 +24,7 @@ class CreateExtension extends Controller
 					'extName' => array(
 						'class' => 'text' ,
 						'title' => '扩展名称' ,
-						'value' => 'com.doname.extname' ,
+						'value' => 'extname' ,
 						'verifier:length' => array('min'=>self::extname_minlen,'max'=>self::extname_maxlen) ,
 					) ,
 					'extVersion' => array(
@@ -149,6 +149,8 @@ class CreateExtension extends Controller
 				
 				$this->viewExtension->messageQueue()->create(Message::success,"新扩展 %s 已经安装到系统中",$sExtName) ;
 			}
+			
+			$this->viewExtension->hideForm() ;
 
 		}while(0) ;}
 	}
@@ -166,7 +168,7 @@ class CreateExtension extends Controller
 			$aFile = $this->application()->fileSystem()->createFile($sPath) ;
 			
 			UIFactory::singleton()->create()->display(
-				'org.opencomb.development.toolkit:'.$sTemplate
+				'development.toolkit:'.$sTemplate
 				, $arrVariables
 				, $aFile->openWriter()
 			) ;
