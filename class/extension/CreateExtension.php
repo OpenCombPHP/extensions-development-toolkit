@@ -59,9 +59,9 @@ class CreateExtension extends Controller
 		// 检查权限 ...
 		// todo
 		
-		if( $this->viewExtension->isSubmit( $this->aParams ) )
+		if( $this->viewExtension->isSubmit( $this->params ) )
 		{do{
-			$this->viewExtension->loadWidgets( $this->aParams ) ;
+			$this->viewExtension->loadWidgets( $this->params ) ;
 			
 			if( !$this->viewExtension->verifyWidgets() )
 			{
