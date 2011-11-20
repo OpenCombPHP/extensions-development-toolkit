@@ -4,7 +4,7 @@ namespace org\opencomb\development\toolkit ;
 use jc\lang\Exception;
 use jc\ui\xhtml\UIFactory;
 use jc\message\Message;
-use oc\mvc\controller\Controller;
+use org\opencomb\coresystem\mvc\controller\Controller;
 
 class CreateExtension extends Controller
 {
