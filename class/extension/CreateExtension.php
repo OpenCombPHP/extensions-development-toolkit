@@ -1,10 +1,10 @@
 <?php
 namespace org\opencomb\development\toolkit\extension ;
 
-use org\opencomb\coresystem\mvc\controller\ControlPanel;
 use jc\lang\Exception;
 use jc\ui\xhtml\UIFactory;
 use jc\message\Message;
+use org\opencomb\coresystem\mvc\controller\Controller;
 
 class CreateExtension extends ControlPanel
 {
