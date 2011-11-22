@@ -1,12 +1,12 @@
 <?php
-namespace org\opencomb\development\toolkit ;
+namespace org\opencomb\development\toolkit\extension ;
 
+use org\opencomb\coresystem\mvc\controller\ControlPanel;
 use jc\lang\Exception;
 use jc\ui\xhtml\UIFactory;
 use jc\message\Message;
-use oc\mvc\controller\Controller;
 
-class CreateExtension extends Controller
+class CreateExtension extends ControlPanel
 {
 	const extname_minlen = 6 ;
 	const extname_maxlen = 30 ;

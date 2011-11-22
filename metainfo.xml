@@ -4,8 +4,9 @@
 	<version>0.1</version>
 	<title>开发工具箱</title>
 	
-	<package folder="/class" namespace="org.opencomb.development.toolkit" />
+	<package folder="/class" namespace="org.opencomb.development.toolkit" >
+		</package>
 	
-	<template folder="/template" />
+	<class>org.opencomb.development.toolkit.Toolkit</class><template folder="/template" />
 	
 </Extension>
