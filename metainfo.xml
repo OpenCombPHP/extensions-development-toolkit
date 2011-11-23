@@ -9,4 +9,6 @@
 	
 	<class>org.opencomb.development.toolkit.Toolkit</class><template folder="/template" />
 	
+	<beanFolder folder="/bean" />
+	
 </Extension>
