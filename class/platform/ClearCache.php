@@ -1,11 +1,11 @@
 <?php
 namespace org\opencomb\development\toolkit\platform ;
 
-use jc\setting\Setting;
+use org\jecat\framework\setting\Setting;
 
-use jc\message\Message;
+use org\jecat\framework\message\Message;
 
-use jc\system\Application;
+use org\jecat\framework\system\Application;
 
 use org\opencomb\coresystem\mvc\controller\ControlPanel;
 

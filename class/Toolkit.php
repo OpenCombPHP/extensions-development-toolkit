@@ -1,8 +1,8 @@
 <?php
 namespace org\opencomb\development\toolkit ;
 
-use jc\lang\aop\AOP;
-use oc\ext\Extension;
+use org\jecat\framework\lang\aop\AOP;
+use org\opencomb\ext\Extension;
 
 class Toolkit extends Extension
 {

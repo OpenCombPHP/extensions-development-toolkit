@@ -1,13 +1,13 @@
 <?php
 namespace org\opencomb\development\toolkit\extension ;
 
-use jc\fs\FileSystem;
+use org\jecat\framework\fs\FileSystem;
 
-use jc\setting\Setting;
+use org\jecat\framework\setting\Setting;
 
-use jc\lang\Exception;
-use jc\ui\xhtml\UIFactory;
-use jc\message\Message;
+use org\jecat\framework\lang\Exception;
+use org\jecat\framework\ui\xhtml\UIFactory;
+use org\jecat\framework\message\Message;
 use org\opencomb\coresystem\mvc\controller\ControlPanel;
 
 class CreateExtension extends ControlPanel
