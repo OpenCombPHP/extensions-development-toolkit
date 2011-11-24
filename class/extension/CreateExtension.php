@@ -1,6 +1,10 @@
 <?php
 namespace org\opencomb\development\toolkit\extension ;
 
+use jc\fs\FileSystem;
+
+use jc\setting\Setting;
+
 use jc\lang\Exception;
 use jc\ui\xhtml\UIFactory;
 use jc\message\Message;
@@ -90,7 +94,7 @@ class CreateExtension extends ControlPanel
 			}
 			
 			
-			$aFs = $this->application()->fileSystem() ;
+			$aFs = FileSystem::singleton() ;
 			$sInstallPath = "/extensions/{$sExtName}/{$sExtVersion}" ;
 			
 			if( $aFs->find($sInstallPath) )
@@ -133,7 +137,7 @@ class CreateExtension extends ControlPanel
 			// 立即安装
 			if( $this->viewExtension->widget('extInstallAtOnce')->value() )
 			{
-				$aSetting = $this->application()->setting() ;
+				$aSetting = Setting::singleton() ;
 				
 				// 安装
 				$arrInstalleds = $aSetting->item('/extensions','installeds',array()) ;
@@ -155,7 +159,7 @@ class CreateExtension extends ControlPanel
 
 	private function createFolder($sPath)
 	{
-		$this->application()->fileSystem()->createFolder($sPath) ;
+		FileSystem::singleton()->createFolder($sPath) ;
 		
 		$this->viewExtension->messageQueue()->create(Message::notice,"创建目录：%s",$sPath) ;
 	}
@@ -163,7 +167,7 @@ class CreateExtension extends ControlPanel
 	private function createFile($sPath,$sTemplate,$arrVariables=null)
 	{
 		try{
-			$aFile = $this->application()->fileSystem()->createFile($sPath) ;
+			$aFile = FileSystem::singleton()->createFile($sPath) ;
 			
 			UIFactory::singleton()->create()->display(
 				'development-toolkit:'.$sTemplate
