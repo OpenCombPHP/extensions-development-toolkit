@@ -126,7 +126,7 @@ class CreateExtension extends ControlPanel
 			// 创建扩展文件
 			if( $sClassNamespace )
 			{
-				$this->createFile("{$sInstallPath}/class/{$sClassName}.php",'Extension.class.php',array(
+				$this->createFile("{$sInstallPath}/class/{$sClassName}.php",'Extension.class',array(
 					'sClassName' => $sClassName ,
 					'sClassNamespace' => $sClassNamespace ,
 				)) ;
