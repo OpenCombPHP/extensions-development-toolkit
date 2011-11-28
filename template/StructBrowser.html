@@ -1,0 +1,32 @@
+<lib name='jquery.treeview' />
+
+
+
+<style type="text/css">
+  #browser {
+    font-family: Verdana, helvetica, arial, sans-serif;
+    font-size: 68.75%;
+  }
+  </style>
+
+<ul id="browser" class="filetree"></ul>
+<button id="add">Add!</button>
+ 
+<script>
+
+(function($) {
+	jQuery("#browser").treeview();
+	jQuery("#add").click(function() {
+		var branches = jQuery("<li><span class='folder'>New Sublist</span><ul>" + 
+			"<li><span class='file'>Item1</span></li>" + 
+			"<li><span class='file'>Item2</span></li>" +
+			"</ul></li>").appendTo("#browser");
+		jQuery("#browser").treeview({
+			add: branches
+		});
+	});
+})(jQuery) ;
+
+
+</script>
+
