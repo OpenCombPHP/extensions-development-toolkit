@@ -1,7 +1,7 @@
 <?php 
 namespace {=str_replace('.','\\',$sClassNamespace)} ;
 
-use oc\ext\Extension ;
+use org\opencomb\ext\Extension ;
 
 class {=$sClassName} extends Extension 
 {

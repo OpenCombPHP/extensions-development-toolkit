@@ -4,7 +4,7 @@ return array(
 		'title' => '开发' ,
 		'menu' => array(
 			'direction' => 'v' ,
-			'independence' => true ,
+			'tearoff' => true ,
 			'items' => array(
 					array(
 							'title'=>'创建扩展' ,
