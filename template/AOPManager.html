@@ -1,0 +1,36 @@
+<lib name='jquery' />
+
+<msgqueue />
+
+<foreach for='$arrAopDetail' item='arrJointPoints' key='sClass'>
+<div id="class-{=$sClass}">
+
+	<div>
+		目标类：{=str_replace('\\','.',$sClass)}
+		<a href="?c=org.opencomb.development.toolkit.compile.AOPManager&act=clearClassCompliled&class={=$sClass}">清理编译缓存</a>
+	</div>
+	
+	<foreach for='$arrJointPoints' item='arrOneJointPoint' key='sJointPointDeclare' idx='nJointPointIdx'>
+	<div id="jointpoint-{=$nJointPointIdx}">
+		<div style="margin-left:20px">
+			<span style="color: #0000AC">切入点(连接点)：{=$sJointPointDeclare}</span>
+			<foreach for="$arrOneJointPoint['advices']" item='aAdvice' idx='nAdviceIdx'>
+				<div style="margin-left:20px">
+					<div>
+						切入代码：{=$aAdvice->position()}
+						<a href="javascript:jquery('#jointpoint-{=$nJointPointIdx}-advice-{=$nAdviceIdx}').toggle()">
+							<span style="color: #A5C400">{=$aAdvice->name()}</span>
+						</a>
+						<div style="color:#bbbbbb">[所属Aspect类: {=str_replace('\\','.',$arrOneJointPoint['aspects'][$nAdviceIdx]->aspectName())}]</div>
+					</div>
+					<pre id="jointpoint-{=$nJointPointIdx}-advice-{=$nAdviceIdx}" style="display:none">
+{=$aAdvice->source()}
+					</pre>
+				</div>
+			</foreach>
+		</div>
+	</div>
+	</foreach>
+</div>
+<hr />
+</foreach>
