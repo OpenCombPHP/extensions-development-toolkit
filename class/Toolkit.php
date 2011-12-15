@@ -2,7 +2,7 @@
 namespace org\opencomb\development\toolkit ;
 
 use org\jecat\framework\lang\aop\AOP;
-use org\opencomb\ext\Extension;
+use org\opencomb\platform\ext\Extension;
 
 class Toolkit extends Extension
 {
