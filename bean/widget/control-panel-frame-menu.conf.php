@@ -6,11 +6,24 @@ return array(
 		'menu' => array(
 			'direction' => 'v' ,
 			'items' => array(
-					'create-extensions' => array(
-							'title'=>'创建扩展' ,
-							'link' => '?c=org.opencomb.development.toolkit.extension.CreateExtension' ,
-							'quote' => 'c=org.opencomb.development.toolkit.extension.CreateExtension' ,
-					) ,
+					'extension' => array(
+						'title' => '扩展' ,
+						'link' => '?c=org.opencomb.development.toolkit.extension.ExtensionPackages' ,
+						'menu' => array(
+							'items' => array(
+								'create-extensions' => array(
+										'title'=>'创建扩展' ,
+										'link' => '?c=org.opencomb.development.toolkit.extension.CreateExtension' ,
+										'quote' => 'c=org.opencomb.development.toolkit.extension.CreateExtension' ,
+								) ,
+								'extensionpackage' => array(
+										'title'=>'扩展打包' ,
+										'link' => '?c=org.opencomb.development.toolkit.extension.ExtensionPackages' ,
+										'quote' => 'c=org.opencomb.development.toolkit.extension.ExtensionPackages' ,
+								) ,
+							),
+						),
+					),
 					'workspace' => array(
 							'title'=>'工作台' ,
 							'link' => '?c=org.opencomb.development.toolkit.platform.ClearCache' ,

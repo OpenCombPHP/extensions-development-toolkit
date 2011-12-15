@@ -1,0 +1,49 @@
+<table border='6'>
+    <tr>
+        <th>
+            名称
+        </th>
+        <th>
+            版本
+        </th>
+        <th>
+            安装位置
+        </th>
+        <th>
+            打包
+        </th>
+        <th>
+            下载
+        </th>
+    </tr>
+    <foreach for='{=$packageList}' item='package'>
+        <tr>
+            <td>
+                {=$package['name']}
+            </td>
+            <td>
+                {=$package['version']}
+            </td>
+            <td>
+                {=$package['installPath']}
+            </td>
+            <td>
+                <a href="{=$package['link']['package']}"><button>
+                	<if "$package['hasPackaged']">
+		                重新打包
+		            <else />
+		                打包
+		            </if>
+                </button></a>
+            </td>
+            <td>
+                <if "$package['hasPackaged']">
+                    <a href="{=$package['link']['download']}"><button>下载</button></a>
+                <else />
+                    尚未打包
+                </if>
+            </td>
+        </tr>
+    </foreach>
+</table>
+<msgqueue />
