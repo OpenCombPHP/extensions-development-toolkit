@@ -96,6 +96,9 @@ class ExtensionPackages extends ControlPanel{
 					}
 				}
 			}
+			
+			// disable tempsave
+			$this->arrPackageList = null;
 		}
 	}
 	
