@@ -1,14 +1,11 @@
 <?php
 namespace org\opencomb\development\toolkit\platform ;
 
+use org\jecat\framework\lang\oop\ClassLoader;
 use org\jecat\framework\fs\FileSystem;
-
 use org\jecat\framework\setting\Setting;
-
 use org\jecat\framework\message\Message;
-
 use org\jecat\framework\system\Application;
-
 use org\opencomb\coresystem\mvc\controller\ControlPanel;
 
 class ClearCache extends ControlPanel
@@ -58,9 +55,82 @@ class ClearCache extends ControlPanel
 			else
 			{
 				$this->form->createMessage(Message::failed,'清除模板编译缓存失败') ;
-			}	
+			}
+		}
+		$this->viewForm->variables()->set('classJson',json_encode( $this->getClassTree(ClassLoader::singleton()->packageIterator()) )) ;
+	}
+	
+	
+	private function getNamespaceTree($aPackageIterator){
+		$arrTree =  array();
+		foreach($aPackageIterator as $package){
+			$ns = $package->ns();
+			$arrNs = explode('\\',$ns);
+			$arrExp = &$arrTree;
+			foreach($arrNs as $ns_cl){
+				if(empty($arrExp[$ns_cl])){
+					$arrExp[$ns_cl] = array();
+				}
+				$arrExp = &$arrExp[$ns_cl];
+			}
+			$aFolder = $package->folder();
+			$this->getFileTree($aFolder->url(false),$arrExp,$aFolder->path());
+			$arrExp[] = $ns;
+		}
+		return $arrTree;
+	}
+	
+	private function getFileTree($pathname , &$arr,$path){
+		$aDirectoryIterator = new \DirectoryIterator($pathname);
+		foreach($aDirectoryIterator as $fileinfo){
+			if($fileinfo->isDot()) continue;
+				
+			$arrChild = array();
+			if($fileinfo->isDir()){
+				$this->getFileTree($fileinfo->getPathname(),$arrChild,$path.'/'.$fileinfo->getFilename());
+			}else{
+				$arrChild['ns'] = '';
+				$arrChild['path'] = $path.'/'.$fileinfo->getFilename();
+				$arrChild['fileinfo'] = $fileinfo;
+			}
+			$arr[$fileinfo->getFileName()] = $arrChild;
 		}
 	}
 
+	
+// 	private function getNamespaceTree($aPackageIterator){
+// 		$arrTree =  array();
+// 		foreach($aPackageIterator as $package){
+// 			$ns = $package->ns();
+// 			$arrNs = explode('\\',$ns);
+// 			$arrExp = &$arrTree;
+// 			foreach($arrNs as $ns_cl){
+// 				if(empty($arrExp[$ns_cl])){
+// 					$arrExp[$ns_cl] = array();
+// 				}
+// 				$arrExp = &$arrExp[$ns_cl];
+// 			}
+// 			$aFolder = $package->folder();
+// 			$this->getFileTree($aFolder->url(false),$arrExp,$aFolder->path());
+// 			$arrExp[] = $ns;
+// 		}
+// 		return $arrTree;
+// 	}
+	
+// 	private function getFileTree($pathname , &$arr,$path){
+// 		$aDirectoryIterator = new \DirectoryIterator($pathname);
+// 		foreach($aDirectoryIterator as $fileinfo){
+// 			if($fileinfo->isDot()) continue;
+				
+// 			$arrChild = array();
+// 			if($fileinfo->isDir()){
+// 				$this->getFileTree($fileinfo->getPathname(),$arrChild,$path.'/'.$fileinfo->getFilename());
+// 			}else{
+// 				$arrChild['ns'] = '';
+// 				$arrChild['path'] = $path.'/'.$fileinfo->getFilename();
+// 				$arrChild['fileinfo'] = $fileinfo;
+// 			}
+// 			$arr[$fileinfo->getFileName()] = $arrChild;
+// 		}
+// 	}
 }
-
