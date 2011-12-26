@@ -66,18 +66,31 @@ class ClearCache extends ControlPanel
 		foreach($aPackageIterator as $package){
 			$ns = $package->ns();
 			$arrNs = explode('\\',$ns);
-			$arrExp['name'] = &$arrTree['name'];
-			foreach($arrNs as $ns_cl){
-				if(empty($arrExp['name'])){
-					$arrExp['name'] = $ns_cl;
-				}
-				$arrExp['name'] = &$arrExp['name'];
-			}
+			$arrExp = &$arrTree;
+			$this->getEmptyTree(&$arrNs,&$arrExp);
+// 			foreach($arrNs as $ns_cl){
+// 				if(empty($arrExp)){
+// 					$arrExp['name'] = $ns_cl;
+// 				}else{
+// 					$arrExp['childs']['name'] = $ns_cl;
+// 				}
+// 				$arrExp = &$arrExp;
+// 			}
 			$arrExp['namespace'] = $ns;
 			$aFolder = $package->folder();
 			$this->getFileTree($aFolder->url(false),$arrExp,$aFolder->path());
 		}
 		return $arrTree;
+	}
+	
+	private function getEmptyTree($arrNs,$arrExp){
+		if($sNs = array_shift($arrNs)){
+			$arrExp['childs'][]['name'] = $sNs;
+			$arrExp['childs'][]['clilds'] = array();
+			$this->getEmptyTree(&$arrNs,&$arrExp);
+		}else{
+			return;
+		}
 	}
 	
 	private function getFileTree($pathname , &$arr , $path){
@@ -89,11 +102,11 @@ class ClearCache extends ControlPanel
 			if($fileinfo->isDir()){
 				$this->getFileTree($fileinfo->getPathname(),$arrChild,$path.'/'.$fileinfo->getFilename());
 			}else{
-				$arrChild['ns'] = '';
+				$arrChild['name'] = $fileinfo->getFileName();
 				$arrChild['path'] = $path.'/'.$fileinfo->getFilename();
-				$arrChild['fileinfo'] = $fileinfo;
+// 				$arrChild['fileinfo'] = $fileinfo;
 			}
-			$arr[$fileinfo->getFileName()] = $arrChild;
+			$arr['childs'][] = $arrChild;
 		}
 	}
 
