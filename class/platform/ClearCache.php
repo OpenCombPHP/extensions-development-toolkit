@@ -57,30 +57,30 @@ class ClearCache extends ControlPanel
 				$this->form->createMessage(Message::failed,'清除模板编译缓存失败') ;
 			}
 		}
-		$this->viewForm->variables()->set('classJson',json_encode( $this->getClassTree(ClassLoader::singleton()->packageIterator()) )) ;
+		$this->viewForm->variables()->set('classJson',json_encode( $this->getNamespaceTree(ClassLoader::singleton()->packageIterator()) )) ;
 	}
 	
 	
 	private function getNamespaceTree($aPackageIterator){
-		$arrTree =  array();
+		$arrTree =  array('name'=>"",'childs'=>array());
 		foreach($aPackageIterator as $package){
 			$ns = $package->ns();
 			$arrNs = explode('\\',$ns);
-			$arrExp = &$arrTree;
+			$arrExp['name'] = &$arrTree['name'];
 			foreach($arrNs as $ns_cl){
-				if(empty($arrExp[$ns_cl])){
-					$arrExp[$ns_cl] = array();
+				if(empty($arrExp['name'])){
+					$arrExp['name'] = $ns_cl;
 				}
-				$arrExp = &$arrExp[$ns_cl];
+				$arrExp['name'] = &$arrExp['name'];
 			}
+			$arrExp['namespace'] = $ns;
 			$aFolder = $package->folder();
 			$this->getFileTree($aFolder->url(false),$arrExp,$aFolder->path());
-			$arrExp[] = $ns;
 		}
 		return $arrTree;
 	}
 	
-	private function getFileTree($pathname , &$arr,$path){
+	private function getFileTree($pathname , &$arr , $path){
 		$aDirectoryIterator = new \DirectoryIterator($pathname);
 		foreach($aDirectoryIterator as $fileinfo){
 			if($fileinfo->isDot()) continue;
