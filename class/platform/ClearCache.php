@@ -57,59 +57,58 @@ class ClearCache extends ControlPanel
 				$this->form->createMessage(Message::failed,'清除模板编译缓存失败') ;
 			}
 		}
-		$this->viewForm->variables()->set('classJson',json_encode( $this->getNamespaceTree(ClassLoader::singleton()->packageIterator()) )) ;
+		
+// 		foreach(ClassLoader::singleton()->packageIterator() as $arr){
+// 			var_dump($arr->ns());
+// 		}
+// 		exit;
+		$this->viewForm->variables()->set('classJson',json_encode( $this->getTree(ClassLoader::singleton()->packageIterator()) )) ;
 	}
 	
-	
-	private function getNamespaceTree($aPackageIterator){
-		$arrTree =  array('name'=>"",'childs'=>array());
+	private function getTree($aPackageIterator){
+		$arrTree =  array();
 		foreach($aPackageIterator as $package){
 			$ns = $package->ns();
 			$arrNs = explode('\\',$ns);
 			$arrExp = &$arrTree;
-			$this->getEmptyTree(&$arrNs,&$arrExp);
-// 			foreach($arrNs as $ns_cl){
-// 				if(empty($arrExp)){
-// 					$arrExp['name'] = $ns_cl;
-// 				}else{
-// 					$arrExp['childs']['name'] = $ns_cl;
-// 				}
-// 				$arrExp = &$arrExp;
-// 			}
-			$arrExp['namespace'] = $ns;
+			foreach($arrNs as $ns_cl){
+				if( empty($arrExp['name']) || $arrExp['name'] != $ns_cl){
+					$arrExp['childs'][] = array('name'=>$ns_cl , 'childs'=>array() );
+					$arrExp = &$arrExp['childs'][count($arrExp['childs'])-1];
+				}
+			}
 			$aFolder = $package->folder();
-			$this->getFileTree($aFolder->url(false),$arrExp,$aFolder->path());
+			$arrExp['childs'][] = $this->buildNode($aFolder->url(false),$aFolder->path());
 		}
+// 		foreach($aPackageIterator as $package){
+// 			$arrTree[]['name'] = $package->ns();
+// 			$arrTree[count($arrTree)-1]['childs'] = $this->buildNode($package->folder()->url() , $package->folder()->path());
+// 		}
 		return $arrTree;
 	}
 	
-	private function getEmptyTree($arrNs,$arrExp){
-		if($sNs = array_shift($arrNs)){
-			$arrExp['childs'][]['name'] = $sNs;
-			$arrExp['childs'][]['clilds'] = array();
-			$this->getEmptyTree(&$arrNs,&$arrExp);
-		}else{
-			return;
-		}
-	}
-	
-	private function getFileTree($pathname , &$arr , $path){
-		$aDirectoryIterator = new \DirectoryIterator($pathname);
+	private function buildNode($aFolderUrl,$aFolderPath){
+		$arrNode = array(
+				'name' => $aFolderPath ,
+				'childs' => array() ,
+		) ;
+		
+		$aDirectoryIterator = new \DirectoryIterator($aFolderUrl);
 		foreach($aDirectoryIterator as $fileinfo){
 			if($fileinfo->isDot()) continue;
-				
-			$arrChild = array();
-			if($fileinfo->isDir()){
-				$this->getFileTree($fileinfo->getPathname(),$arrChild,$path.'/'.$fileinfo->getFilename());
-			}else{
-				$arrChild['name'] = $fileinfo->getFileName();
-				$arrChild['path'] = $path.'/'.$fileinfo->getFilename();
-// 				$arrChild['fileinfo'] = $fileinfo;
-			}
-			$arr['childs'][] = $arrChild;
-		}
-	}
 
+			//$arrChild = array();
+			if($fileinfo->isDir()){
+				$arrNode['childs'][] = $this->buildNode($fileinfo->getPathname(),$aFolderPath.'/'.$fileinfo->getFilename());
+			}else{
+				$arrNode['childs'][] = array(
+					'name' => $fileinfo->getFilename() ,
+					'path' => $aFolderPath.'/'.$fileinfo->getFilename() ,
+				) ;
+			}
+		}
+		return $arrNode;
+	}
 	
 // 	private function getNamespaceTree($aPackageIterator){
 // 		$arrTree =  array();
