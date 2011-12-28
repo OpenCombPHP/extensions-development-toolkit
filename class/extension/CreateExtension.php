@@ -146,7 +146,7 @@ class CreateExtension extends ControlPanel
 				
 				// 激活
 				$arrEnable = $aSetting->item('/extensions','enable',array()) ;
-				$arrEnable[] = $sExtName ;
+				$arrEnable[3][] = $sExtName ;
 				$aSetting->setItem('/extensions','enable',$arrEnable) ;
 				
 				$aSetting->saveKey('/extensions') ;
