@@ -73,7 +73,6 @@ class ClearCache extends ControlPanel
 			}
 			exit($sMessage);
 		}
-		
 		$this->viewForm->variables()->set('classJson',json_encode( $this->getTree(ClassLoader::singleton()->packageIterator()) )) ;
 	}
 	
