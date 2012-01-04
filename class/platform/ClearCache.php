@@ -1,6 +1,8 @@
 <?php
 namespace org\opencomb\development\toolkit\platform ;
 
+use org\jecat\framework\fs\FSIterator;
+
 use org\jecat\framework\lang\oop\ClassLoader;
 use org\jecat\framework\fs\FileSystem;
 use org\jecat\framework\setting\Setting;
@@ -57,11 +59,20 @@ class ClearCache extends ControlPanel
 				$this->form->createMessage(Message::failed,'清除模板编译缓存失败') ;
 			}
 		}
-		
-// 		foreach(ClassLoader::singleton()->packageIterator() as $arr){
-// 			var_dump($arr->ns());
-// 		}
-// 		exit;
+		//ajax的清理请求
+		if( $this->params->has('deletePaths') )
+		{
+			$sMessage = '成功清理以下缓存文件 : <br/>';
+			if($dataFolder = FileSystem::singleton()->findFolder('/data/compiled/class/')){
+				foreach($dataFolder->iterator(FSIterator::FOLDER | FSIterator::RETURN_FSO) as $aFolder){
+					foreach($this->params->get('deletePaths') as $sPath){
+						$aFolder->deleteChild( $sPath ,true,true);
+						$sMessage .=  $sPath . "<br/>";
+					}
+				}
+			}
+			exit($sMessage);
+		}
 		$this->viewForm->variables()->set('classJson',json_encode( $this->getTree(ClassLoader::singleton()->packageIterator()) )) ;
 	}
 	
@@ -72,77 +83,42 @@ class ClearCache extends ControlPanel
 			$arrNs = explode('\\',$ns);
 			$arrExp = &$arrTree;
 			foreach($arrNs as $ns_cl){
-				if( empty($arrExp['name']) || $arrExp['name'] != $ns_cl){
-					$arrExp['childs'][] = array('name'=>$ns_cl , 'childs'=>array() );
-					$arrExp = &$arrExp['childs'][count($arrExp['childs'])-1];
+				$bFound= false;
+				for($i = 0; $i < count($arrExp) ;$i++){
+					if( isset($arrExp[$i]['name']) && $arrExp[$i]['name'] == $ns_cl){
+						$arrExp = &$arrExp[$i]['childs'];
+						$bFound = true;
+						break;
+					}
+				}
+				if(!$bFound){
+					$arrExp[] = array('name'=>$ns_cl , 'childs'=>array());
+					$arrExp = &$arrExp[count($arrExp)-1]['childs'];
 				}
 			}
 			$aFolder = $package->folder();
-			$arrExp['childs'][] = $this->buildNode($aFolder->url(false),$aFolder->path());
+			$arrExp = $this->buildNode($aFolder->url(false),$aFolder->path());
 		}
-// 		foreach($aPackageIterator as $package){
-// 			$arrTree[]['name'] = $package->ns();
-// 			$arrTree[count($arrTree)-1]['childs'] = $this->buildNode($package->folder()->url() , $package->folder()->path());
-// 		}
 		return $arrTree;
 	}
 	
-	private function buildNode($aFolderUrl,$aFolderPath){
-		$arrNode = array(
-				'name' => $aFolderPath ,
-				'childs' => array() ,
-		) ;
-		
-		$aDirectoryIterator = new \DirectoryIterator($aFolderUrl);
+	private function buildNode($sFolderUrl,$aFolderPath){
+		$arrNode = array();
+		$aDirectoryIterator = new \DirectoryIterator($sFolderUrl);
 		foreach($aDirectoryIterator as $fileinfo){
-			if($fileinfo->isDot()) continue;
-
-			//$arrChild = array();
+			if($fileinfo->isDot()){
+				continue;
+			}
 			if($fileinfo->isDir()){
-				$arrNode['childs'][] = $this->buildNode($fileinfo->getPathname(),$aFolderPath.'/'.$fileinfo->getFilename());
+				$arrNode[]['childs'] = $this->buildNode( $fileinfo->getPathname() , $aFolderPath.'/'.$fileinfo->getFilename() );
+				$arrNode[count($arrNode)-1]['name'] = $fileinfo->getFilename();
 			}else{
-				$arrNode['childs'][] = array(
-					'name' => $fileinfo->getFilename() ,
-					'path' => $aFolderPath.'/'.$fileinfo->getFilename() ,
+				$arrNode[] = array(
+					'name' => substr($fileinfo->getFilename() , 0 ,strlen($fileinfo->getFilename())-4) ,
+					'filename' => $fileinfo->getFilename()
 				) ;
 			}
 		}
 		return $arrNode;
 	}
-	
-// 	private function getNamespaceTree($aPackageIterator){
-// 		$arrTree =  array();
-// 		foreach($aPackageIterator as $package){
-// 			$ns = $package->ns();
-// 			$arrNs = explode('\\',$ns);
-// 			$arrExp = &$arrTree;
-// 			foreach($arrNs as $ns_cl){
-// 				if(empty($arrExp[$ns_cl])){
-// 					$arrExp[$ns_cl] = array();
-// 				}
-// 				$arrExp = &$arrExp[$ns_cl];
-// 			}
-// 			$aFolder = $package->folder();
-// 			$this->getFileTree($aFolder->url(false),$arrExp,$aFolder->path());
-// 			$arrExp[] = $ns;
-// 		}
-// 		return $arrTree;
-// 	}
-	
-// 	private function getFileTree($pathname , &$arr,$path){
-// 		$aDirectoryIterator = new \DirectoryIterator($pathname);
-// 		foreach($aDirectoryIterator as $fileinfo){
-// 			if($fileinfo->isDot()) continue;
-				
-// 			$arrChild = array();
-// 			if($fileinfo->isDir()){
-// 				$this->getFileTree($fileinfo->getPathname(),$arrChild,$path.'/'.$fileinfo->getFilename());
-// 			}else{
-// 				$arrChild['ns'] = '';
-// 				$arrChild['path'] = $path.'/'.$fileinfo->getFilename();
-// 				$arrChild['fileinfo'] = $fileinfo;
-// 			}
-// 			$arr[$fileinfo->getFileName()] = $arrChild;
-// 		}
-// 	}
 }
