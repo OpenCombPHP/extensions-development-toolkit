@@ -1,0 +1,94 @@
+<lib name='jquery' />
+<style>
+.select_table{
+	width:40%;
+}
+</style>
+<div>扩展名：{=$extName}</div>
+<form>
+	<input type='hidden' name='c' value='org.opencomb.development.toolkit.extension.createsetup.CreateSetup' />
+	<input type='hidden' name='extName' value='{=$extName}' />
+	<if 'empty($tableList)'>
+		<div>此扩展不包含数据表</div>
+	<else />
+		选择数据表：
+		<table class="select_table">
+			<tr>
+				<th>数据表名称</th>
+				<th>是否包含数据表结构</th>
+				<th>是否包含数据</th>
+			</tr>
+			<tr>
+				<td></td>
+				<td>
+					<input type='button' value='全选' onclick='setStructCheck("a")' />
+					<input type='button' value='全取消' onclick='setStructCheck("n")' />
+					<input type='button' value='反选' onclick='setStructCheck("o")' />
+				</td>
+			</tr>
+			<foreach for='$tableList' item='tableName' >
+				<tr>
+					<td>{=$tableName}</td>
+					<td><input class='struct' type='checkbox' name="struct[]" value='{=$tableName}' /></td>
+					<td><input class='data' type='checkbox' name='data[]' value='{=$tableName}' /></td>
+				</tr>
+			</foreach>
+		</table>
+	</if>
+	<div>选择配置<input type='checkbox' name='conf' /></div>
+	<div>选择文件<input type='checkbox' name='file' /></div>
+	<div>更新metainfo.xml<input type='checkbox' name='updatemetainfo' /></div>
+	<div>覆盖已有安装程序<input type='checkbox' name='coverexist' /></div>
+	<input type='submit' />
+</form>
+<script type="text/javascript">
+function bindClickForStruct(){
+	jQuery('.struct').change(
+		function(){
+			var tr = jQuery(this).closest('tr');
+			var data = tr.find('.data');
+			if(this.checked){
+				data.css('display','inline');
+			}else{
+				data.attr('checked',false);
+				data.css('display','none');
+			}
+		}
+	);
+}
+function setDisplayForData(){
+	jQuery('.data').css('display',
+		function(index,value){
+			var tr = jQuery(this).closest('tr');
+			var struct = tr.find('.struct');
+			if(struct.attr('checked')){
+				return 'inline';
+			}else{
+				return 'none';
+			}
+		}
+	);
+}
+// t: a , n , o
+// all , none , opposite
+function setStructCheck(t){
+	jQuery('.struct').attr('checked',
+		function(i,v){
+			switch(t){
+			case 'a':
+				return true;
+				break;
+			case 'n':
+				return false;
+				break;
+			case 'o':
+				return !v;
+				break;
+			}
+		}
+	);
+	jQuery('.struct').change();
+}
+jQuery(bindClickForStruct);
+jQuery(setDisplayForData);
+</script>

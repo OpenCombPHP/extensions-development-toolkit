@@ -1,0 +1,36 @@
+<form>
+    <input type='hidden' name='c' value='org.opencomb.development.toolkit.extension.createsetup.SelectItem' />
+    <table border='6'>
+        <tr>
+            <th>
+            </th>
+            <th>
+                名称
+            </th>
+            <th>
+                标题
+            </th>
+            <th>
+                版本
+            </th>
+        </tr>
+        <foreach for='{=$arrPackage}' item='package'>
+            <tr>
+                <td>
+                    <input type='radio' name='extName' value='{=$package['name']}'/>
+                </td>
+                <td>
+                    {=$package['name']}
+                </td>
+                <td>
+                    {=$package['title']}
+                </td>
+                <td>
+                    {=$package['version']}
+                </td>
+            </tr>
+        </foreach>
+    </table>
+    <input type='submit' />
+</form>
+<msgqueue />
