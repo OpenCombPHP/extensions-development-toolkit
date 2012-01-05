@@ -13,7 +13,6 @@ class Setup extends AbstractSetup{
 		
 		// 1 . create data table
 		<foreach for="$arrTableInfoList" item="tableinfo">
-		$this->executeSQL('drop table if exists `{=$tableinfo['Table']}`');
 		$this->executeSQL(
 "{=$tableinfo['Create Table']}"
 		);
