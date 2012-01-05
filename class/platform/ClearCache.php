@@ -1,14 +1,14 @@
 <?php
 namespace org\opencomb\development\toolkit\platform ;
 
-use org\jecat\framework\fs\FSIterator;
-
 use org\jecat\framework\lang\oop\ClassLoader;
 use org\jecat\framework\fs\FileSystem;
 use org\jecat\framework\setting\Setting;
 use org\jecat\framework\message\Message;
 use org\jecat\framework\system\Application;
 use org\opencomb\coresystem\mvc\controller\ControlPanel;
+use org\jecat\framework\fs\IFolder ;
+use org\jecat\framework\fs\FSIterator ;
 
 class ClearCache extends ControlPanel
 {
@@ -97,25 +97,23 @@ class ClearCache extends ControlPanel
 				}
 			}
 			$aFolder = $package->folder();
-			$arrExp = $this->buildNode($aFolder->url(false),$aFolder->path());
+			$arrExp = $this->buildNode($aFolder);
 		}
 		return $arrTree;
 	}
 	
-	private function buildNode($sFolderUrl,$aFolderPath){
+	private function buildNode(IFolder $aFolder){
 		$arrNode = array();
-		$aDirectoryIterator = new \DirectoryIterator($sFolderUrl);
-		foreach($aDirectoryIterator as $fileinfo){
-			if($fileinfo->isDot()){
-				continue;
-			}
-			if($fileinfo->isDir()){
-				$arrNode[]['childs'] = $this->buildNode( $fileinfo->getPathname() , $aFolderPath.'/'.$fileinfo->getFilename() );
-				$arrNode[count($arrNode)-1]['name'] = $fileinfo->getFilename();
+		$aFSIterator = $aFolder->iterator( ( FSIterator::FLAG_DEFAULT ^ FSIterator::RECURSIVE_SEARCH ) | FSIterator::RETURN_FSO );
+		foreach($aFSIterator as $aFSO){
+			if($aFSO instanceof IFolder){
+				$arrNode[]['childs'] = $this->buildNode( $aFSO );
+				$arrNode[count($arrNode)-1]['name'] = $aFSO->name();
 			}else{
+				$name = $aFSO->name();
 				$arrNode[] = array(
-					'name' => substr($fileinfo->getFilename() , 0 ,strlen($fileinfo->getFilename())-4) ,
-					'filename' => $fileinfo->getFilename()
+					'name' => substr($name , 0 ,strlen($name)-4) ,
+					'filename' => $name
 				) ;
 			}
 		}
