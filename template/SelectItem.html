@@ -3,9 +3,15 @@
 .select_table{
 	width:40%;
 }
+.warning{
+	color:red;
+}
+#file_list{
+	display:none;
+}
 </style>
 <div>扩展名：{=$extName}</div>
-<form>
+<form id='form'>
 	<input type='hidden' name='c' value='org.opencomb.development.toolkit.extension.createsetup.CreateSetup' />
 	<input type='hidden' name='extName' value='{=$extName}' />
 	<if 'empty($tableList)'>
@@ -35,13 +41,41 @@
 			</foreach>
 		</table>
 	</if>
-	<div>选择配置<input type='checkbox' name='conf' /></div>
-	<div>选择文件<input type='checkbox' name='file' /></div>
+	<div>包含配置<input type='checkbox' name='conf' /></div>
+	<div>
+		包含文件
+		<input type='checkbox' name='file' onchange='on_check(this,"注意：将会覆盖已包含的数据文件","")' />
+		<div id="warning_file" class="warning"></div>
+		<ul class="warning" id='file_list'>
+			<foreach for='$aDataFileFolderIterator' item='file'>
+				<li>{=$file}</li>
+			</foreach>
+		</ul>
+	</div>
 	<div>更新metainfo.xml<input type='checkbox' name='updatemetainfo' /></div>
-	<div>覆盖已有安装程序<input type='checkbox' name='coverexist' /></div>
-	<input type='submit' />
+	<div><div class="warning">注意：将会覆盖已有的安装程序</div></div>
+	<a href='#' onclick='on_submit()'>产生setup</a>
 </form>
 <script type="text/javascript">
+function on_check(o,y,n){
+	var warning_file = document.getElementById('warning_file');
+	var file_list = document.getElementById('file_list');
+	if(o.checked){
+		warning_file.innerHTML=y;
+		file_list.style.display = 'block';
+	}else{
+		warning_file.innerHTML=n;
+		file_list.style.display = 'none';
+	}
+}
+function on_submit(){
+	var c = confirm('将会覆盖已有的安装程序，是否继续');
+	console.log(c);
+	if(c){
+		var form = document.getElementById('form');
+		form.submit();
+	}
+}
 function bindClickForStruct(){
 	jQuery('.struct').change(
 		function(){

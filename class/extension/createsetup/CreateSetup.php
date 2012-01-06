@@ -30,6 +30,7 @@ class CreateSetup extends ControlPanel{
 		$bUpdateMetainfo = $this->params['updatemetainfo'];
 		
 		// calc
+		$this->sExtName = $extName ;
 		foreach($struct as $s){
 			$tableInfo = $this->getShowCreateTable($s);
 			$this->arrTableInfoList[$s] = $tableInfo ;
@@ -48,19 +49,23 @@ class CreateSetup extends ControlPanel{
 		$aPackageIterator = $this->aExtension->metainfo()->pakcageIterator();
 		$arrPackage = $aPackageIterator->current();
 		$this->ns = $arrPackage[0] ;
+		// conf
 		if($bContainConf){
 			$this->setting = $this->getSettings();
 		}
+		// file
 		if($bContainFile and $this->aExtension->publicFolder()->exists() ){
 			$this->sDataFolder = $this->aExtension->metainfo()->installPath().'/data/public';
 			try{
+				$aToFolder = FileSystem::singleton()->findFolder($this->sDataFolder);
+				if($aToFolder->exists()){
+					$aToFolder->delete(true);
+				}
 				$this->aExtension->publicFolder()->copy($this->sDataFolder);
 			}catch(\Exception $e){
 				$this->createSetup->createMessage(Message::error,'copy folder error :%s',$e->message());
-				$this->sDataFolder = '' ;
 			}
 		}
-		$this->sExtName = $extName ;
 		$strSetupCode = $this->createSetup() ;
 		// save code to file
 		$aClassLoader = ClassLoader::singleton();
@@ -132,7 +137,6 @@ class CreateSetup extends ControlPanel{
 		$aUI = UIFactory::singleton()->create();
 		$aBuffer = new OutputStreamBuffer;
 		$className = $this->aExtension->metainfo()->className();
-		//$namespace = substr( $className , 0 , strrpos($className,'\\') );
 		$variables = array(
 			'extName' => $this->sExtName,
 			'className' => $className,

@@ -3,6 +3,8 @@ namespace org\opencomb\development\toolkit\extension\createsetup ;
 
 use org\opencomb\coresystem\mvc\controller\ControlPanel;
 use org\jecat\framework\db\DB ;
+use org\opencomb\platform\ext\Extension ;
+use org\jecat\framework\fs\FileSystem ;
 
 class SelectItem extends ControlPanel{
 	public function createBeanConfig(){
@@ -18,9 +20,13 @@ class SelectItem extends ControlPanel{
 		$extName = $this->params['extName'] ;
 		// calc
 		$tableList = $this->getExtDBTableList($extName,'') ;
+		$aExtension = Extension::flyweight($extName);
+		$sDataFileFolder = $aExtension->metainfo()->installPath().'/data/public';
+		$aDataFileFolderIterator = FileSystem::singleton()->findFolder($sDataFileFolder)->iterator();
 		// set to template
 		$this->selectItem->variables()->set('extName',$extName) ;
 		$this->selectItem->variables()->set('tableList',$tableList);
+		$this->selectItem->variables()->set('aDataFileFolderIterator',$aDataFileFolderIterator);
 	}
 	
 	public function getExtDBTableList($extName , $prefix){
