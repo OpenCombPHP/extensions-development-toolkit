@@ -1,0 +1,40 @@
+<div>扩展名称：{=$extName}</div>
+<msgqueue />
+<table border='1'>
+	<foreach for='$arrTableInfoList' item='tableinfo'>
+		<tr>
+			<td>{=$tableinfo['Table']}</td>
+			<td><pre>{=$tableinfo['Create Table']}</pre></td>
+			<td>
+				<if '!empty($tableinfo["keys"])'>
+					<table>
+						<tr>
+							<foreach for='$tableinfo["keys"]' item='key'>
+								<th>{=$key}</th>
+							</foreach>
+						</tr>
+						<foreach for='$tableinfo["data"]' item='row'>
+							<tr>
+								<foreach for='$row' item='d'>
+									<td>{=$d}</td>
+								</foreach>
+							</tr>
+						</foreach>
+					</table>
+				<else '!empty($tableinfo["data"])' />
+					此表内数据为空
+				<else />
+					选择不包含此表的数据
+				</if>
+			</td>
+		</tr>
+	</foreach>
+</table>
+<if '!empty($setting)'>
+	配置：{=$setting}
+</if>
+<if '!empty($dataFolder)'>
+	文件：{=$dataFolder}
+</if>
+<br />
+{=highlight_string($setupCode,true)}

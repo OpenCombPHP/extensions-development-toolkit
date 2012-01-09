@@ -21,6 +21,15 @@ return array(
 										'link' => '?c=org.opencomb.development.toolkit.extension.ExtensionPackages' ,
 										'query' => 'c=org.opencomb.development.toolkit.extension.ExtensionPackages' ,
 								) ,
+								'createsetup' => array(
+										'title'=>'生成setup' ,
+										'link' => '?c=org.opencomb.development.toolkit.extension.createsetup.SelectExtension' ,
+										'query' => array(
+												'c=org.opencomb.development.toolkit.extension.createsetup.SelectExtension' ,
+												'c=org.opencomb.development.toolkit.extension.createsetup.SelectItem' ,
+												'c=org.opencomb.development.toolkit.extension.createsetup.CreateSetup',
+											),
+								) ,
 							),
 						),
 					),

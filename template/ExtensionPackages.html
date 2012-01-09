@@ -1,3 +1,16 @@
+<script type="text/javascript">
+function submit_package(pname){
+    var package_name = document.getElementById('package_name');
+    package_name.value = pname;
+    var form = document.getElementById('form');
+    form.submit();
+}
+</script>
+<form id='form'>
+<input type='hidden' name='c' value='org.opencomb.development.toolkit.extension.ExtensionPackages' />
+<input type='hidden' name='act' value='package' />
+<input id="package_name" type='hidden' name='name' value='' />
+<input type='checkbox' name='includeGit' >将.git目录/.svn目录/.cvs目录加入包中</input>
 <table border='6'>
     <tr>
         <th>
@@ -34,13 +47,13 @@
                 {=$package['installPath']}
             </td>
             <td>
-                <a href="{=$package['link']['package']}"><button>
-                	<if "$package['hasPackaged']">
-		                重新打包
-		            <else />
-		                打包
-		            </if>
-                </button></a>
+                <a href='#' onclick="submit_package('{=$package["name"]}')">
+                    <if "$package['hasPackaged']">
+                        重新打包
+                    <else />
+                        打包
+                    </if>
+                </a>
             </td>
             <td>
                 <if "$package['hasPackaged']">
@@ -52,4 +65,5 @@
         </tr>
     </foreach>
 </table>
+</form>
 <msgqueue />

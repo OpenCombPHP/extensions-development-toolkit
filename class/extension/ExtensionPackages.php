@@ -32,6 +32,8 @@ class ExtensionPackages extends ControlPanel{
 	
 	protected function actionPackage(){
 		$name = $this->params['name'];
+		$includeGit = $this->params['includeGit'];
+		
 		$debug = $this->getDebug();
 		$packageList = $this->packageList();
 		$package = $packageList[$name];
@@ -57,42 +59,48 @@ class ExtensionPackages extends ControlPanel{
 				if($debug){
 					$this->extensionPackages->createMessage(Message::notice,'扩展安装目录:%s',$installFolder->path());
 				}
+				if($debug){
+					if($includeGit){
+						$this->extensionPackages->createMessage(Message::notice,'包含git\svn\cvs目录');
+					}
+				}
 				foreach($installFolder->iterator(FSIterator::FILE | FSIterator::FOLDER | FSIterator::RECURSIVE_SEARCH | FSIterator::RETURN_FSO) as $it){
-					if(preg_match('/.git/',$it->path())){
-						
+					if(preg_match('`/\\.(git|svn|cvs)(/|$)`',$it->path())){
+						if(empty($includeGit)){
+							continue;
+						}
+					}
+					if($it instanceof IFolder){
+						$path = $it->path();
+						$path = FileSystem::relativePath($installFolder,$it);
+						$bSuccess = $bSuccess and $aZip->addEmptyDir($path);
+						if($debug){
+							$this->extensionPackages->createMessage(Message::notice, '创建目录：%s : %s',array($path,$aZip->getStatusString()));
+						}
 					}else{
-						if($it instanceof IFolder){
-							$path = $it->path();
-							$path = FileSystem::relativePath($installFolder,$it);
-							$bSuccess = $bSuccess and $aZip->addEmptyDir($path);
-							if($debug){
-								$this->extensionPackages->createMessage(Message::notice, '创建目录：%s : %s',array($path,$aZip->getStatusString()));
-							}
-						}else{
-							$path = $it->path();
-							$path = FileSystem::relativePath($installFolder,$it);
-							$bSuccess = $bSuccess and $aZip->addFile($it->url(false),$path);
-							if($debug){
-								$this->extensionPackages->createMessage(Message::notice, '压缩文件 %s 来自 %s : %s',array($path,$it->path(),$aZip->getStatusString()));
-							}
+						$path = $it->path();
+						$path = FileSystem::relativePath($installFolder,$it);
+						$bSuccess = $bSuccess and $aZip->addFile($it->url(false),$path);
+						if($debug){
+							$this->extensionPackages->createMessage(Message::notice, '压缩文件 %s 来自 %s : %s',array($path,$it->path(),$aZip->getStatusString()));
 						}
 					}
 				}
 				$bSuccess = $bSuccess and $aZip->close();
 				if($debug){
-					$this->extensionPackages->createMessage(Message::notice,'关闭压缩文件:%s,%s',array($aPackagedFSO->path(),$aZip->getStatusString()));
+					$this->extensionPackages->createMessage(Message::notice,'关闭压缩文件:%s',array($aPackagedFSO->path()));
 				}
 				if($debug){
 					if($bSuccess){
-						$this->extensionPackages->createMessage(Message::notice,'%s打包成功:%s',array($name,$aZip->getStatusString()));
+						$this->extensionPackages->createMessage(Message::notice,'%s打包成功',array($name));
 					}else{
-						$this->extensionPackages->createMessage(Message::notice,'%s打包失败:%s',array($name,$aZip->getStatusString()));
+						$this->extensionPackages->createMessage(Message::notice,'%s打包失败',array($name));
 					}
 				}else{
 					if($bSuccess){
 						$this->extensionPackages->createMessage(Message::notice,'%s打包成功',array($name));
 					}else{
-						$this->extensionPackages->createMessage(Message::notice,'%s打包失败:%s',array($name,$aZip->getStatusString()));
+						$this->extensionPackages->createMessage(Message::notice,'%s打包失败',array($name));
 					}
 				}
 			}
@@ -123,7 +131,6 @@ class ExtensionPackages extends ControlPanel{
 							),
 					);
 			}
-			
 		}
 		return $this->arrPackageList;
 	}
