@@ -48,14 +48,14 @@ class RemoveCache extends ControlPanel
 				$bFound= false;
 				for($i = 0; $i < count($arrExp) ;$i++){
 					if( isset($arrExp[$i]['name']) && $arrExp[$i]['name'] == $ns_cl){
-						$arrExp = &$arrExp[$i]['childs'];
+						$arrExp = &$arrExp[$i]['children'];
 						$bFound = true;
 						break;
 					}
 				}
 				if(!$bFound){
-					$arrExp[] = array('name'=>$ns_cl , 'childs'=>array());
-					$arrExp = &$arrExp[count($arrExp)-1]['childs'];
+					$arrExp[] = array('name'=>$ns_cl , 'children'=>array());
+					$arrExp = &$arrExp[count($arrExp)-1]['children'];
 				}
 			}
 			$aFolder = $package->folder();
@@ -72,7 +72,7 @@ class RemoveCache extends ControlPanel
 				continue;
 			}
 			if($fileinfo->isDir()){
-				$arrNode[]['childs'] = $this->buildNode( $fileinfo->getPathname() , $aFolderPath.'/'.$fileinfo->getFilename() );
+				$arrNode[]['children'] = $this->buildNode( $fileinfo->getPathname() , $aFolderPath.'/'.$fileinfo->getFilename() );
 				$arrNode[count($arrNode)-1]['name'] = $fileinfo->getFilename();
 			}else{
 				$arrNode[] = array(
