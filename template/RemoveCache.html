@@ -1,10 +1,10 @@
 <lib name='jquery.ztree' />
 <script>
-jQuery(function(){
+jquery(function(){
 	//树数据
 	classList = {=$classJson};
 	//初始化树
-	jQuery.fn.zTree.init(jQuery("#classTree"), {
+	jquery.fn.zTree.init(jquery("#classTree"), {
 		view: {
 			expandSpeed: 0
 		},
@@ -14,11 +14,11 @@ jQuery(function(){
 		},
 	}, classList);
 	
-	var aRunningZTree = jQuery.fn.zTree.getZTreeObj("classTree");
+	var aRunningZTree = jquery.fn.zTree.getZTreeObj("classTree");
 	
 	//搜索树
-	jQuery('#keyWord').on('change',function(){
-		var sKeyWord = jQuery.trim(jQuery(this).val());
+	jquery('#keyWord').on('keyup',function(){
+		var sKeyWord = jquery.trim(jquery(this).val());
 		if(sKeyWord.length < 2){
 			aRunningZTree.expandAll(false);
 			aRunningZTree.cancelSelectedNode();
@@ -35,18 +35,18 @@ jQuery(function(){
 		}
 		//隐藏无关树
 		var nodeLis = jquery('#classTree li');
-		nodeLis.show(0);
 		nodeLis.each(function (){
-			if(!jquery(this).find('a.curSelectedNode').size()){
-				jquery(this).hide(0);
+			jquery(this).hide(0);
+			if(jquery(this).has('a.curSelectedNode').length){
+				jquery(this).show(0);
 			}
 		});
 		//焦点回归
-		jQuery(this).focus();
+		jquery(this).focus();
 	});
 	
 	//点击清理按钮
-	jQuery('#cleanSpecialCache').click(function(){
+	jquery('#cleanSpecialCache').click(function(){
 		var arrCheckedNodes = aRunningZTree.getCheckedNodes(true);
 		var arrDeletePaths = [];
 		//整理需要清理的路径
@@ -55,16 +55,16 @@ jQuery(function(){
 		}
 		var aDelete = {deletePaths: arrDeletePaths};
 		//发送到后台进行清理
-		jQuery.ajax({
+		jquery.ajax({
 			url: "?c=org.opencomb.development.toolkit.platform.RemoveCache",
 			type: 'post',
 			data:aDelete,
 			dataType: 'text',
 			beforeSend : function(){
-				jQuery("#cleanMessage").html("处理中...");
+				jquery("#cleanMessage").html("处理中...");
 			},
 			success: function(msg){
-				jQuery("#cleanMessage").html(msg);
+				jquery("#cleanMessage").html(msg);
 			}
 		});
 	});
