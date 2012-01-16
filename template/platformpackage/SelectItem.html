@@ -1,0 +1,48 @@
+<style>
+.error{
+	display:inline;
+	color:red;
+}
+</style>
+<script type='text/javascript' >
+// t: a , n , o
+// all , none , opposite
+function setSelect(t){
+	var arrCheck = document.getElementsByName('ext[]');
+	for(var i=0;i<arrCheck.length;++i){
+		var aCheck = arrCheck[i];
+		switch(t){
+		case 'a':
+			aCheck.checked = true;
+			break;
+		case 'n':
+			aCheck.checked = false;
+			break;
+		case 'o':
+			aCheck.checked = !aCheck.checked;
+			break;
+		}
+	}
+}
+</script>
+<h1>选择扩展</h1>
+<button onclick='setSelect("a")' >全选</button>
+<button onclick='setSelect("n")' >清空</button>
+<button onclick='setSelect("o")' >反选</button>
+<form method='get' >
+	<input type='hidden' name='c' value='org.opencomb.development.toolkit.platform.createpackage.ShowVersion' />
+	<ul class='selectItem'>
+		<foreach for='$arrExtension' item='ext'>
+			<li>
+				<input type='checkbox' name='ext[]' value='{=$ext->name()}' />{=$ext->name()}。版本：{=$ext->version()}
+				<if '$arrPackageState[$ext->name()] === false'>
+					<div class='error'>此扩展尚未打包，请进入扩展打包页面进行打包</div>
+				</if>
+			</li>
+		</foreach>
+	</ul>
+	<br />
+	<input type='checkbox' name='gitframework' />是否携带framework的版本仓库<br />
+	<input type='checkbox' name='gitplatform' />是否携带platform的版本仓库<br />
+	<input type='submit' value='确定' />
+</form>
