@@ -33,6 +33,24 @@ return array(
 							),
 						),
 					),
+					'platform' => array(
+						'title' => '平台' ,
+						'link' => '?c=org.opencomb.development.toolkit.platform.createpackage.SelectItem' ,
+						'query' => 'c=org.opencomb.development.toolkit.platform.createpackage.SelectItem' ,
+						'menu' => array(
+							'items' => array(
+								'create-package' => array(
+									'title' => '二次发布' ,
+									'link' => '?c=org.opencomb.development.toolkit.platform.createpackage.SelectItem' ,
+									'query' => array(
+											'c=org.opencomb.development.toolkit.platform.createpackage.SelectItem' ,
+											'c=org.opencomb.development.toolkit.platform.createpackage.ShowVersion' ,
+											'c=org.opencomb.development.toolkit.platform.createpackage.CreatePackage' ,
+									),
+								),
+							),
+						),
+					),
 					'workspace' => array(
 							'title'=>'工作台' ,
 							'link' => '?c=org.opencomb.development.toolkit.platform.ClearCache' ,

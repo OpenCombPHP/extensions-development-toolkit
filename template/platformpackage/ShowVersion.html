@@ -1,0 +1,132 @@
+<style>
+.selectItem{
+	margin-left:30px;
+}
+.error{
+	color:red;
+	display:inline;
+}
+.error2{
+	color:red;
+}
+.section1{
+	font-size:22px;
+}
+</style>
+{?$error = false }
+<div class='section1'>需求依赖</div>
+<ul class='selectItem'>
+	<li>语言
+		<ul class='selectItem'>
+			<li>php。现在有版本：{=$version['php']}。需求版本：
+				<ul class='selectItem'>
+					<foreach for='$arrDependence["language"]["php"]' item='versionScope'>
+						<li>{=$versionScope->toString(true)}</li>
+					</foreach>
+				</ul>
+			</li>
+		</ul>
+	</li>
+	<li>语言扩展
+		<ul class='selectItem'>
+			<foreach for='$arrDependence["language_module"]' key='name' item='lm'>
+				<li>{=$name}。
+					<if 'isset($version[$name])'>
+						现有版本：{=$version[$name]}
+					<else />
+						<div class='error'>本机未安装此扩展</div>
+					</if>
+					。需求版本：
+					<ul class='selectItem'>
+						<foreach for='$lm' item='lmvs'>
+							<li>{=$lmvs->toString(true)}</li>
+						</foreach>
+					</ul>
+				</li>
+			</foreach>
+		</ul>
+	</li>
+	<li>框架
+		<ul class='selectItem'>
+			<li>JeCat。版本：{=$version['jecat']}。需求版本
+				<ul class='selectItem'>
+					<foreach for='$arrDependence["framework"][""]' item='versionScope'>
+						<li>{=$versionScope->toString(true)}</li>
+					</foreach>
+				</ul>
+			</li>
+		</ul>
+	</li>
+	<li>平台
+		<ul class='selectItem'>
+			<li>OpenComb。版本：{=$version['opencomb']}。需求版本
+				<ul class='selectItem'>
+					<foreach for='$arrDependence["platform"][""]' item='versionScope'>
+						<li>{=$versionScope->toString(true)}</li>
+					</foreach>
+				</ul>
+			</li>
+		</ul>
+	</li>
+	<li>平台扩展
+		<ul class='selectItem'>
+			<foreach for='$arrDependence["extension"]' key='name' item='lm'>
+				<li>{=$name}。
+					<if 'isset($arrExtension[$name])'>
+						现有版本：{=$arrExtension[$name]->version()->toString(true)}
+					<else />
+						<div class='error'>本机未安装此扩展</div>
+					</if>
+					。需求版本：
+					<ul class='selectItem'>
+						<foreach for='$lm' item='lmvs'>
+							<li>{=$lmvs->toString(true)}</li>
+						</foreach>
+					</ul>
+				</li>
+			</foreach>
+		</ul>
+	</li>
+</ul>
+<div class='section1'>将会把以下扩展打包</div>
+<form method='get'>
+	<input type='hidden' name='c' value='org.opencomb.development.toolkit.platform.createpackage.CreatePackage' />
+	<foreach for='$arrContainGit' key='key' item='value'>
+		<input type='hidden' name='git{=$key}' value='on' />
+	</foreach>
+	<table>
+		<tr>
+			<th>name</th>
+			<th>title</th>
+			<th>version</th>
+			<th>dependence</th>
+		</tr>
+		<foreach for='$arrExtension' key='sExtName' item='ext'>
+			<tr>
+				<if 'empty($ext)'>
+					<td>{=$sExtName}</td>
+					<td><div class='error'>未安装此扩展</div></td>
+				<else />
+					<td>{=$ext->name()}<input type='hidden' name='ext[]' value='{=$ext->name()}' />
+						<if '$arrPackageState[$sExtName] === false'>
+							<div class='error2'>此扩展尚未打包，请进入扩展打包页面进行打包</div>
+							{?$error = true}
+						</if>
+					</td>
+					<td>{=$ext->title()}</td>
+					<td>{=$ext->version()}</td>
+					<td>
+						<foreach for='$ext->dependence()->iterator()' item='dep'>
+							{=$dep->type()},{=$dep->itemName()},{=$dep->versionScope()->toString(true)},<br />
+						</foreach>
+					</td>
+				</if>
+			</tr>
+		</foreach>
+	</table>
+	<if '$error === false'>
+		<input type='submit' value='确认，下一步' />
+	<else />
+		<div class='error2'>有错误，无法进入下一步。</div>
+	</if>
+</form>
