@@ -51,7 +51,10 @@ jquery(function(){
 		//焦点回归
 		jquery(this).focus();
 	});
-	
+	//点击清除搜索框内容
+	jquery('#cleanKeyWord').click(function(){
+		jquery('#keyWord').val('');
+	});
 	//点击清理按钮
 	jquery('#cleanSpecialCache').click(function(){
 		var arrCheckedNodes = aRunningZTree.getCheckedNodes(true);
@@ -92,7 +95,7 @@ jquery(function(){
 <h2>删除缓存</h2>
 <msgqueue />
 
-<label>搜索: <input type="text" id="keyWord" /></label>
+<label>搜索: <input type="text" id="keyWord" /></label><button id='cleanKeyWord'>清除</button>
 <div id='classTree' class='ztree'></div>
 <input id="cleanSpecialCache" type="submit" class='coresystem-form-button' value='清 理'/>
 <div id="cleanMessage">
