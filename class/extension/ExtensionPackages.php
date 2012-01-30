@@ -12,8 +12,6 @@ use org\jecat\framework\fs\IFolder ;
 use org\opencomb\platform\Platform ;
 
 // /?c=org.opencomb.development.toolkit.extension.ExtensionPackages
-// 扩展打包之后的文件名：
-// <extension name>-<version>.ocp.zip
 
 class ExtensionPackages extends ControlPanel{
 	public function createBeanConfig()
@@ -27,6 +25,10 @@ class ExtensionPackages extends ControlPanel{
 	
 	public function process(){
 		$this->doActions() ;
+		
+		$aPackageFolder = $this->getPackageFolder();
+		
+		$this->extensionPackages->variables()->set('packageFolder',$aPackageFolder->path());
 		$this->extensionPackages->variables()->set('packageList',$this->packageList()) ;
 	}
 	
@@ -39,14 +41,14 @@ class ExtensionPackages extends ControlPanel{
 		$package = $packageList[$name];
 		$bSuccess = true;
 		if(!empty($package)){
-			$aPackagedFSO = $this->getPackagedFSO($package['name'],$package['version']);
+			$aPackagedFSO = $this->getPackagedFSO($package['name'],$package['version'],$includeGit);
 			if(! $aPackagedFSO instanceof LocalFSO){
 				$this->extensionPackages->createMessage(Message::notice, '失败：扩展安装目录不在本地文件系统');
 				return;
 			}
 			$aZip = new \ZipArchive();
 			$filename = $aPackagedFSO->name();
-			$filePath = $this->getPackagedFSO($package['name'],$package['version'])->url(false);
+			$filePath = $aPackagedFSO->url(false);
 			if($debug){
 				$this->extensionPackages->createMessage(Message::notice,'即将创建压缩文件:%s : %s',array($aPackagedFSO->path(),$filePath));
 			}else{
@@ -122,12 +124,15 @@ class ExtensionPackages extends ControlPanel{
 						'title' => $ext->title(),
 						'version' => $ext->version(),
 						'installPath' => $ext->installPath(),
-						'hasPackaged' => $this->hasPackaged($ext->name(),$ext->version()),
+						'hasPackaged' => $this->hasPackaged($ext->name(),$ext->version(),0),
+						'hasPackagedVl' => $this->hasPackaged($ext->name(),$ext->version(),1),
 						'metainfo' => $ext,
 						'link' =>
 							array(
 								'package' => $this->createLink('package',$ext->name()),
+								'packageVl' => $this->createLink('package',$ext->name(),'',1),
 								'download' => $this->createLink('download',$ext->name(),$ext->version()),
+								'downloadVl' => $this->createLink('download',$ext->name(),$ext->version(),1),
 							),
 					);
 			}
@@ -141,24 +146,41 @@ class ExtensionPackages extends ControlPanel{
 	}
 	
 	private function getPackageFolder(){
-		return Extension::flyweight('development-toolkit')->publicFolder();
+		return Extension::flyweight('development-toolkit')->publicFolder()->findFolder('extensionPackages',FileSystem::FIND_AUTO_CREATE);
 	}
 	
-	private function getPackagedFSO($name,$version){
-		return $this->getPackageFolder()->findFile($name.'-'.$version.'.ocp.zip',FileSystem::FIND_AUTO_CREATE_OBJECT);
+	/**
+	 * 扩展打包之后的文件名：
+	 * 1.不含版本库
+	 * <extension name>-<version>.ocp.zip
+	 * 2.包含版本库
+	 * <extension name>-<version>-repos.ocp.zip
+	 */
+	private function getPackagedFSO($name,$version , $vl){
+		$sVl = '';
+		if(empty($vl)){
+			$sVl = '';
+		}else{
+			$sVl = '-repos';
+		}
+		return $this->getPackageFolder()->findFile($name.'-'.$version.$sVl.'.ocp.zip',FileSystem::FIND_AUTO_CREATE_OBJECT);
 	}
 	
-	private function hasPackaged($name,$version){
-		return $this->getPackagedFSO($name,$version)->exists();
+	private function hasPackaged($name,$version , $vl){
+		return $this->getPackagedFSO($name,$version , $vl)->exists();
 	}
 	
-	private function createLink($type,$name,$version=''){
+	private function createLink($type,$name,$version='',$vl=''){
 		switch($type){
 		case 'package':
-			return '/?c=org.opencomb.development.toolkit.extension.ExtensionPackages&act=package&name='.$name;
+			if(empty($vl)){
+				return '/?c=org.opencomb.development.toolkit.extension.ExtensionPackages&act=package&name='.$name;
+			}else{
+				return '/?c=org.opencomb.development.toolkit.extension.ExtensionPackages&act=package&name='.$name.'&includeGit=on';
+			}
 			break;
 		case 'download':
-			return $this->getPackagedFSO($name,$version)->path();
+			return $this->getPackagedFSO($name,$version,$vl)->path();
 			break;
 		}
 	}
