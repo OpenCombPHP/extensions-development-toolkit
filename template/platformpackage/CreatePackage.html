@@ -1,3 +1,31 @@
-{=$sFrameworkFileName}
-<br />
-{=$sPlatformFileName}
+<style>
+.yes{
+	color:red;
+}
+.no{
+	color:green;
+}
+</style>
+<table>
+	<tr>
+		<th>名称</th>
+		<th>解压目标</th>
+		<th>是否包含版本仓库</th>
+		<th>文件路径</th>
+	</tr>
+	<foreach for='$arrZipFiles' item='ZipFile'>
+		<tr>
+			<td>{=$ZipFile['name']}</td>
+			<td>{=$ZipFile['path']}</td>
+			<td>
+				<if 'empty($ZipFile["git"])'>
+					<div class="no">否</div>
+				<else />
+					<div class="yes">是</div>
+				</if>
+			</td>
+			<td>{=$ZipFile['localpath']}</td>
+		</tr>
+	</foreach>
+</table>
+

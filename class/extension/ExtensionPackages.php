@@ -140,12 +140,12 @@ class ExtensionPackages extends ControlPanel{
 		return $this->arrPackageList;
 	}
 	
-	private function getDebug(){
+	static private function getDebug(){
 		$aPlatform = Platform::singleton();
 		return $aPlatform->isDebugging();
 	}
 	
-	private function getPackageFolder(){
+	static private function getPackageFolder(){
 		return Extension::flyweight('development-toolkit')->publicFolder()->findFolder('extensionPackages',FileSystem::FIND_AUTO_CREATE);
 	}
 	
@@ -156,21 +156,21 @@ class ExtensionPackages extends ControlPanel{
 	 * 2.包含版本库
 	 * <extension name>-<version>-repos.ocp.zip
 	 */
-	private function getPackagedFSO($name,$version , $vl){
+	static public function getPackagedFSO($name,$version , $vl){
 		$sVl = '';
 		if(empty($vl)){
 			$sVl = '';
 		}else{
 			$sVl = '-repos';
 		}
-		return $this->getPackageFolder()->findFile($name.'-'.$version.$sVl.'.ocp.zip',FileSystem::FIND_AUTO_CREATE_OBJECT);
+		return self::getPackageFolder()->findFile($name.'-'.$version.$sVl.'.ocp.zip',FileSystem::FIND_AUTO_CREATE_OBJECT);
 	}
 	
-	private function hasPackaged($name,$version , $vl){
-		return $this->getPackagedFSO($name,$version , $vl)->exists();
+	static public function hasPackaged($name,$version , $vl){
+		return self::getPackagedFSO($name,$version , $vl)->exists();
 	}
 	
-	private function createLink($type,$name,$version='',$vl=''){
+	static public function createLink($type,$name,$version='',$vl=''){
 		switch($type){
 		case 'package':
 			if(empty($vl)){
@@ -180,7 +180,7 @@ class ExtensionPackages extends ControlPanel{
 			}
 			break;
 		case 'download':
-			return $this->getPackagedFSO($name,$version,$vl)->path();
+			return self::getPackagedFSO($name,$version,$vl)->path();
 			break;
 		}
 	}

@@ -11,6 +11,8 @@ use org\jecat\framework\fs\FileSystem ;
 use org\jecat\framework\fs\FSIterator ;
 use org\jecat\framework\io\IOutputStream ;
 use org\jecat\framework\ui\xhtml\UIFactory ;
+use org\opencomb\development\toolkit\extension\ExtensionPackages ;
+use org\opencomb\platform\Platform ;
 
 class CreatePackage extends ControlPanel
 {
@@ -25,41 +27,68 @@ class CreatePackage extends ControlPanel
 	public function process(){
 		// input
 		$arrExtName = $this->params['ext'];
-		$git = array() ;
-		$git['framework'] = $this->params['gitframework'] ;
-		$git['platform'] = $this->params['gitplatform'] ;
+		$git = $this->params['git'] ;
 		// stamp
-		$sStamp = date("Y-m-d_G-i-s") ;
-		// create zip
-		$aZipFileFramework =
-			Extension::flyweight('development-toolkit')
-				->publicFolder()
-					->findFile('framework_'.$sStamp.'.zip',FileSystem::FIND_AUTO_CREATE_OBJECT);
-		$aZipFramework = $this->createZip($aZipFileFramework);
-		$aZipFilePlatform =
-			Extension::flyweight('development-toolkit')
-				->publicFolder()
-					->findFile('platform_'.$sStamp.'.zip',FileSystem::FIND_AUTO_CREATE_OBJECT);
-		$aZipPlatform = $this->createZip($aZipFilePlatform);
-		// package framework
-		$this->packageFramework($aZipFramework , $git['framework'] );
-		// package platform
-		$this->packagePlatform($aZipPlatform , $git['platform'] );
-		// close
-		$bCloseFramework = $aZipFramework->close();
-		$bClosePlatform = $aZipPlatform->close();
-		// file name
-		$sFrameworkFileName = $aZipFileFramework -> path() ;
-		$sPlatformFileName = $aZipFilePlatform -> path() ;
-		$this->view->variables()->set('sFrameworkFileName',$sFrameworkFileName);
-		$this->view->variables()->set('sPlatformFileName',$sPlatformFileName);
-		// test data
-		$this->testData($aZipFileFramework);
+		$sStamp = '';
+		
+		// arr zip files
+		$arrZipFiles = 
+		array(
+			'framework' =>
+			array(
+				'name'=>'framework',
+				'path'=>'framework',
+			),
+			'platform' =>
+			array(
+				'name'=>'platform',
+				'path'=>'.',
+			),
+		);
+		
+		// packagePublicSetup
+		$arrZipFiles[] = $this->packagePublicSetup();
+		 
+		// package framework and platform
+		$arr = array('framework','platform') ;
+		foreach($arr as $s){
+			if(!isset($git[$s])){
+				$git[$s] = 0;
+			}
+			$uc = ucwords($s);
+			$aZipFile = ExtensionPackages::getPackagedFSO($s , 'version' ,$git[$s] ) ;
+			$aZip = $this->createZip($aZipFile);
+			$sFun = 'package'.$uc;
+			$this->$sFun($aZip , $git[$s]);
+			$aZip->close();
+			$arrZipFiles[$s]['reader'] = $aZipFile->openReader();
+			$arrZipFiles[$s]['localpath'] = $aZipFile->path();
+			$arrZipFiles[$s]['git'] = $git[$s] ;
+		}
 		// dependence
 		$this->calcDependence($arrExtName);
+
+		$aExtensionManager = ExtensionManager::singleton();
+		foreach($arrExtName as $sExtName){
+			$aMetainfo = $aExtensionManager->extensionMetainfo($sExtName);
+			$sName = $aMetainfo->name();
+			$sVersion = $aMetainfo->version()->toString();
+			$aFile = ExtensionPackages::getPackagedFSO($sName , $sVersion ,$git[$sName] ) ;
+			$arrZipFiles [] = 
+			array(
+				'name' => $sName ,
+				'path' => 'extensions/'.$sName ,
+				'reader' => $aFile->openReader() ,
+				'localpath' => $aFile->path(),
+				'git' => $git[$sName] ,
+			);
+		}
 		// create setup
 		$aWriter = $this->createWriter();
-		$this->createSetup($aWriter);
+		$this->createSetup($aWriter , $arrZipFiles);
+		
+		// template
+		$this->view->variables()->set('arrZipFiles',$arrZipFiles);
 	}
 	
 	private function createZip(IFile $aFile){
@@ -82,7 +111,7 @@ class CreatePackage extends ControlPanel
 		}else{
 			$sExcludePattern = '' ;
 		}
-		return $this->package($aZip,$aFolder,'framework',$sExcludePattern);
+		return $this->package($aZip,$aFolder,'',$sExcludePattern);
 	}
 	
 	private function packagePlatform(\ZIPARCHIVE $aZip , $git ){
@@ -93,7 +122,7 @@ class CreatePackage extends ControlPanel
 		}else{
 			$sExcludePattern = '`^(framework|data|extensions|settings|.settings)(/|$)`' ;
 		}
-		return $this->package($aZip,$aFolder,'platform',$sExcludePattern);
+		return $this->package($aZip,$aFolder,'',$sExcludePattern);
 	}
 	
 	private function package(\ZIPARCHIVE $aZip,IFolder $aFolder , $sPrefix , $sExcludePattern){
@@ -125,17 +154,15 @@ class CreatePackage extends ControlPanel
 		return $aFile->openWriter();
 	}
 	
-	private function createSetup(IOutputStream $aDevice){
+	private function createSetup(IOutputStream $aDevice , array $arrZipFile){
 		$aUI = UIFactory::singleton()->create();
+		$sZipKey = md5(date("Y-m-d_G-i-s"));
 		$variables = array(
 			'arrDependence' => $this->arrDependence,
+			'sZipKey' => $sZipKey ,
+			'arrZips' => $arrZipFile,
 		);
 		$aUI->display('development-toolkit:platformpackage/setup.php',$variables,$aDevice);
-	}
-	
-	private function testData(IFile $aFile){
-		$aReader = $aFile->openReader();
-		$str = $aReader->read();
 	}
 	
 	private function calcDependence(array $arrExtName){
@@ -181,6 +208,51 @@ class CreatePackage extends ControlPanel
 		if(!empty($arrRequireExtension)){
 			$this->calcDependence($arrRequireExtension);
 		}
+	}
+	
+	private function packagePublicSetup(){
+		$sName = 'public' ;
+		$git = 0 ;
+		// file list and folder list
+		$aPlatform = Platform::singleton();
+		$arrFileList = array();
+		foreach($aPlatform->publicFolders()->folderIterator('development-toolkit.oc.setup') as $aFolder){
+			$aFSIterator = $aFolder->iterator(FSIterator::CONTAIN_FILE | FSIterator::CONTAIN_FOLDER | FSIterator::RETURN_FSO | FSIterator::RECURSIVE_SEARCH );
+			foreach($aFSIterator as $aFSO){
+				$sRelativePath = $aFSIterator->relativePath();
+				$arrFileList[$sRelativePath] = $aFSO ;
+			}
+		}
+		
+		// create zip
+		$aZipFile = ExtensionPackages::getPackagedFSO( $sName , 'noversion' ,$git ) ;
+		$aZip = $this->createZip($aZipFile);
+		
+		// zip 
+		foreach($arrFileList as $sInZipPath => $aFSO){
+			if( $aFSO instanceof IFolder ){
+				$bR = $aZip->addEmptyDir($sInZipPath);
+				if($bR === false){
+					echo $aZip->getStatusString();
+				}
+			}else{
+				$sLocalPath = $aFSO->url(false);
+				$bR = $aZip->addFile($sLocalPath , $sInZipPath);
+				if($bR === false){
+					echo $aZip->getStatusString();
+				}
+			}
+		}
+		$aZip->close();
+		
+		$arr = array(
+			'name' => $sName ,
+				'path' => $sName ,
+				'reader' => $aZipFile->openReader() ,
+				'localpath' => $aZipFile->path(),
+				'git' => $git ,
+		);
+		return $arr ;
 	}
 	
 	private $arrDependence = null ;

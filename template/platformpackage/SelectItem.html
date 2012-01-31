@@ -1,6 +1,6 @@
 <style>
 .error{
-	display:inline;
+	display:block;
 	color:red;
 }
 </style>
@@ -36,13 +36,55 @@ function setSelect(t){
 			<li>
 				<input type='checkbox' name='ext[]' value='{=$ext->name()}' />{=$ext->name()}。版本：{=$ext->version()}
 				<if '$arrPackageState[$ext->name()] === false'>
-					<div class='error'>此扩展尚未打包，请进入扩展打包页面进行打包</div>
+					
 				</if>
 			</li>
 		</foreach>
 	</ul>
+	<div class='error'>若扩展尚未打包，则无法选择，请进入<a href='/?c=org.opencomb.development.toolkit.extension.ExtensionPackages'>扩展打包</a>页面进行打包</div>
+	<table>
+		<tr>
+			<th>
+				扩展名称
+			</th>
+			<th>
+				版本
+			</th>
+			<th>
+				是否选择此扩展
+			</th>
+			<th>
+				是否携带版本仓库
+			</th>
+		</tr>
+		<foreach for='$arrExtension' item='ext'>
+			<tr>
+				<td>
+					{=$ext->name()}
+				</td>
+				<td>
+					{=$ext->version()}
+				</td>
+				<td>
+					<if '$arrPackageState[$ext->name()][0] or $arrPackageState[$ext->name()][1]'>
+						<input type='checkbox' name='ext[]' value='{=$ext->name()}' />
+					</if>
+				</td>
+				<td>
+					{=;var_export($arrPackageState[$ext->name()][0],true)}
+					<if '$arrPackageState[$ext->name()][0]'>
+						<input type='radio' name='git[{=$ext->name()}]' value='0' checked='checked' />否
+					</if>
+					{=;var_export($arrPackageState[$ext->name()][1],true)}
+					<if '$arrPackageState[$ext->name()][1]'>
+						<input type='radio' name='git[{=$ext->name()}]' value='1' />是
+					</if>
+				</td>
+			</tr>
+		</foreach>
+	</table>
 	<br />
-	<input type='checkbox' name='gitframework' />是否携带framework的版本仓库<br />
-	<input type='checkbox' name='gitplatform' />是否携带platform的版本仓库<br />
+	<input type='checkbox' name='git[framework]' value='1' />是否携带framework的版本仓库<br />
+	<input type='checkbox' name='git[platform]' value='1' />是否携带platform的版本仓库<br />
 	<input type='submit' value='确定' />
 </form>

@@ -92,7 +92,7 @@
 <form method='get'>
 	<input type='hidden' name='c' value='org.opencomb.development.toolkit.platform.createpackage.CreatePackage' />
 	<foreach for='$arrContainGit' key='key' item='value'>
-		<input type='hidden' name='git{=$key}' value='on' />
+		<input type='hidden' name='git[{=$key}]' value='{=$value}' />
 	</foreach>
 	<table>
 		<tr>

@@ -11,4 +11,6 @@
 	
 	<beanFolder folder="/bean" />
 	
+	<publicFolder folder="/public.oc.setup" for="development-toolkit.oc.setup" />
+	
 </Extension>

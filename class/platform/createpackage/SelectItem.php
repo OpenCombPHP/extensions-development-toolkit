@@ -5,6 +5,7 @@ use org\opencomb\coresystem\mvc\controller\ControlPanel ;
 use org\opencomb\platform\ext\ExtensionManager ;
 use org\opencomb\platform\ext\Extension ;
 use org\jecat\framework\fs\FileSystem ;
+use org\opencomb\development\toolkit\extension\ExtensionPackages ;
 
 class SelectItem extends ControlPanel
 {
@@ -36,12 +37,9 @@ class SelectItem extends ControlPanel
 		foreach($aMetainfoIterator as $aMetainfo){
 			$sExtName = $aMetainfo->name();
 			$sExtVersion = $aMetainfo->version();
-			$bIsPackaged = 
-				Extension::flyweight('development-toolkit')
-					->publicFolder()
-						->findFile($sExtName.'-'.$sExtVersion.'.ocp.zip',FileSystem::FIND_AUTO_CREATE_OBJECT)
-							->exists();
-			$arrPackageState[$sExtName] = $bIsPackaged ;
+			for($i=0;$i<=1;++$i){
+				$arrPackageState[$sExtName][$i] = ExtensionPackages::hasPackaged($sExtName , $sExtVersion,$i) ;
+			}
 		}
 		return $arrPackageState ;
 	}

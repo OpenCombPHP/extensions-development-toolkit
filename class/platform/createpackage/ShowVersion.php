@@ -21,13 +21,7 @@ class ShowVersion extends ControlPanel
 	public function process(){
 		// input
 		$arrExtName = $this->params['ext'];
-		$arrContainGit = array();
-		if(!empty($this->params['gitframework'])){
-			$arrContainGit['framework'] = $this->params['gitframework'];
-		}
-		if(!empty($this->params['gitplatform'])){
-			$arrContainGit['platform'] = $this->params['gitplatform'];
-		}
+		$arrContainGit = $this->params['git'];
 		// version list
 		$arrVersion = $this->getPhpVersionList();
 		$arrVersion['jecat'] = $this->getJeCatVersion();
