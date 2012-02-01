@@ -1,6 +1,6 @@
 <style>
 .error{
-	display:block;
+	display:inline;
 	color:red;
 }
 </style>
@@ -31,18 +31,48 @@ function setSelect(t){
 <button onclick='setSelect("o")' >反选</button>
 <form method='get' >
 	<input type='hidden' name='c' value='org.opencomb.development.toolkit.platform.createpackage.ShowVersion' />
-	<ul class='selectItem'>
-		<foreach for='$arrExtension' item='ext'>
-			<li>
-				<input type='checkbox' name='ext[]' value='{=$ext->name()}' />{=$ext->name()}。版本：{=$ext->version()}
-				<if '$arrPackageState[$ext->name()] === false'>
-					
-				</if>
-			</li>
-		</foreach>
-	</ul>
-	<div class='error'>若扩展尚未打包，则无法选择，请进入<a href='/?c=org.opencomb.development.toolkit.extension.ExtensionPackages'>扩展打包</a>页面进行打包</div>
+	
 	<table>
+		<tr>
+			<th>
+				项目名称
+			</th>
+			<th>
+				
+			</th>
+			<th>
+				是否选择此项目
+			</th>
+			<th>
+				是否携带版本仓库
+			</th>
+		</tr>
+		<tr>
+			<td>framework</td>
+			<td></td>
+			<td>必须选择此项目</td>
+			<td>
+				<input type='radio' name='git[framework]' value='0' checked='checked' />否
+				<input type='radio' name='git[framework]' value='1' />是
+			</td>
+		</tr>
+		<tr>
+			<td>platform</td>
+			<td></td>
+			<td>必须选择此项目</td>
+			<td>
+				<input type='radio' name='git[platform]' value='0' checked='checked' />否
+				<input type='radio' name='git[platform]' value='1' />是
+			</td>
+		</tr>
+		<tr>
+			<td>public</td>
+			<td></td>
+			<td>必须选择此项目</td>
+			<td>
+				此项目无版本仓库
+			</td>
+		</tr>
 		<tr>
 			<th>
 				扩展名称
@@ -52,6 +82,7 @@ function setSelect(t){
 			</th>
 			<th>
 				是否选择此扩展
+				<div class='error'>若扩展尚未打包，则无法选择，请进入<a href='/?c=org.opencomb.development.toolkit.extension.ExtensionPackages'>扩展打包</a>页面进行打包</div>
 			</th>
 			<th>
 				是否携带版本仓库
@@ -84,7 +115,5 @@ function setSelect(t){
 		</foreach>
 	</table>
 	<br />
-	<input type='checkbox' name='git[framework]' value='1' />是否携带framework的版本仓库<br />
-	<input type='checkbox' name='git[platform]' value='1' />是否携带platform的版本仓库<br />
 	<input type='submit' value='确定' />
 </form>
