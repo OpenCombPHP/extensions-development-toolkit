@@ -15,16 +15,21 @@ class CreateExtension extends ControlPanel
 	const extname_minlen = 6 ;
 	const extname_maxlen = 30 ;
 	
+	/**
+	 * @example /mvc/视图/表单控件(Widget)
+	 * @forwiki /mvc/视图/表单控件(Widget)
+	 * @forwiki /mvc/视图/表单控件/文字输入框(Text)
+	 * @forwiki /mvc/视图/表单控件/选项(CheckBtn)
+	 * 
+	 * 控件bean的写法
+	 */
 	public function createBeanConfig()
 	{
 		return array(
-		
 			'view:Extension' => array(
 				'template' => 'CreateExtension.html' ,
 				'class' => 'form' ,
-				
 				'widgets' => array(
-		
 					'extName' => array(
 						'class' => 'text' ,
 						'title' => '扩展名称' ,
