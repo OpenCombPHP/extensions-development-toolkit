@@ -23,6 +23,10 @@ class CreateExtension extends ControlPanel
 	 * 
 	 * 控件bean的写法
 	 */
+	/**
+	 * @example /校验器/字符长度校验器(Length):Bean格式演示[2]
+	 * @forwiki /校验器/字符长度校验器(Length)
+	 */
 	public function createBeanConfig()
 	{
 		return array(
