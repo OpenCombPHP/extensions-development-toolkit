@@ -16,10 +16,10 @@ class CreateExtension extends ControlPanel
 	const extname_maxlen = 30 ;
 	
 	/**
-	 * @example /mvc/视图/表单控件(Widget)
-	 * @forwiki /mvc/视图/表单控件(Widget)
-	 * @forwiki /mvc/视图/表单控件/文字输入框(Text)
-	 * @forwiki /mvc/视图/表单控件/选项(CheckBtn)
+	 * @example /MVC模式/视图/表单控件(Widget)
+	 * @forwiki /MVC模式/视图/表单控件(Widget)
+	 * @forwiki /MVC模式/视图/表单控件/文字输入框(Text)
+	 * @forwiki /MVC模式/视图/表单控件/选项(CheckBtn)
 	 * 
 	 * 控件bean的写法
 	 */
