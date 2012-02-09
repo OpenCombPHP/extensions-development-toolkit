@@ -1,6 +1,8 @@
 <?php
 namespace org\opencomb\development\toolkit\extension ;
 
+use org\opencomb\coresystem\auth\Id;
+
 use org\jecat\framework\fs\FileSystem;
 
 use org\jecat\framework\setting\Setting;
@@ -30,6 +32,7 @@ class CreateExtension extends ControlPanel
 	public function createBeanConfig()
 	{
 		return array(
+			'title'=>'创建扩展',
 			'view:Extension' => array(
 				'template' => 'CreateExtension.html' ,
 				'class' => 'form' ,
@@ -64,13 +67,19 @@ class CreateExtension extends ControlPanel
 					) ,
 				) ,
 			) ,
+			'perms' => array(
+				// 权限类型的许可
+				'perm.purview'=>array(
+					'namespace'=>'coresystem',
+					'name' => Id::PLATFORM_ADMIN,
+				) ,
+			) ,
 		) ;
 	}
-	
+
 	public function process()
 	{
-		// 检查权限 ...
-		// todo
+		$this->checkPermissions('您没有使用这个功能的权限,无法继续浏览',array()) ;
 		
 		if( $this->viewExtension->isSubmit( $this->params ) )
 		{do{

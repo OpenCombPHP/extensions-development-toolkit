@@ -1,6 +1,8 @@
 <?php
 namespace org\opencomb\development\toolkit\platform\createpackage ;
 
+use org\opencomb\coresystem\auth\Id;
+
 use org\opencomb\coresystem\mvc\controller\ControlPanel ;
 use org\opencomb\platform\ext\ExtensionManager ;
 use org\opencomb\platform\ext\Extension ;
@@ -11,13 +13,21 @@ class SelectItem extends ControlPanel
 {
 	public function createBeanConfig(){
 		return array(
+			'title'=>'',
 			'view:view' => array(
 				'template' => 'platformpackage/SelectItem.html' ,
-			)
+			),
+			'perms' => array(
+					// 权限类型的许可
+					'perm.purview'=>array(
+							'name' => Id::PLATFORM_ADMIN,
+					) ,
+			) ,
 		) ;
 	}
 	
 	public function process(){
+		$this->checkPermissions('您没有使用这个功能的权限,无法继续浏览',array()) ;
 		// extension list
 		$arrExtension = $this->getExtensionList() ;
 		// package state

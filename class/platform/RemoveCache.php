@@ -1,6 +1,8 @@
 <?php
 namespace org\opencomb\development\toolkit\platform ;
 
+use org\opencomb\coresystem\auth\Id;
+
 use org\jecat\framework\fs\FSIterator;
 use org\jecat\framework\lang\oop\ClassLoader;
 use org\jecat\framework\fs\FileSystem;
@@ -12,15 +14,23 @@ class RemoveCache extends ControlPanel
 	public function createBeanConfig()
 	{
 		return array(
+			'title'=>'清理缓存',
 			'view:form' => array(
 				'template' => 'RemoveCache.html' ,
 			),
-			
+			'perms' => array(
+					// 权限类型的许可
+					'perm.purview'=>array(
+							'namespace' => 'coresystem' ,
+							'name' => Id::PLATFORM_ADMIN,
+					) ,
+			) ,
 		) ;
 	}
 
 	public function process()
 	{
+		$this->checkPermissions('您没有使用这个功能的权限,无法继续浏览',array()) ;
 		//ajax的清理请求
 		if( $this->params->has('deletePaths') )
 		{

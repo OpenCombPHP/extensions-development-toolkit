@@ -1,6 +1,8 @@
 <?php
 namespace org\opencomb\development\toolkit\platform ;
 
+use org\opencomb\coresystem\auth\Id;
+
 use org\jecat\framework\fs\FileSystem;
 use org\jecat\framework\message\Message;
 use org\opencomb\coresystem\mvc\controller\ControlPanel;
@@ -17,12 +19,21 @@ class ClearCache extends ControlPanel
 			'controller:removeCache' => array(
 					'class' => 'org\\opencomb\\development\\toolkit\\platform\\RemoveCache' ,
 			) ,
-			'title' => '清理缓存'
+			'title' => '清理缓存',
+			'perms' => array(
+					// 权限类型的许可
+					'perm.purview'=>array(
+							'namespace'=>'coresystem',
+							'name' => Id::PLATFORM_ADMIN,
+					) ,
+			) ,
 		) ;
 	}
 
 	public function process()
 	{
+		$this->checkPermissions('您没有使用这个功能的权限,无法继续浏览',array()) ;
+		
 		if( $this->params->has('clear_system_cache') )
 		{
 			if( FileSystem::singleton()->delete('/data/cache/platform/system/objects',true,true) )
