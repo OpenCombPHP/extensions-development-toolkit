@@ -77,8 +77,9 @@ if(1)
 	}
 		
 	// echo '-','-','>',"\n";
-	$step = $_GET['step'];
-	if(empty($step)){
+	if(isset($_GET['step'])){
+		$step = $_GET['step'];
+	}else{
 		$step = 0;
 	}
 	$bHasNext = true;
@@ -361,9 +362,27 @@ along with this program.  If not, see <a href='http://www.gnu.org/licenses/'>htt
 	case 3:
 		$bHasNext = false;
 		
+		$bFinish = true;
+		$sError = '';
+		$sDebugInfo = '';
+		
 		$fZip = null ;
 		$sName = '' ;
 		$sInstallPath = '';
+		
+		$arrExtensionList = array();
+		
+		function startsWith($haystack, $needle){
+			$length = strlen($needle);
+			return (substr($haystack, 0, $length) === $needle);
+		}
+		
+		function isExtension($sPath){
+			if( startsWith($sPath,'extensions/') ){
+				return true;
+			}
+			return false;
+		}
 		
 		function processLine($sLine){
 			global $fZip ;
@@ -372,7 +391,6 @@ along with this program.  If not, see <a href='http://www.gnu.org/licenses/'>htt
 			$sZipKey = '{=$sZipKey}';
 			$nLenKey = strlen($sZipKey);
 			if( substr( $sLine , 0 , $nLenKey ) === $sZipKey ){
-				echo $sLine,'<br />' ;
 				$arrLine = explode(':',$sLine);
 				if( 3 === count($arrLine)){
 					$sName = $arrLine[1];
@@ -380,24 +398,26 @@ along with this program.  If not, see <a href='http://www.gnu.org/licenses/'>htt
 					$fZip = fopen($sFileName,'w');
 					$sInstallPath = $arrLine[2];
 				}else if( 2 === count($arrLine)){
-					echo $sName,' : ',$arrLine[1],'<br />';
 					fclose($fZip);
 					$fZip = null ;
 					
 					$sFileName = $sName.'.zip' ;
 					$zip = new ZipArchive;
-					echo 'file name : ',$sFileName,'<br />';
 					if ($zip->open($sFileName) === TRUE) {
 						$zip->extractTo($sInstallPath);
 						$zip->close();
-						echo 'extractTo ok.<br />';
 						unlink($sFileName);
 						
-						if(isExtension()){
-							
+						if(isExtension($sInstallPath)){
+							$arrExtensionList [] =
+								array(
+									'name' => $sName ,
+									'path' => $sInstallPath ,
+								);
 						}
 					} else {
-						echo 'open failed.<br />';
+						$bFinish = false;
+						$sError .= 'open failed.'."\n";
 					}
 				}
 			}else if( null !== $fZip ){
@@ -406,7 +426,8 @@ along with this program.  If not, see <a href='http://www.gnu.org/licenses/'>htt
 		}
 		$fp = fopen(__FILE__,'r');
 		if(!$fp){
-			echo 'Could not open file ',__FILE__;
+			$bFinish = false;
+			$sError .= 'Could not open file '.__FILE__."\n";
 		}else{
 			$sLine = '' ;
 			while( false !== ($char = fgetc($fp))){
@@ -461,10 +482,6 @@ return array (
 DBSETTINGS;
 		mkdir('settings/platform/db/www',0755,true);
 		file_put_contents('settings/platform/db/www/items.php',$str);
-
-		
-		$bFinish = false;
-		$sError = '';
 		
 		if($bFinish){
 ?>
@@ -484,8 +501,13 @@ DBSETTINGS;
 		break;
 	}
 	if($bHasNext){
+		if(isset($_SERVER["PATH_INFO"])){
+			$path_info = $_SERVER["PATH_INFO"];
+		}else{
+			$path_info = '';
+		}
 ?>
-	<a id='btnNext' href='<?php echo $_SERVER["PATH_INFO"];?>?step=<?php echo $step+1;?>'><button>下一步</button></a>
+	<a id='btnNext' href='<?php echo $path_info;?>?step=<?php echo $step+1;?>'><button>下一步</button></a>
 <?php
 	}
 	

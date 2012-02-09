@@ -103,7 +103,7 @@
 		</tr>
 		<foreach for='$arrExtension' key='sExtName' item='ext'>
 			<tr>
-				<if 'empty($ext)'>
+				<if 'null === $ext'>
 					<td>{=$sExtName}</td>
 					<td><div class='error'>未安装此扩展</div></td>
 				<else />

@@ -37,6 +37,7 @@ class ShowVersion extends ControlPanel
 		// package state
 		$aSelectItem = new SelectItem;
 		$arrPackageState = $aSelectItem->getExtensionPackageStateList();
+		
 		// template
 		$this->view->variables()->set('arrExtension',$this->arrExtension);
 		$this->view->variables()->set('arrDependence',$this->arrDependence);

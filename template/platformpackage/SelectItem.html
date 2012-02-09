@@ -106,7 +106,11 @@ function setSelect(t){
 						<input type='radio' name='git[{=$ext->name()}]' value='0' checked='checked' />否
 					</if>
 					<if '$arrPackageState[$ext->name()][1]'>
-						<input type='radio' name='git[{=$ext->name()}]' value='1' />是
+						<if '$arrPackageState[$ext->name()][0]'>
+							<input type='radio' name='git[{=$ext->name()}]' value='1' />是
+						<else />
+							<input type='radio' name='git[{=$ext->name()}]' value='1' checked='checked' />是
+						</if>
 					</if>
 				</td>
 			</tr>
