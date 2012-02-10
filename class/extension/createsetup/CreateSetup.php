@@ -58,7 +58,7 @@ class CreateSetup extends ControlPanel{
 		}
 		$this->aExtension = Extension::flyweight($extName);
 		// namespace 
-		$aPackageIterator = $this->aExtension->metainfo()->pakcageIterator();
+		$aPackageIterator = $this->aExtension->metainfo()->packageIterator();
 		$arrPackage = $aPackageIterator->current();
 		$this->ns = $arrPackage[0] ;
 		// conf
