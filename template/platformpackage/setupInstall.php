@@ -1,5 +1,6 @@
 <?php
 
+$arrExtensionList = array();
 /**
  * @return array(
  *             'success' => true,
@@ -19,8 +20,6 @@ function extractFiles(){
 	$sName = '' ;
 	$sInstallPath = '';
 	
-	$arrExtensionList = array();
-	
 	function startsWith($haystack, $needle){
 		$length = strlen($needle);
 		return (substr($haystack, 0, $length) === $needle);
@@ -37,6 +36,7 @@ function extractFiles(){
 		global $fZip ;
 		global $sName ;
 		global $sInstallPath ;
+		global $arrExtensionList ;
 		$sZipKey = '{=$sZipKey}';
 		$nLenKey = strlen($sZipKey);
 		if( substr( $sLine , 0 , $nLenKey ) === $sZipKey ){
@@ -135,12 +135,67 @@ array (
 DBSETTINGS;
 	mkdir('settings/platform/db/www',0755,true);
 	file_put_contents('settings/platform/db/www/items.php',$str);
+	
+	global $arrExtensionList;
+	
+	// 简单配置启动 OC platform
+	$aPlatform = require 'jc.init.php' ;
+	
+	// data upgrader
+	$aDataUpgrader = \org\opencomb\platform\system\upgrader\PlatformDataUpgrader::singleton() ; 
+	
+	$aMessageQueue = new \org\jecat\framework\message\MessageQueue;
+	
+	$aDataUpgrader->process($aMessageQueue) ;
+	
+	foreach($arrExtensionList as $arrExtension){
+		$sPath = $arrExtension['path'] ;
+		if( !$aExtFolder = \org\jecat\framework\fs\FileSystem::singleton()->findFolder('/'.$sPath) )
+		{
+			$aMessageQueue->create(\org\jecat\framework\message\Message::error,'输入的路径不存在:%s',$sPath) ;
+			break ;
+		}
+		
+		try{
+			// 清理缓存
+			\org\opencomb\platform\system\PlatformSerializer::singleton()->clearRestoreCache();
+			
+			// 安装
+			$aExtMeta = \org\opencomb\platform\ext\ExtensionSetup::singleton()->install($aExtFolder , $aMessageQueue ) ;
+			
+			$aMessageQueue->create(
+					\org\jecat\framework\message\Message::success
+					, "扩展% s(%s:%s) 已经成功安装到平台中。"
+					, array( $aExtMeta->title(), $aExtMeta->name(), $aExtMeta->version() )
+			) ;
+
+			// 激活
+			\org\opencomb\platform\ext\ExtensionSetup::singleton()->enable($aExtMeta->name()) ;
+			
+			$aMessageQueue->create(
+					\org\jecat\framework\message\Message::success
+					, "扩展 %s(%s:%s) 已经激活使用。"
+					, array( $aExtMeta->title(), $aExtMeta->name(), $aExtMeta->version() )
+			) ;
+		}catch(Exception $e){
+			$aMessageQueue->create(\org\jecat\framework\message\Message::error,$e->getMessage(),$e->messageArgvs()) ;
+		}
+	}
+	
+	return $aMessageQueue ;
+	//$aBuffer = new \org\jecat\framework\io\OutputStreamBuffer ;
+	// $aMessageQueue->display(null,$aBuffer);
 }
 
 function install(){
 	$arrResult = extractFiles();
+	
+	$str = '';
 	if( $arrResult['success'] ){
-		writeInfo();
+		$aMessageQueue = writeInfo();
+		$aBuffer = new \org\jecat\framework\io\OutputStreamBuffer ;
+		$aMessageQueue->display(null,$aBuffer);
+		$str = $aBuffer -> __toString() ;
 	}
 	
 	$sCode = {='<<<'}CODE
@@ -163,14 +218,7 @@ function install(){
 			<div class="bottombar">
 				<h1><span>完成</span></h1>
 				<div class="inner">
-					<ul>
-						<li>XXX .XXXXX 1.0</li>
-						<li>OOXX OOXX  O</li>
-						<li>XXX .XXXXX 1.0</li>
-						<li>OOXX OOXX  O</li>
-						<li>XXX .XXXXX 1.0</li>
-						<li>OOXX OOXX  O</li>
-					</ul>
+					$str
 				</div>
 				<a id="btnNext" href="/" class="step_btn">进入系统</a>
 			</div>
