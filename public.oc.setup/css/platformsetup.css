@@ -1,0 +1,145 @@
+@charset "utf-8";
+/* css reset */
+
+body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6, pre, form, fieldset, input, textarea, p, blockquote, th, td {
+	margin:0;
+	padding:0;
+}
+table {
+	border-collapse:collapse;
+	border-spacing:0;
+}
+fieldset, img {
+	border:0;
+}
+address, caption, cite, code, dfn, em, strong, th, var, i {
+	font-style:normal;
+	font-weight:normal;
+}
+ol, ul {
+	list-style:none;
+}
+caption, th {
+	text-align:left;
+}
+h1, h2, h3, h4, h5, h6 {
+	font-size:100%;
+	font-weight:normal;
+}
+q:before, q:after {
+	content:'';
+}
+abbr, acronym {
+	border:0;
+}
+img {
+	color: transparent;
+	font-size: 0;
+	vertical-align: middle;
+	-ms-interpolation-mode: bicubic;/*Only fot IE7*/
+}
+b, strong {
+	/*
+  Makes browsers agree.
+  IE + Opera = font-weight: bold.
+  Gecko + WebKit = font-weight: bolder.
+*/
+  font-weight: bold;
+}
+*:focus {
+	/* 去掉获得焦点时出现的虚线框 */
+	outline: none;
+}
+textarea {
+	/* chrome 不允许 textarea 可更改大小  */
+	resize:none;
+}
+.clearfix:after {
+	clear: both;
+	content: ".";
+	display: block;
+	height: 0;
+	visibility: hidden;
+}
+.clearfix {
+	display: inline-block;
+}
+* html .clearfix {
+	height: 1%;
+}
+.clearfix {
+	display: block;
+}
+.clear {
+	clear: both;
+	display: block;
+	overflow: hidden;
+	visibility: hidden;
+	width: 0;
+	height: 0;
+}
+
+/* platformsetup*/
+body{ background:#eee; font:13px "微软雅黑",Arial, Helvetica, sans-serif; }
+
+.main{width:900px;margin:15px auto; background:#f6f6f6; -webkit-border-radius:8px; -moz-border-radius:8px; border-radius:8px;padding:20px; box-shadow:0 0px 1px rgba(0,0,0,0.3) inset;}
+.content{width:870px;background:#fff; -webkit-border-radius:8px; -moz-border-radius:8px; border-radius:8px;padding:15px; box-shadow:0 0px 1px rgba(0,0,0,0.3) inset;}
+
+.topbar{ position:relative; background:url(../images/topbarbg.gif) no-repeat 0 bottom; padding-bottom:20px;margin-bottom:15px; height:40px}
+.topbar h1{ font-size:30px; color:#0cf;}
+.topbar h1 .azxd{ color:#494949;}
+.topbar h1 .topversion{ position:absolute; bottom:12px; right:4px; font-size:12px; color:#999;}
+
+.stepbar{width:870px; height:40px; background:url(../images/stepbarbg.jpg) no-repeat 0 0; margin-bottom:25px; }
+.stepbar li{ width:217px; height:40px; float:left; text-align:center; line-height:40px; font-size:14px; color:#8c8c8c; text-shadow:1px 1px 1px rgba(255,255,255,1)}
+.stepbar .this-step{color:#333}
+
+.bottombar {border-top:2px solid #333; position:relative}
+.bottombar h1 { margin-top:-10px; text-align:center;margin-bottom:20px;}
+.bottombar h1 span{ color:#333; font-size:26px;background:#fff;padding:0 10px;}
+
+/*step0*/
+.step0 .inner{width:500px; margin:0 auto;}
+.step0 ul{}
+.step0 ul li{ color:#333; font-size:13px; font-weight:bold; line-height:150%; padding:0 4px;}
+.step0 ul li ul li{ font-weight:normal; color:#666}
+.step0 ul li ul li:hover{ background:#ffffd9}
+.step0 em{ float:right; display:block; text-indent:-9999em; overflow:hidden;width:14px; height:14px; }
+.succeed{background:url(../images/mark1.png) no-repeat 0 center;}
+.fail{background:url(../images/mark2.png) no-repeat 0 center;}
+a.step_btn{ background:url(../images/btn.png) no-repeat 0 0; height:30px; width:102px; display:block; color:#4b4b4b; font-size:14px; text-shadow:0 1px 1px rgba(255,255,255,1); text-align:center; line-height:30px; text-decoration:none; margin:10px auto 0;}
+a:hover.step_btn{ background-position:0 -30px; color:#fff;text-shadow:0 1px 1px rgba(40,211,254,1); }
+/*step1*/
+
+/*step2*/
+.step2 table{ width:650px; margin:0 auto;}
+.step2 table th{ font-weight:bold; width:100px; padding-top:2px}
+.step2 table tr{ vertical-align:top}
+.step2 table td{width:240px; padding-bottom:10px;}
+.step2 .tit{ text-align:right; width:100px;padding-right:10px; padding-top:2px;}
+.in{ height:24px; width:220px; border:1px solid #ccc; border-radius:3px; color:#333; font-size:12px;padding:0 2px;}
+.in:focus{border:1px solid #3ED9FF; background:#F4FEFF; color:#0CF}
+.check_right{background:url(../images/mark1.png) no-repeat center; width:24px; height:24px;}
+.check_error{ background:#FFF2F0 url(../images/mark2.png) no-repeat 4px 6px; border:1px solid #FFCFC4; font-weight:bold; color:#f30; padding:3px 4px 3px 20px; border-radius:3px;}
+
+/*step3*/
+.step3 .bottombar{ border-top:0px solid #fff;}
+.step3 .bottombar h1 { margin-top:0px; background:#F3FCEB; border-radius:25px; height:32px;padding:8px 0; border:1px solid #CDEDA7; text-align:center;}
+.step3 .bottombar h1 span{ font-size:26px; color:#81CC29; background:#F3FCEB url(../images/step3_right.png) no-repeat 0 center; padding-left:40px;}
+.step3 .inner ul{padding-left:10px; line-height:150%;}
+
+.step3_wrong .bottombar{ border-top:0px solid #fff;}
+.step3_wrong .bottombar h1 { margin-top:0px; background:#FFF0F0; border-radius:25px; height:32px;padding:8px 0; border:1px solid #fFC1C1; text-align:center;}
+.step3_wrong .bottombar h1 span{ font-size:26px; color:#E74214; background:#FFF0F0 url(../images/step3_wrong.png) no-repeat 0 center; padding-left:40px;}
+.step3_wrong .inner ul{padding-left:10px; line-height:150%;}
+
+
+
+
+.xycontent{ background:#f6f6f6; border-radius:5px; padding:6px 10px;color:#666; font-size:13px; width:800px; margin:0 auto 14px; box-shadow:1px 1px 3px rgba(0,0,0,0.4)}
+.xytit{ font-weight:bold; font-size:14px; cursor:pointer}
+.xyinner{ display:none; line-height:200%;padding:10px; background:url(../images/xytit.gif) repeat-x 0 0;margin-top:10px;}
+.xyinner a{ color:#0cf; text-decoration:underline}
+.xyinner a:hover{color:#f90}
+.xy_check{ width:816px; margin:0 auto; color:#333; font-weight:bold}
+.xy_check input{ margin-right:4px; vertical-align:-2px;}

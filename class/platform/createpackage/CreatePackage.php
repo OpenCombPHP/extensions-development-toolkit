@@ -12,6 +12,7 @@ use org\jecat\framework\fs\IFolder ;
 use org\jecat\framework\fs\FileSystem ;
 use org\jecat\framework\fs\FSIterator ;
 use org\jecat\framework\io\IOutputStream ;
+use org\jecat\framework\io\OutputStreamBuffer ;
 use org\jecat\framework\ui\xhtml\UIFactory ;
 use org\opencomb\development\toolkit\extension\ExtensionPackages ;
 use org\opencomb\platform\Platform ;
@@ -39,6 +40,11 @@ class CreatePackage extends ControlPanel
 		// input
 		$arrExtName = $this->params['ext'];
 		$git = $this->params['git'] ;
+		
+		if(empty($arrExtName)){
+			$arrExtName = array();
+		}
+		
 		// stamp
 		$sStamp = '';
 		
@@ -167,13 +173,60 @@ class CreatePackage extends ControlPanel
 	
 	private function createSetup(IOutputStream $aDevice , array $arrZipFile){
 		$aUI = UIFactory::singleton()->create();
-		$sZipKey = md5(date("Y-m-d_G-i-s"));
-		$variables = array(
+		// checkEnv
+		$aCheckEnvBuffer = new OutputStreamBuffer;
+		$arrVariables = array(
 			'arrDependence' => $this->arrDependence,
+		);
+		$aUI->display('development-toolkit:platformpackage/setupCheckEnv.php',$arrVariables,$aCheckEnvBuffer);
+		
+		// licence
+		$aLicenceBuffer = new OutputStreamBuffer ;
+		$arrVariables = array(
+		);
+		$aUI->display('development-toolkit:platformpackage/setupLicence.php',$arrVariables,$aLicenceBuffer);
+		
+		
+		// input
+		$aInputBuffer = new OutputStreamBuffer ;
+		$arrVariables = array(
+		);
+		$aUI->display('development-toolkit:platformpackage/setupInput.php',$arrVariables,$aInputBuffer);
+		
+		// install
+		$sZipKey = md5(date("Y-m-d_G-i-s"));
+		$aInstallBuffer = new OutputStreamBuffer ;
+		$arrVariables = array(
+			'sZipKey' => $sZipKey ,
+		);
+		$aUI->display('development-toolkit:platformpackage/setupInstall.php',$arrVariables,$aInstallBuffer);
+		
+		// main
+		$aMainBuffer = new OutputStreamBuffer;
+		
+		$arrVariables = array(
+			'code_checkEnv' => $aCheckEnvBuffer->__toString(),
+			'code_licence' => $aLicenceBuffer->__toString(),
+			'code_input' => $aInputBuffer->__toString(),
+			'code_install' => $aInstallBuffer->__toString(),
 			'sZipKey' => $sZipKey ,
 			'arrZips' => $arrZipFile,
 		);
-		$aUI->display('development-toolkit:platformpackage/setup.php',$variables,$aDevice);
+		$aUI->display('development-toolkit:platformpackage/setup-main.php',$arrVariables,$aMainBuffer);
+		
+		// frame
+		$arrVariables = array(
+			'main_code' => $aMainBuffer->__toString(),
+		);
+		$aUI->display('development-toolkit:platformpackage/setup-frame.php',$arrVariables,$aDevice);
+		
+		
+		$variables = array(
+			
+			'sZipKey' => $sZipKey ,
+			'arrZips' => $arrZipFile,
+		);
+		
 	}
 	
 	private function calcDependence(array $arrExtName){
@@ -258,10 +311,10 @@ class CreatePackage extends ControlPanel
 		
 		$arr = array(
 			'name' => $sName ,
-				'path' => $sName ,
-				'reader' => $aZipFile->openReader() ,
-				'localpath' => $aZipFile->path(),
-				'git' => $git ,
+			'path' => $sName ,
+			'reader' => $aZipFile->openReader() ,
+			'localpath' => $aZipFile->path(),
+			'git' => $git ,
 		);
 		return $arr ;
 	}

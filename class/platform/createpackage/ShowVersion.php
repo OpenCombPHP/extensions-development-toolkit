@@ -33,6 +33,11 @@ class ShowVersion extends ControlPanel
 		// input
 		$arrExtName = $this->params['ext'];
 		$arrContainGit = $this->params['git'];
+		
+		if(empty($arrExtName)){
+			$arrExtName = array();
+		}
+		
 		// version list
 		$arrVersion = $this->getPhpVersionList();
 		$arrVersion['jecat'] = $this->getJeCatVersion();
