@@ -3,6 +3,11 @@
 function inputBaseInfo(){
 	$sCode = {='<<<'}CODE
 
+<script type="text/javascript">
+function next_step(){
+	document.getElementById('form_1').submit();
+}
+</script>
 <div class="main">
 <div class="content">
 	<div class="topbar">
@@ -20,7 +25,7 @@ function inputBaseInfo(){
 	
 	<div class="bottombar step2">
 	<h1><span>请填入必要的信息</span></h1>
-	<form method="get">
+	<form id="form_1" method="get">
 		<input type="hidden" name="step" value="3" />
 		<table class="inner">
 		<tbody>
@@ -47,8 +52,7 @@ function inputBaseInfo(){
 		</tr>
 		</tbody>
 		</table>
-		<a id="btnNext" href="/setup.php?step=3" class="step_btn">下一步</a>
-		<input type='submit' class='step_btn' value='下一步' />
+		<a id="btnNext" href="#" class="step_btn" onclick="next_step()">下一步</a>
 	</form>
 </div>
 </div>
