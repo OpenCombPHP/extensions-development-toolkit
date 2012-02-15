@@ -5,8 +5,36 @@ function inputBaseInfo(){
 
 <script type="text/javascript">
 function next_step(){
-	document.getElementById('form_1').submit();
+	var bHasEmpty = false ;
+	jQuery('.in').each(
+		function(){
+			if(this.value == ''){
+				bHasEmpty = true ;
+			}
+		}
+	);
+	if(bHasEmpty){
+		alert('信息不完整');
+	}else{
+		document.getElementById('form_1').submit();
+	}
 }
+jQuery(function(){
+	jQuery('.in').change(
+		function (){
+			var div_check = jQuery(this).closest('tr').find('.checkinput') ;
+			if(this.value == ''){
+				div_check.removeClass('check_right');
+				div_check.html('不能为空');
+				div_check.addClass('check_error');
+			}else{
+				div_check.removeClass('check_error');
+				div_check.html('');
+				div_check.addClass('check_right');
+			}
+		}
+	);
+});
 </script>
 <div class="main">
 <div class="content">
@@ -30,25 +58,25 @@ function next_step(){
 		<table class="inner">
 		<tbody>
 		<tr>
-		<th>管理员用户</th><td class="tit">用户名：</td><td><input name="adminName" class="in" /></td><td><div class="check_right"></div></td>
+		<th>管理员用户</th><td class="tit">用户名：</td><td><input name="adminName" class="in" /></td><td><div class="checkinput"></div></td>
 		</tr>
 		<tr>
-		<th></th><td class="tit">密码：</td><td><input type="password" name="adminPswd" class="in" /></td><td><div class="check_error">用户已存在</div></td>
+		<th></th><td class="tit">密码：</td><td><input type="password" name="adminPswd" class="in" /></td><td><div class="checkinput"></div></td>
 		</tr>
 		<tr>
-		<th>数据库</th><td class="tit">数据库地址：</td><td><input name="dbAddress" class="in" /></td><td></td>
+		<th>数据库</th><td class="tit">数据库地址：</td><td><input name="dbAddress" class="in" /></td><td><div class="checkinput"></div></td>
 		</tr>
 		<tr>
-		<th></th><td class="tit">数据库名：</td><td><input name="dbName" class="in" /></td><td></td>
+		<th></th><td class="tit">数据库名：</td><td><input name="dbName" class="in" /></td><td><div class="checkinput"></div></td>
 		</tr>
 		<tr>
-		<th></th><td class="tit">登录名：</td><td><input name="dbUsername" class="in" /></td><td></td>
+		<th></th><td class="tit">登录名：</td><td><input name="dbUsername" class="in" /></td><td><div class="checkinput"></div></td>
 		</tr>
 		<tr>
-		<th></th><td class="tit">密码：</td><td><input type="password" name="dbPswd" class="in" /></td><td></td>
+		<th></th><td class="tit">密码：</td><td><input type="password" name="dbPswd" class="in" /></td><td><div class="checkinput"></div></td>
 		</tr>
 		<tr>
-		<th>网站</th><td class="tit">名称：</td><td><input name="websiteName" class="in" /></td><td></td>
+		<th>网站</th><td class="tit">名称：</td><td><input name="websiteName" class="in" /></td><td><div class="checkinput"></div></td>
 		</tr>
 		</tbody>
 		</table>
