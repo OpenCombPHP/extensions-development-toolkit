@@ -16,6 +16,7 @@ use org\jecat\framework\io\OutputStreamBuffer ;
 use org\jecat\framework\ui\xhtml\UIFactory ;
 use org\opencomb\development\toolkit\extension\ExtensionPackages ;
 use org\opencomb\platform\Platform ;
+use org\jecat\framework\util\Version ;
 
 class CreatePackage extends ControlPanel
 {
@@ -183,9 +184,65 @@ class CreatePackage extends ControlPanel
 		// licence
 		$aLicenceBuffer = new OutputStreamBuffer ;
 		$arrVariables = array(
+			'licenceList' => array(
+				// array(
+				//     'title' =>
+				//     'extname' =>
+				//     'extversion' =>
+				//     'licencename' =>
+				//     'licencecontent' =>
+				// )
+			) ,
 		);
-		$aUI->display('development-toolkit:platformpackage/setupLicence.php',$arrVariables,$aLicenceBuffer);
 		
+		function generateLicence(array &$arrLicenceList , array $arrExtInfo){
+			$aExtFolder = FileSystem::singleton()->findFolder($arrExtInfo['installPath']) ;
+			$aLicenceFolder = $aExtFolder->findFolder('licence');
+			if( null !== $aLicenceFolder ){
+				$aLicenceIterator = $aLicenceFolder->iterator( FSIterator::CONTAIN_FILE | FSIterator::RETURN_FSO ) ;
+				foreach($aLicenceIterator as $aFSO){
+					$arrLicence = array(
+						'title' => $arrExtInfo['title'] ,
+						'extname' => $arrExtInfo['extname'] ,
+						'extversion' => $arrExtInfo['extversion'] ,
+						'licencename' => $aFSO->name() ,
+						'licencereader' => $aFSO->openReader(),
+					);
+					$arrLicenceList [] = $arrLicence ;
+				}
+			}
+		}
+		// ext
+		foreach($this->arrExtension as $sExtName => $aExtMetainfo){
+			$sInstallPath = $aExtMetainfo->installPath() ;
+			$arrExtInfo = array(
+				'title' => $aExtMetainfo->title() ,
+				'extname' => $aExtMetainfo->name() ,
+				'extversion' => $aExtMetainfo->version() ,
+				'installPath' => $sInstallPath ,
+			);
+			generateLicence( $arrVariables['licenceList'] , $arrExtInfo );
+		}
+		
+		// framework
+		$arrExtInfo = array(
+			'title' => 'JeCat框架' ,
+			'extname' => 'framework' ,
+			'extversion' => Version::FromString(\org\jecat\framework\VERSION) ,
+			'installPath' => '/framework' ,
+		);
+		generateLicence( $arrVariables['licenceList'] , $arrExtInfo );
+		
+		// platform
+		$arrExtInfo = array(
+			'title' => '蜂巢平台' ,
+			'extname' => 'platform' ,
+			'extversion' => Platform::singleton()->version() ,
+			'installPath' => '/' ,
+		);
+		generateLicence( $arrVariables['licenceList'] , $arrExtInfo );
+		
+		$aUI->display('development-toolkit:platformpackage/setupLicence.php',$arrVariables,$aLicenceBuffer);
 		
 		// input
 		$aInputBuffer = new OutputStreamBuffer ;
@@ -254,6 +311,7 @@ class CreatePackage extends ControlPanel
 		$arrRequireExtension = array();
 		foreach($arrExtName as $sExtensionName){
 			$aExtension = ExtensionManager::singleton()->extensionMetainfo($sExtensionName);
+			$this->arrExtension[$sExtensionName] = $aExtension ;
 			if($aExtension){
 				$aDependence = $aExtension->dependence();
 				foreach($aDependence->iterator() as $aRequireItem){

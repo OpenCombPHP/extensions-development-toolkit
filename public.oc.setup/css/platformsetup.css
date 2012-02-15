@@ -138,7 +138,7 @@ a:hover.step_btn{ background-position:0 -30px; color:#fff;text-shadow:0 1px 1px 
 
 .xycontent{ background:#f6f6f6; border-radius:5px; padding:6px 10px;color:#666; font-size:13px; width:800px; margin:0 auto 14px; box-shadow:1px 1px 3px rgba(0,0,0,0.4)}
 .xytit{ font-weight:bold; font-size:14px; cursor:pointer}
-.xyinner{ display:none; line-height:200%;padding:10px; background:url(../images/xytit.gif) repeat-x 0 0;margin-top:10px;}
+.xyinner{ display:none; line-height:200%;padding:10px; background:url(../images/xytit.gif) repeat-x 0 0;margin-top:10px;width: 100%;word-wrap: break-word;}
 .xyinner a{ color:#0cf; text-decoration:underline}
 .xyinner a:hover{color:#f90}
 .xy_check{ width:816px; margin:0 auto; color:#333; font-weight:bold}

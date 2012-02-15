@@ -20,63 +20,14 @@ function licence(){
 	<div class="bottombar step1">
 		<h1><span>您是否同意以下协议</span></h1>
 		<!--xy-->
-	<div class="xycontent">
-		<h2 class="xytit">协议一</h2>
-		<div class="xyinner">Copyright (C) 2012  JeCat.org
-	
-	This program is free software: you can redistribute it and/or modify
-	it under the terms of the GNU General Public License as published by
-	the Free Software Foundation, either version 3 of the License, or
-	(at your option) any later version.
-	
-	This program is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-	GNU General Public License for more details.
-	
-	You should have received a copy of the GNU General Public License
-	along with this program.  If not, see <a href="http://www.gnu.org/licenses/">http://www.gnu.org/licenses/</a>.
-		</div>
-	</div>
-	<!--xy-->
-	<div class="xycontent">
-		<h2 class="xytit">协议一</h2>
-		<div class="xyinner">Copyright (C) 2012  JeCat.org
-	
-	This program is free software: you can redistribute it and/or modify
-	it under the terms of the GNU General Public License as published by
-	the Free Software Foundation, either version 3 of the License, or
-	(at your option) any later version.
-	
-	This program is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-	GNU General Public License for more details.
-	
-	You should have received a copy of the GNU General Public License
-	along with this program.  If not, see <a href="http://www.gnu.org/licenses/">http://www.gnu.org/licenses/</a>.
-		</div>
-	</div>
-		<div class="xycontent">
-		<h2 class="xytit">协议一</h2>
-		<div class="xyinner">Copyright (C) 2012  JeCat.org
-	
-	This program is free software: you can redistribute it and/or modify
-	it under the terms of the GNU General Public License as published by
-	the Free Software Foundation, either version 3 of the License, or
-	(at your option) any later version.
-	
-	This program is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-	GNU General Public License for more details.
-	
-	You should have received a copy of the GNU General Public License
-	along with this program.  If not, see <a href="http://www.gnu.org/licenses/">http://www.gnu.org/licenses/</a>.
-		</div>
-	</div>
-
-
+		<foreach for='$licenceList' item='licence'>
+			<div class="xycontent">
+				<h2 class="xytit">{=$licence['title']} ( {=$licence['extname']} version : {=$licence['extversion']} ) 协议：{=$licence['licencename']}</h2>
+				<div class="xyinner">
+					<pre>{=$licence['licencereader']->read()}</pre>
+				</div>
+			</div>
+		</foreach>
 
 <script type="text/javascript">
 $(".xytit").click(function(){
