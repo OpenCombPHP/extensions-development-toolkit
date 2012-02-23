@@ -13,4 +13,6 @@
 	
 	<publicFolder folder="/public.oc.setup" for="development-toolkit.oc.setup" />
 	
+	<require type="extension" item='coresystem'><![CDATA[ >=0.1 ]]></require>
+	
 </Extension>
