@@ -1,6 +1,12 @@
 <?php
 namespace org\opencomb\development\toolkit\compile ;
 
+use org\opencomb\platform\system\PlatformSerializer;
+
+use org\opencomb\platform\Platform;
+
+use org\opencomb\platform\system\PlatformFactory;
+
 use org\opencomb\coresystem\auth\Id;
 
 use org\jecat\framework\lang\oop\ClassLoader;
@@ -85,19 +91,22 @@ class AOPManager extends ControlPanel
 		if( !$aCompiledFile = ClassLoader::singleton()->searchClass($this->params['class'],ClassLoader::SEARCH_COMPILED) )
 		{
 			$this->aopManager->createMessage(Message::failed,'没有在系统中找到 class %s 的编译缓存',$this->params['class']) ;
-			return ;
 		}
 		
-		if( $aCompiledFile->delete() )
-		{
-			$this->aopManager->createMessage(Message::success,'class %s 的编译缓存:%s已经删除',array($this->params['class'],$aCompiledFile->url())) ;
-			return ;			
-		}
 		else
 		{
-			$this->aopManager->createMessage(Message::failed,'无法删除class %s 的编译缓存:%s',array($this->params['class'],$aCompiledFile->url())) ;
-			return ;
+			if( $aCompiledFile->delete() )
+			{
+				$this->aopManager->createMessage(Message::success,'class %s 的编译缓存:%s已经删除',array($this->params['class'],$aCompiledFile->url())) ;
+			}
+			else
+			{
+				$this->aopManager->createMessage(Message::failed,'无法删除class %s 的编译缓存:%s',array($this->params['class'],$aCompiledFile->url())) ;
+			}
 		}
+		
+		PlatformSerializer::singleton()->clearRestoreCache() ;
+		$this->aopManager->createMessage(Message::success,'已经情况系统缓存。') ;
 	}
 }
 
