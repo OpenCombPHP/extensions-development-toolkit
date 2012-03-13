@@ -3,7 +3,7 @@ namespace org\opencomb\development\toolkit\extension ;
 
 use org\opencomb\coresystem\auth\Id;
 
-use org\jecat\framework\fs\FileSystem;
+use org\jecat\framework\fs\Folder;
 
 use org\jecat\framework\setting\Setting;
 
@@ -112,7 +112,7 @@ class CreateExtension extends ControlPanel
 			}
 			
 			
-			$aFs = FileSystem::singleton() ;
+			$aFs = Folder::singleton() ;
 			$sInstallPath = "/extensions/{$sExtName}/{$sExtVersion}" ;
 			
 			if( $aFs->find($sInstallPath) )
@@ -177,7 +177,7 @@ class CreateExtension extends ControlPanel
 
 	private function createFolder($sPath)
 	{
-		FileSystem::singleton()->createFolder($sPath) ;
+		Folder::singleton()->createChildFolder($sPath) ;
 		
 		$this->viewExtension->messageQueue()->create(Message::notice,"创建目录：%s",$sPath) ;
 	}
@@ -185,7 +185,7 @@ class CreateExtension extends ControlPanel
 	private function createFile($sPath,$sTemplate,$arrVariables=null)
 	{
 		try{
-			$aFile = FileSystem::singleton()->createFile($sPath) ;
+			$aFile = Folder::singleton()->createChildFile($sPath) ;
 			
 			UIFactory::singleton()->create()->display(
 				'development-toolkit:'.$sTemplate

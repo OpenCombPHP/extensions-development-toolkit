@@ -6,7 +6,7 @@ use org\opencomb\coresystem\auth\Id;
 use org\opencomb\coresystem\mvc\controller\ControlPanel ;
 use org\opencomb\platform\ext\ExtensionManager ;
 use org\opencomb\platform\ext\Extension ;
-use org\jecat\framework\fs\FileSystem ;
+use org\jecat\framework\fs\Folder ;
 use org\opencomb\development\toolkit\extension\ExtensionPackages ;
 
 class SelectItem extends ControlPanel

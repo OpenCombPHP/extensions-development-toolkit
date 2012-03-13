@@ -10,7 +10,7 @@ use org\jecat\framework\ui\xhtml\UIFactory ;
 use org\jecat\framework\io\OutputStreamBuffer ;
 use org\jecat\framework\setting\IKey ;
 use org\jecat\framework\lang\oop\ClassLoader ;
-use org\jecat\framework\fs\FileSystem ;
+use org\jecat\framework\fs\Folder ;
 use org\jecat\framework\message\Message;
 
 class CreateSetup extends ControlPanel{
@@ -69,7 +69,7 @@ class CreateSetup extends ControlPanel{
 		if($bContainFile and $this->aExtension->publicFolder()->exists() ){
 			$this->sDataFolder = $this->aExtension->metainfo()->installPath().'/data/public';
 			try{
-				$aToFolder = FileSystem::singleton()->findFolder($this->sDataFolder);
+				$aToFolder = Folder::singleton()->findFolder($this->sDataFolder);
 				if($aToFolder->exists()){
 					$aToFolder->delete(true);
 				}
@@ -86,14 +86,14 @@ class CreateSetup extends ControlPanel{
 				break;
 			}
 		}
-		$aCodeFile = $aPackage->folder()->findFile('setup/Setup.php',FileSystem::CREATE_RECURSE_DIR | FileSystem::FIND_AUTO_CREATE );
+		$aCodeFile = $aPackage->folder()->findFile('setup/Setup.php',Folder::CREATE_RECURSE_DIR | Folder::FIND_AUTO_CREATE );
 		$aWriter = $aCodeFile->openWriter();
 		$aWriter->write($strSetupCode);
 		$aWriter->flush();
 		// update meta info
 		if($bUpdateMetainfo){
 			$sInstallPath = $this->aExtension->metainfo()->installPath() ;
-			$sMetainfoFilePath = FileSystem::singleton()->find($sInstallPath.'/metainfo.xml')->url(false);
+			$sMetainfoFilePath = Folder::singleton()->find($sInstallPath.'/metainfo.xml')->path();
 			$aSimpleXML = simplexml_load_file($sMetainfoFilePath) ;
 			$aSimpleXML->data->setup = $this->ns.'\setup\Setup';
 			$aSimpleXML->asXML($sMetainfoFilePath);

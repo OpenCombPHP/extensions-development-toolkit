@@ -7,9 +7,9 @@ use org\opencomb\coresystem\mvc\controller\ControlPanel ;
 use org\opencomb\platform\ext\Extension ;
 use org\opencomb\platform\ext\ExtensionManager ;
 use org\opencomb\platform\ext\dependence\RequireItem ;
-use org\jecat\framework\fs\IFile ;
-use org\jecat\framework\fs\IFolder ;
-use org\jecat\framework\fs\FileSystem ;
+use org\jecat\framework\fs\File ;
+use org\jecat\framework\fs\Folder ;
+use org\jecat\framework\fs\Folder ;
 use org\jecat\framework\fs\FSIterator ;
 use org\jecat\framework\io\IOutputStream ;
 use org\jecat\framework\io\OutputStreamBuffer ;
@@ -109,12 +109,12 @@ class CreatePackage extends ControlPanel
 		$this->view->variables()->set('arrZipFiles',$arrZipFiles);
 	}
 	
-	private function createZip(IFile $aFile){
+	private function createZip(File $aFile){
 		if($aFile->exists()){
 			$aFile->delete();
 		}
 		$aZip = new \ZipArchive;
-		$sFilePath = $aFile->url(false);
+		$sFilePath = $aFile->path();
 		if($aZip->open($sFilePath,\ZIPARCHIVE::CREATE) !== TRUE){
 			throw new Exception("can not open file <%s>",$sFilePath);
 		}
@@ -122,7 +122,7 @@ class CreatePackage extends ControlPanel
 	}
 	
 	private function packageFramework(\ZIPARCHIVE $aZip , $git ){
-		$aFolder = FileSystem::singleton()->findFolder('/framework');
+		$aFolder = Folder::singleton()->findFolder('/framework');
 		$sExcludePattern = '';
 		if(empty($git)){
 			$sExcludePattern = '`^\\.(git|svn|cvs)(/|$|ignore)`' ;
@@ -133,7 +133,7 @@ class CreatePackage extends ControlPanel
 	}
 	
 	private function packagePlatform(\ZIPARCHIVE $aZip , $git ){
-		$aFolder = FileSystem::singleton()->findFolder('/');
+		$aFolder = Folder::singleton()->findFolder('/');
 		$sExcludePattern = '';
 		if(empty($git)){
 			$sExcludePattern = '`^(\\.(git|svn|cvs)|(framework|data|extensions|settings|.settings)(/|$))`' ;
@@ -143,7 +143,7 @@ class CreatePackage extends ControlPanel
 		return $this->package($aZip,$aFolder,'',$sExcludePattern);
 	}
 	
-	private function package(\ZIPARCHIVE $aZip,IFolder $aFolder , $sPrefix , $sExcludePattern){
+	private function package(\ZIPARCHIVE $aZip,Folder $aFolder , $sPrefix , $sExcludePattern){
 		$aIterator = $aFolder->iterator( FSIterator::FILE | FSIterator::FOLDER | FSIterator::RECURSIVE_SEARCH ) ;
 		foreach( $aIterator as $sPath){
 			if( !empty($sExcludePattern) and preg_match($sExcludePattern,$sPath)){
@@ -156,7 +156,7 @@ class CreatePackage extends ControlPanel
 					echo $aZip->getStatusString();
 				}
 			}else{
-				$sLocalPath = $aFolder->url(false).'/'.$sPath;
+				$sLocalPath = $aFolder->path().'/'.$sPath;
 				$bR = $aZip->addFile($sLocalPath , $sInZipPath);
 				if($bR === false){
 					echo $aZip->getStatusString();
@@ -168,7 +168,7 @@ class CreatePackage extends ControlPanel
 	private function createWriter(){
 		$aFile = Extension::flyweight('development-toolkit')
 				->publicFolder()
-					->findFile('setup.php',FileSystem::FIND_AUTO_CREATE);
+					->findFile('setup.php',Folder::FIND_AUTO_CREATE);
 		return $aFile->openWriter();
 	}
 	
@@ -196,7 +196,7 @@ class CreatePackage extends ControlPanel
 		);
 		
 		function generateLicence(array &$arrLicenceList , array $arrExtInfo){
-			$aExtFolder = FileSystem::singleton()->findFolder($arrExtInfo['installPath']) ;
+			$aExtFolder = Folder::singleton()->findFolder($arrExtInfo['installPath']) ;
 			$aLicenceFolder = $aExtFolder->findFolder('licence');
 			if( null !== $aLicenceFolder ){
 				$aLicenceIterator = $aLicenceFolder->iterator( FSIterator::CONTAIN_FILE | FSIterator::RETURN_FSO ) ;
@@ -352,13 +352,13 @@ class CreatePackage extends ControlPanel
 		
 		// zip 
 		foreach($arrFileList as $sInZipPath => $aFSO){
-			if( $aFSO instanceof IFolder ){
+			if( $aFSO instanceof Folder ){
 				$bR = $aZip->addEmptyDir($sInZipPath);
 				if($bR === false){
 					echo $aZip->getStatusString();
 				}
 			}else{
-				$sLocalPath = $aFSO->url(false);
+				$sLocalPath = $aFSO->path();
 				$bR = $aZip->addFile($sLocalPath , $sInZipPath);
 				if($bR === false){
 					echo $aZip->getStatusString();

@@ -5,7 +5,7 @@ use org\jecat\framework\db\DB ;
 use org\jecat\framework\db\sql\StatementFactory ;
 use org\opencomb\platform\ext\ExtensionMetainfo ;
 use org\opencomb\platform\ext\Extension ;
-use org\jecat\framework\fs\FileSystem ;
+use org\jecat\framework\fs\Folder ;
 
 abstract class AbstractSetup implements ISetup{
 	protected function setMetainfo(ExtensionMetainfo $aMetainfo){
@@ -36,7 +36,7 @@ abstract class AbstractSetup implements ISetup{
 	}
 	
 	protected function copyFolder($sfrom,$sto){
-		return FileSystem::singleton()->copy($sfrom,$sto);
+		return Folder::singleton()->copy($sfrom,$sto);
 	}
 	
 	protected function getToFolder(){

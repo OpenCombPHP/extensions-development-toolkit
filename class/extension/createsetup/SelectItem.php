@@ -6,7 +6,7 @@ use org\opencomb\coresystem\auth\Id;
 use org\opencomb\coresystem\mvc\controller\ControlPanel;
 use org\jecat\framework\db\DB ;
 use org\opencomb\platform\ext\Extension ;
-use org\jecat\framework\fs\FileSystem ;
+use org\jecat\framework\fs\Folder ;
 
 class SelectItem extends ControlPanel{
 	public function createBeanConfig(){
@@ -34,7 +34,7 @@ class SelectItem extends ControlPanel{
 		$tableList = $this->getExtDBTableList($extName,'') ;
 		$aExtension = Extension::flyweight($extName);
 		$sDataFileFolder = $aExtension->metainfo()->installPath().'/data/public';
-		$aDataFileFolderIterator = FileSystem::singleton()->findFolder($sDataFileFolder)->iterator();
+		$aDataFileFolderIterator = Folder::singleton()->findFolder($sDataFileFolder)->iterator();
 		// set to template
 		$this->selectItem->variables()->set('extName',$extName) ;
 		$this->selectItem->variables()->set('tableList',$tableList);

@@ -5,7 +5,7 @@ use org\opencomb\coresystem\auth\Id;
 
 use org\jecat\framework\fs\FSIterator;
 use org\jecat\framework\lang\oop\ClassLoader;
-use org\jecat\framework\fs\FileSystem;
+use org\jecat\framework\fs\Folder;
 use org\jecat\framework\setting\Setting;
 use org\opencomb\coresystem\mvc\controller\ControlPanel;
 
@@ -35,7 +35,7 @@ class RemoveCache extends ControlPanel
 		if( $this->params->has('deletePaths') )
 		{
 			$sMessage = '成功清理以下缓存文件 : <br/>';
-			if($dataFolder = FileSystem::singleton()->findFolder('/data/compiled/class')){
+			if($dataFolder = Folder::singleton()->findFolder('/data/compiled/class')){
 				foreach($dataFolder->iterator(FSIterator::FOLDER | FSIterator::RETURN_FSO) as $aFolder){
 					foreach($this->params->get('deletePaths') as $sPath){
 						$aFolder->deleteChild( $sPath ,true,true);
@@ -69,7 +69,7 @@ class RemoveCache extends ControlPanel
 				}
 			}
 			$aFolder = $package->folder();
-			$arrExp = $this->buildNode($aFolder->url(false),$aFolder->path());
+			$arrExp = $this->buildNode($aFolder->path(),$aFolder->path());
 		}
 		return $arrTree;
 	}

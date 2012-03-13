@@ -7,10 +7,10 @@ use org\opencomb\coresystem\mvc\controller\ControlPanel;
 use org\jecat\framework\message\Message ;
 use org\opencomb\platform\ext\ExtensionManager ;
 use org\opencomb\platform\ext\Extension ;
-use org\jecat\framework\fs\FileSystem ;
+use org\jecat\framework\fs\Folder ;
 use org\jecat\framework\fs\FSIterator ;
 use org\jecat\framework\fs\imp\LocalFSO ;
-use org\jecat\framework\fs\IFolder ;
+use org\jecat\framework\fs\Folder ;
 use org\opencomb\platform\Platform ;
 
 // /?c=org.opencomb.development.toolkit.extension.ExtensionPackages
@@ -61,7 +61,7 @@ class ExtensionPackages extends ControlPanel{
 			}
 			$aZip = new \ZipArchive();
 			$filename = $aPackagedFSO->name();
-			$filePath = $aPackagedFSO->url(false);
+			$filePath = $aPackagedFSO->path();
 			if($debug){
 				$this->extensionPackages->createMessage(Message::notice,'即将创建压缩文件:%s : %s',array($aPackagedFSO->path(),$filePath));
 			}else{
@@ -70,7 +70,7 @@ class ExtensionPackages extends ControlPanel{
 			if($aZip->open($filePath,\ZIPARCHIVE::CREATE) !== TRUE){
 				$this->extensionPackages->createMessage(Message::notice,"can not open file <$filePath>");
 			}else{
-				$installFolder = FileSystem::singleton()->findFolder($package['installPath']);
+				$installFolder = Folder::singleton()->findFolder($package['installPath']);
 				if($debug){
 					$this->extensionPackages->createMessage(Message::notice,'扩展安装目录:%s',$installFolder->path());
 				}
@@ -85,17 +85,17 @@ class ExtensionPackages extends ControlPanel{
 							continue;
 						}
 					}
-					if($it instanceof IFolder){
+					if($it instanceof Folder){
 						$path = $it->path();
-						$path = FileSystem::relativePath($installFolder,$it);
+						$path = Folder::relativePath($installFolder,$it);
 						$bSuccess = $bSuccess and $aZip->addEmptyDir($path);
 						if($debug){
 							$this->extensionPackages->createMessage(Message::notice, '创建目录：%s : %s',array($path,$aZip->getStatusString()));
 						}
 					}else{
 						$path = $it->path();
-						$path = FileSystem::relativePath($installFolder,$it);
-						$bSuccess = $bSuccess and $aZip->addFile($it->url(false),$path);
+						$path = Folder::relativePath($installFolder,$it);
+						$bSuccess = $bSuccess and $aZip->addFile($it->path(),$path);
 						if($debug){
 							$this->extensionPackages->createMessage(Message::notice, '压缩文件 %s 来自 %s : %s',array($path,$it->path(),$aZip->getStatusString()));
 						}
@@ -159,7 +159,7 @@ class ExtensionPackages extends ControlPanel{
 	}
 	
 	static private function getPackageFolder(){
-		return Extension::flyweight('development-toolkit')->publicFolder()->findFolder('extensionPackages',FileSystem::FIND_AUTO_CREATE);
+		return Extension::flyweight('development-toolkit')->publicFolder()->findFolder('extensionPackages',Folder::FIND_AUTO_CREATE);
 	}
 	
 	/**
@@ -176,7 +176,7 @@ class ExtensionPackages extends ControlPanel{
 		}else{
 			$sVl = '-repos';
 		}
-		return self::getPackageFolder()->findFile($name.'-'.$version.$sVl.'.ocp.zip',FileSystem::FIND_AUTO_CREATE_OBJECT);
+		return self::getPackageFolder()->findFile($name.'-'.$version.$sVl.'.ocp.zip',Folder::FIND_AUTO_CREATE_OBJECT);
 	}
 	
 	static public function hasPackaged($name,$version , $vl){

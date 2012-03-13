@@ -150,7 +150,7 @@ DBSETTINGS;
 	
 	foreach($arrExtensionList as $arrExtension){
 		$sPath = $arrExtension['path'] ;
-		if( !$aExtFolder = \org\jecat\framework\fs\FileSystem::singleton()->findFolder('/'.$sPath) )
+		if( !$aExtFolder = \org\jecat\framework\fs\Folder::singleton()->findFolder('/'.$sPath) )
 		{
 			$aMessageQueue->create(\org\jecat\framework\message\Message::error,'输入的路径不存在:%s',$sPath) ;
 			break ;
