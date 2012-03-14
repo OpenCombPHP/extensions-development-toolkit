@@ -10,7 +10,6 @@ use org\opencomb\platform\ext\Extension ;
 use org\jecat\framework\fs\Folder ;
 use org\jecat\framework\fs\FSIterator ;
 use org\jecat\framework\fs\imp\LocalFSO ;
-use org\jecat\framework\fs\Folder ;
 use org\opencomb\platform\Platform ;
 
 // /?c=org.opencomb.development.toolkit.extension.ExtensionPackages
