@@ -81,11 +81,7 @@ jquery(function(){
 	function getPath(aNode){
 		var aParentNode = aNode.getParentNode();
 		if( aParentNode != null){
-			if(aNode.filename){
-				return getPath(aParentNode)+'/'+aNode.filename;
-			}else{
-				return getPath(aParentNode)+'/'+aNode.name;
-			}
+			return getPath(aParentNode)+'.'+aNode.name;
 		}else{
 			return aNode.name;
 		}

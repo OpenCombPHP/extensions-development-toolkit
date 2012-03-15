@@ -1,8 +1,10 @@
 <?php
 namespace org\opencomb\development\toolkit\platform ;
 
+use org\opencomb\platform\lang\compile\OcCompilerFactory;
+use org\jecat\framework\lang\oop\Package;
+use org\jecat\framework\fs\FSO;
 use org\opencomb\coresystem\auth\Id;
-
 use org\jecat\framework\fs\FSIterator;
 use org\jecat\framework\lang\oop\ClassLoader;
 use org\jecat\framework\fs\Folder;
@@ -34,14 +36,22 @@ class RemoveCache extends ControlPanel
 		//ajax的清理请求
 		if( $this->params->has('deletePaths') )
 		{
-			$sMessage = '成功清理以下缓存文件 : <br/>';
-			if($dataFolder = Folder::singleton()->findFolder('/data/compiled/class')){
-				foreach($dataFolder->iterator(FSIterator::FOLDER | FSIterator::RETURN_FSO) as $aFolder){
-					foreach($this->params->get('deletePaths') as $sPath){
-						$aFolder->deleteChild( $sPath ,true,true);
-						$sMessage .=  $aFolder->localPath() . $sPath . "<br/>";
-					}
+			$sMessage = '';
+			foreach($this->params->get('deletePaths') as $sPath)
+			{
+				$sClassName = str_replace('.','\\',$sPath) ;
+				
+				// 清理缓存文件
+				if( $sPath = ClassLoader::singleton()->searchClass($sClassName,Package::compiled) )
+				{
+					unlink($sPath) ;
+					$sMessage .=  '缓存缓存文件 :'.FSO::tidyPath( $sPath ) . "<br/>";
 				}
+				
+				// 重新编译缓存文件
+				OcCompilerFactory::singleton()->create()->compileClass($sClassName) ;
+				$sMessage .=  '编译类 :'.$sClassName . "<br/>";
+				
 			}
 			exit($sMessage);
 		}
