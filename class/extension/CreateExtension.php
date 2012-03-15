@@ -159,7 +159,7 @@ class CreateExtension extends ControlPanel
 				
 				// 安装
 				$arrInstalleds = $aSetting->item('/extensions','installeds',array()) ;
-				$arrInstalleds[] = $sInstallPath ;
+				$arrInstalleds[] = $aFs->find($sInstallPath)->path() ;
 				$aSetting->setItem('/extensions','installeds',$arrInstalleds) ;
 				
 				// 激活
