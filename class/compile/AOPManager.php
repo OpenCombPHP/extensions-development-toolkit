@@ -75,10 +75,13 @@ class AOPManager extends ControlPanel
 							$arrAopDetail[$sClass][$sDeclare]['aspects'][] = $aAspect ;
 						}
 					}
+					
+					$arrAopDetail[$sClass][$sDeclare]['derived'] = $aJointPoint->isMatchDerivedClass() ;
 				} 
 			}
 		}
 		
+		//print_r($arrAopDetail) ;
 		$this->aopManager->variables()->set('arrAopDetail',$arrAopDetail) ;
 	}
 	
