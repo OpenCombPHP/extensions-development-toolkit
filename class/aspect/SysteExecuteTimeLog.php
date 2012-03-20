@@ -5,7 +5,7 @@ use org\jecat\framework\lang\Object;
 use org\jecat\framework\lang\aop\jointpoint\JointPointMethodDefine;
 
 class SysteExecuteTimeLog extends Object
-{
+{ 
 	/**
 	 * @advice around 
 	 * @use org\opencomb\platform\debug\ExecuteTimeWatcher
@@ -23,11 +23,11 @@ class SysteExecuteTimeLog extends Object
 				$sName = $this->name() ;
 				$aExecuteTimeWatcher = \org\opencomb\platform\debug\ExecuteTimeWatcher::singleton() ;
 				
-				$aExecuteTimeWatcher->start("/system/controller/{$sName}/{$sObjId}/initialize") ;
+				$aExecuteTimeWatcher->start("/controller/{$sName}/{$sObjId}/initialize") ;
 				
 				aop_call_origin($params,$sName,$bBuildAtonce) ;
 				
-				$aExecuteTimeWatcher->finish("/system/controller/{$sName}/{$sObjId}/initialize") ;
+				$aExecuteTimeWatcher->finish("/controller/{$sName}/{$sObjId}/initialize") ;
 
 				return  ;
 				
@@ -37,11 +37,11 @@ class SysteExecuteTimeLog extends Object
 				$sName = $this->name() ;
 				$aExecuteTimeWatcher = \org\opencomb\platform\debug\ExecuteTimeWatcher::singleton() ;
 				
-				$aExecuteTimeWatcher->start("/system/controller/{$sName}/{$sObjId}/process") ;
+				$aExecuteTimeWatcher->start("/controller/{$sName}/{$sObjId}/process") ;
 				
 				aop_call_origin() ;
 				
-				$aExecuteTimeWatcher->finish("/system/controller/{$sName}/{$sObjId}/process") ;
+				$aExecuteTimeWatcher->finish("/controller/{$sName}/{$sObjId}/process") ;
 				
 				
 				return ;
