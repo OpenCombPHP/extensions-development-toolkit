@@ -67,6 +67,11 @@ return array(
 					'link' => '?c=org.opencomb.development.toolkit.compile.AOPManager' ,
 					'query' => 'c=org.opencomb.development.toolkit.compile.AOPManager' ,
 			) ,
+			'item:codeTidy' => array(
+					'title' => '源代码清理工具' ,
+					'link' => '?c=org.opencomb.development.toolkit.compile.CodeTidyView' ,
+					'query' => 'c=org.opencomb.development.toolkit.compile.CodeTidyView' ,
+			),
 		) ,
 	) ,
 ) ;
