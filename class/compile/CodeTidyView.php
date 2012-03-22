@@ -100,6 +100,13 @@ class CodeTidyView extends ControlPanel{
 				continue ;
 			}
 			$aWriter->write($aBuffer);
+			$this->view->createMessage(
+				Message::success,
+				'处理文件成功：`%s`',
+				array(
+					$sPath,
+				)
+			);
 		}
 	}
 	

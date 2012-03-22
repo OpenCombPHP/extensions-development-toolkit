@@ -94,12 +94,12 @@ class SourceCodeTidy extends Object{
 	
 	const COPY_RIGHT_MARK = 'SourceCodeTidyaddCopyRight';
 	private function addCopyRight($sContent,$sCopyRight){
-		$sPregMark = '`/\*'.self::COPY_RIGHT_MARK."\n.*\n".self::COPY_RIGHT_MARK.'\*/`s';
+		$sPregMark = "`(<\?php)(\n|\r)*.*\n/\*".self::COPY_RIGHT_MARK.'\*/`s';
 		$sMark = self::COPY_RIGHT_MARK ;
 		if(preg_match($sPregMark,$sContent)){
-			$sContent = preg_replace($sPregMark,"/*$sMark\n$sCopyRight\n$sMark*/",$sContent);
+			$sContent = preg_replace($sPregMark,"\\1\n$sCopyRight\n/*$sMark*/",$sContent);
 		}else{
-			$sContent = preg_replace('`(<\?php)`',"\\1\n/*$sMark\n$sCopyRight\n$sMark*/",$sContent);
+			$sContent = preg_replace('`(<\?php)`',"\\1\n$sCopyRight\n/*$sMark*/",$sContent);
 		}
 		return $sContent ;
 	}
