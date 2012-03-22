@@ -16,7 +16,7 @@ class SourceCodeTidy extends Object{
 							);
 	 */
 	public function tidy(IInputStream $aInputStream , IOutputStream $aOutputStream,array $arrConf = array() ){
-		$sContent = $aInputStream->read();
+		$sContent = $aInputStream->read(-1);
 		if( isset($arrConf['tidyUse']) and $arrConf['tidyUse'] ){
 			$sContent = $this->tidyUse($sContent);
 		}
@@ -52,7 +52,7 @@ class SourceCodeTidy extends Object{
 			$arrUseMap = $this->getUseMap($sUseArea);
 			
 			// words
-			preg_match_all('`(?:[ :(){}\\\\]|\n|\r|\t)([a-zA-Z][a-zA-Z0-9]*)`',$sCleanContent,$arrMatch,PREG_OFFSET_CAPTURE,$iOffset + strlen($sUseArea) );
+			preg_match_all('`(?:[^a-zA-Z])([a-zA-Z][a-zA-Z0-9]*)`',$sCleanContent,$arrMatch,PREG_OFFSET_CAPTURE,$iOffset + strlen($sUseArea) );
 			$arrWords = $arrMatch[1];
 			
 			foreach($arrWords as $arrWord){
@@ -88,12 +88,19 @@ class SourceCodeTidy extends Object{
 	}
 	
 	private function tidyCloseTag($sContent){
-		$sContent = preg_replace('`(\n|\r|\s)*\?>(\n|\r|\s)*$`','',$sContent);
+		$sContent = preg_replace('`(\n|\r|\s)*\?>(\n|\r|\s)*$`',"\n",$sContent);
 		return $sContent ;
 	}
 	
+	const COPY_RIGHT_MARK = 'SourceCodeTidyaddCopyRight';
 	private function addCopyRight($sContent,$sCopyRight){
-		$sContent = preg_replace('`(<\?php)`',"\\1\n/*\n$sCopyRight\n*/",$sContent);
+		$sPregMark = '`/\*'.self::COPY_RIGHT_MARK."\n.*\n".self::COPY_RIGHT_MARK.'\*/`s';
+		$sMark = self::COPY_RIGHT_MARK ;
+		if(preg_match($sPregMark,$sContent)){
+			$sContent = preg_replace($sPregMark,"/*$sMark\n$sCopyRight\n$sMark*/",$sContent);
+		}else{
+			$sContent = preg_replace('`(<\?php)`',"\\1\n/*$sMark\n$sCopyRight\n$sMark*/",$sContent);
+		}
 		return $sContent ;
 	}
 	

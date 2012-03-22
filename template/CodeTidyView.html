@@ -1,0 +1,120 @@
+<lib name='jquery.ztree' />
+<style>
+.copyRight{
+	height:400px;
+	width:400px;
+	display:none ;
+}
+</style>
+<script type='text/javascript'>
+function showCopyRight(o){
+	var cr = document.getElementById('copyRight') ;
+	if(o.checked){
+		cr.style.display='inline-block';
+	}else{
+		cr.style.display='none';
+	}
+}
+
+var arrTree = {=json_encode($arrNsFolder)};
+var arrTreeName = new Array();
+jquery(function(){
+	jQuery('.folderTree').each(
+		function(index,obj){
+			var o=obj;
+			var t = jQuery(o);
+			var ns = t.attr('ns');
+			arrTreeName.push(obj.id);
+			jquery.fn.zTree.init(
+				t,
+				{
+					view: {
+						expandSpeed: 0
+					},
+					check:{
+						enable:true,
+						chkboxType:{ "Y": "ps", "N": "ps" }
+					},
+				},
+				{
+					name:ns,
+					children:arrTree[ns],
+				}
+			);
+		}
+	);
+});
+
+function submit(){
+	var i,j;
+	var arrCheckedPath = new Array() ;
+	for(i=0;i<arrTreeName.length;++i){
+		var tid = arrTreeName[i] ;
+		var ztobj = jquery.fn.zTree.getZTreeObj(tid);
+		var nodeList =  ztobj.getCheckedNodes(true) ;
+		for(j=0;j<nodeList.length;++j){
+			if( typeof(nodeList[j].path) != 'undefined' ){
+				arrCheckedPath.push(nodeList[j].path);
+			}
+		}
+	}
+	jQuery('#input_paths').val(arrCheckedPath);
+	document.getElementById('form').submit();
+}
+</script>
+<msgqueue />
+<ul>
+	<li>
+		<h4>JeCat框架</h4>
+		<div id='folder_framework' class='folderTree ztree' ns='org.jecat.framework'></div>
+	</li>
+	<li>
+		<h4>蜂巢平台</h4>
+		<div id='folder_platform' class='folderTree ztree' ns='org.opencomb.platform'></div>
+	</li>
+	<li>
+		<h4>扩展</h4>
+		<foreach for='$arrExtPackageList' item='arrExtPackage'>
+			<h5>{=$arrExtPackage['meta']->title()}（{=$arrExtPackage['meta']->name()}）</h5>
+			<ul>
+				<foreach for='$arrExtPackage["packages"]' item='arrPackage'>
+					<li>
+						<div id='folder_ext_{=str_replace('.','_',$arrPackage['ns'])}' class='folderTree ztree' ns='{=$arrPackage["ns"]}'></div>
+					</li>
+				</foreach>
+			</ul>
+		</foreach>
+	</li>
+</ul>
+<form id='form' method='post'>
+	<input type='hidden' name='act' value='tidy' />
+	<input id='input_paths' type='hidden' name='paths' />
+	<div>
+		<label>
+			<input type='checkbox' name='arrConf[tidyUse]' />
+			重建use声明（删除多余/重复的use声明，并对use声明按照字母排序）
+		</label>
+	</div>
+	<div>
+		<label>
+			<input type='checkbox' name='arrConf[tidyCloseTag]' value='true' />
+			删除类文件末尾的 "?>" ，避免输出多余的空白字符
+		</label>
+	</div>
+	<div>
+		<label>
+			<input type='checkbox' name='arrConf[tidyBOM]' value='true' />
+			清理文件头 UTF-BOM 标记
+		</label>
+	</div>
+	<div>
+		<label>
+			<input type='checkbox' name='arrConf[addCopyRight]' value='true' onchange='showCopyRight(this);' />
+			加入/更改 class 文件头的 license 
+		</label>
+	</div>
+	<div>
+		<textarea id='copyRight' name='arrConf[copyRight]' class='copyRight'></textarea>
+	</div>
+</form>
+<button onclick='submit()'>提交</button>
