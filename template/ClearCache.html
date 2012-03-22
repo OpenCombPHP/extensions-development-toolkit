@@ -20,5 +20,17 @@
 		</label>
 	</div>
 	
+	<div class="coresystem-form-checkbox">
+		<label title="系统反射数据库结构后，将信息保存在缓存文件中，避免重复读取数据库结构。当数据表结构发生变化后，需要清理这一项缓存，才能生效。目前没有任何机制促使这项缓存自动更新，需要在人为清理后更新。针对目录:/data/cache/db">
+			<input type="checkbox" name="clear_model_compiled" value="1" />数据库结构缓存
+		</label>
+	</div>
+	
+	<div class="coresystem-form-checkbox">
+		<label title="系统为不同的数据表自动 Model 和 Prototype 的“影子”子类，以便 AOP 切入特定的数据表 Model/Prototype。针对目录: /data/class">
+			<input type="checkbox" name="clear_shadow_compiled" value="1" />“影子类”缓存
+		</label>
+	</div>
+	
 	<input type='submit' class="coresystem-form-button" value="清 理" />
 </form>
