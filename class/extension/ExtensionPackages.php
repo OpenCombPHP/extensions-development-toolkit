@@ -54,10 +54,6 @@ class ExtensionPackages extends ControlPanel{
 		$bSuccess = true;
 		if(!empty($package)){
 			$aPackagedFSO = $this->getPackagedFSO($package['name'],$package['version'],$includeGit);
-			if(! $aPackagedFSO instanceof LocalFSO){
-				$this->extensionPackages->createMessage(Message::notice, '失败：扩展安装目录不在本地文件系统');
-				return;
-			}
 			$aZip = new \ZipArchive();
 			$filename = $aPackagedFSO->name();
 			$filePath = $aPackagedFSO->path();
@@ -192,7 +188,7 @@ class ExtensionPackages extends ControlPanel{
 			}
 			break;
 		case 'download':
-			return self::getPackagedFSO($name,$version,$vl)->path();
+			return Folder::relativePath(Folder::singleton(),self::getPackagedFSO($name,$version,$vl)->path());
 			break;
 		}
 	}
