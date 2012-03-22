@@ -1,6 +1,8 @@
 <?php
 namespace org\opencomb\development\toolkit\platform ;
 
+use org\jecat\framework\message\Message;
+
 use org\opencomb\platform\lang\compile\OcCompilerFactory;
 use org\jecat\framework\lang\oop\Package;
 use org\jecat\framework\fs\FSO;
@@ -37,24 +39,34 @@ class RemoveCache extends ControlPanel
 		if( $this->params->has('deletePaths') )
 		{
 			$sMessage = '';
+// 			var_dump($this->params->get('deletePaths') );
+// 			exit;
+			$aCompiler = OcCompilerFactory::singleton()->create() ;
 			foreach($this->params->get('deletePaths') as $sPath)
 			{
 				$sClassName = str_replace('.','\\',$sPath) ;
 				
 				// 清理缓存文件
-				if( $sPath = ClassLoader::singleton()->searchClass($sClassName,Package::compiled) )
-				{
-					unlink($sPath) ;
-					$sMessage .=  '缓存缓存文件 :'.FSO::tidyPath( $sPath ) . "<br/>";
-				}
-				
+// 				if( $sPath = ClassLoader::singleton()->searchClass($sClassName,Package::compiled) )
+// 				{
+// 					unlink($sPath) ;
+// 					$sMessage .=  '缓存缓存文件 :'.FSO::tidyPath( $sPath ) . "<br/>";
+// 				}
+// 				$aCompiler = OcCompilerFactory::create() ;
+// 				foreach($arrClassList as $sClass)
+// 				{
+// 					$aCompiler->compileClass($sClass);
+// 				}
 				// 重新编译缓存文件
-				OcCompilerFactory::singleton()->create()->compileClass($sClassName) ;
+// 				OcCompilerFactory::singleton()->create()->compileClass($sClassName) ;
+				// 重新编译缓存文件
+				$aCompiler->compileClass($sClassName);
 				$sMessage .=  '编译类 :'.$sClassName . "<br/>";
 				
 			}
-			exit($sMessage);
+			$this->viewForm->createMessage(Message::success,$sMessage) ;
 		}
+		
 		$this->viewForm->variables()->set('classJson',json_encode( $this->getTree(ClassLoader::singleton()->packageIterator()) )) ;
 	}
 	
@@ -65,6 +77,9 @@ class RemoveCache extends ControlPanel
 			$arrNs = explode('\\',$ns);
 			$arrExp = &$arrTree;
 			foreach($arrNs as $ns_cl){
+				if($ns_cl === ''){
+					continue;
+				}
 				$bFound= false;
 				for($i = 0; $i < count($arrExp) ;$i++){
 					if( isset($arrExp[$i]['name']) && $arrExp[$i]['name'] == $ns_cl){

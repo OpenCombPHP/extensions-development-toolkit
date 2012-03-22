@@ -2,20 +2,23 @@
 <msgqueue />
 
 <form method="post">
-	<label>
 	<div class="coresystem-form-checkbox">
-		<input type="checkbox" name="clear_system_cache" value="1" />系统缓存
+		<label title="各个扩展注册到系统中的数据和功能，当扩展发生变动，可能需要清理整个系统的缓存生效. 针对目录:/data/cache/platform/system">
+			<input type="checkbox" name="clear_system_cache" value="1" />系统缓存
+		</label>
 	</div>
-	</label>
-	<label>
+	
 	<div class="coresystem-form-checkbox">
-		<input type="checkbox" name="clear_class_compiled" value="1" />类编译缓存
+		<label title="平台、框架、扩展提供的类，编译后的文件。针对目录: /data/compiled/class">
+			<input type="checkbox" name="clear_class_compiled" value="1"  />类编译缓存
+		</label>
 	</div>
-	</label>
-	<label>
+	
 	<div class="coresystem-form-checkbox">
-		<input type="checkbox" name="clear_template_compiled" value="1" />模板编译缓存
+		<label title="UI 模版文件的缓存文件。针对目录: /data/compiled/template">
+			<input type="checkbox" name="clear_template_compiled" value="1" />模板编译缓存
+		</label>
 	</div>
-	</label>
+	
 	<input type='submit' class="coresystem-form-button" value="清 理" />
 </form>
