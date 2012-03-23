@@ -9,7 +9,6 @@ use org\opencomb\platform\ext\ExtensionManager ;
 use org\opencomb\platform\ext\dependence\RequireItem ;
 use org\jecat\framework\fs\File ;
 use org\jecat\framework\fs\Folder ;
-use org\jecat\framework\fs\Folder ;
 use org\jecat\framework\fs\FSIterator ;
 use org\jecat\framework\io\IOutputStream ;
 use org\jecat\framework\io\OutputStreamBuffer ;
@@ -91,7 +90,12 @@ class CreatePackage extends ControlPanel
 			$aMetainfo = $aExtensionManager->extensionMetainfo($sExtName);
 			$sName = $aMetainfo->name();
 			$sVersion = $aMetainfo->version()->toString();
-			$aFile = ExtensionPackages::getPackagedFSO($sName , $sVersion ,$git[$sName] ) ;
+			
+			$bGit = null ;
+			if(isset($git[$sName])){
+				$bGit = $git[$sName] ;
+			}
+			$aFile = ExtensionPackages::getPackagedFSO($sName , $sVersion ,$bGit ) ;
 			$arrZipFiles [] = 
 			array(
 				'name' => $sName ,

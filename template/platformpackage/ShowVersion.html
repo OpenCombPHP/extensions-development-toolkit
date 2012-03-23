@@ -108,8 +108,11 @@
 					<td><div class='error'>未安装此扩展</div></td>
 				<else />
 					<td>{=$ext->name()}<input type='hidden' name='ext[]' value='{=$ext->name()}' />
-						<if '$arrPackageState[$sExtName] === false'>
-							<div class='error2'>此扩展尚未打包，请进入扩展打包页面进行打包</div>
+						{? $cGit = 0 ;
+							if( !empty($arrContainGit[$sExtName] ) ) $cGit=$arrContainGit[$sExtName];
+						}
+						<if '$arrPackageState[$sExtName][$cGit] === false'>
+							<span class='error2'>此扩展尚未打包，请进入扩展打包页面进行打包</span>
 							{?$error = true}
 						</if>
 					</td>
