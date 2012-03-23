@@ -113,7 +113,7 @@ class CreateExtension extends ControlPanel
 			
 			
 			$aFs = Folder::singleton() ;
-			$sInstallPath = "/extensions/{$sExtName}/{$sExtVersion}" ;
+			$sInstallPath = "extensions/{$sExtName}/{$sExtVersion}" ;
 			
 			if( $aFs->find($sInstallPath) )
 			{
@@ -159,7 +159,7 @@ class CreateExtension extends ControlPanel
 				
 				// 安装
 				$arrInstalleds = $aSetting->item('/extensions','installeds',array()) ;
-				$arrInstalleds[] = $aFs->find($sInstallPath)->path() ;
+				$arrInstalleds[] = $sInstallPath ;
 				$aSetting->setItem('/extensions','installeds',$arrInstalleds) ;
 				
 				// 激活
