@@ -139,7 +139,7 @@ DBSETTINGS;
 	global $arrExtensionList;
 	
 	// 简单配置启动 OC platform
-	$aPlatform = require 'jc.init.php' ;
+	$aPlatform = require 'oc.init.php' ;
 	
 	// data upgrader
 	$aDataUpgrader = \org\opencomb\platform\system\upgrader\PlatformDataUpgrader::singleton() ; 
@@ -150,7 +150,7 @@ DBSETTINGS;
 	
 	foreach($arrExtensionList as $arrExtension){
 		$sPath = $arrExtension['path'] ;
-		if( !$aExtFolder = \org\jecat\framework\fs\Folder::singleton()->findFolder('/'.$sPath) )
+		if( !$aExtFolder = \org\jecat\framework\fs\Folder::singleton()->findFolder($sPath) )
 		{
 			$aMessageQueue->create(\org\jecat\framework\message\Message::error,'输入的路径不存在:%s',$sPath) ;
 			break ;
@@ -183,8 +183,6 @@ DBSETTINGS;
 	}
 	
 	return $aMessageQueue ;
-	//$aBuffer = new \org\jecat\framework\io\OutputStreamBuffer ;
-	// $aMessageQueue->display(null,$aBuffer);
 }
 
 function install(){
