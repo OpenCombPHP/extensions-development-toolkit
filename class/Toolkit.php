@@ -1,8 +1,8 @@
 <?php
 namespace org\opencomb\development\toolkit ;
 
+use org\opencomb\platform\service\Service;
 use org\jecat\framework\bean\BeanFactory;
-use org\opencomb\platform\Platform;
 use org\jecat\framework\lang\aop\AOP;
 use org\opencomb\platform\ext\Extension;
 use org\opencomb\development\toolkit\aspect\SysteExecuteTimeLog ;
@@ -13,19 +13,21 @@ class Toolkit extends Extension
 	{
 		$aAop = AOP::singleton() ;
 		$aAop->register('org\\opencomb\\development\\toolkit\\aspect\\ControlPanelFrameAspect') ;
-		
-		if(Platform::singleton()->isDebugging())
+
+		if(Service::singleton()->isDebugging())
 		{
 			$aAop->register('org\\opencomb\\development\\toolkit\\aspect\\ModelDataUsefulDetecter') ;
 			
-			$aAop->registerBean(array(
+			/*$aAop->registerBean(array(
 					// jointponts
-					'org\\jecat\\framework\\mvc\\controller\\Controller::__construct' ,
-					'org\\jecat\\framework\\mvc\\controller\\Controller::process[derived]' ,
+					'org\\jecat\\framework\\mvc\\controller\\Controller::__construct()' ,
+					'org\\jecat\\framework\\mvc\\controller\\Controller::process()[derived]' ,
+					'org\\jecat\\framework\\mvc\\controller\\Response::process()' ,
+					'org\\jecat\\framework\\ui\\UI::render()' ,
 					// advices
 					array('org\\opencomb\\development\\toolkit\\aspect\\SysteExecuteTimeLog','executeTimeLogger') ,
 			),__FILE__) ;
-			
+			*/
 			// 
 			
 			
