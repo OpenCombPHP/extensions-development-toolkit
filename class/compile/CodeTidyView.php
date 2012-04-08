@@ -1,6 +1,10 @@
 <?php
 namespace org\opencomb\development\toolkit\compile ;
 
+use org\jecat\framework\lang\oop\Package;
+
+use org\opencomb\platform\Platform;
+
 use org\opencomb\coresystem\mvc\controller\ControlPanel;
 use org\jecat\framework\fs\Folder ;
 use org\jecat\framework\fs\FSIterator ;
@@ -23,7 +27,7 @@ class CodeTidyView extends ControlPanel{
 		
 		// packages
 		$aClassLoader = ClassLoader::singleton ();
-		$aPackageIterator = $aClassLoader->packageIterator ();
+		$aPackageIterator = $aClassLoader->packageIterator(Package::nocompiled);
 		$arrNsFolder = array () ;
 		foreach($aPackageIterator as $aPackage){
 			$sNs = $aPackage->ns() ;
@@ -72,7 +76,7 @@ class CodeTidyView extends ControlPanel{
 		
 		$aTidy = SourceCodeTidy::singleton();
 		foreach($arrPath as $sPath){
-			$aFile = Folder::singleton()->findFile($sPath);
+			$aFile = Platform::singleton()->installFolder()->findFile($sPath);
 			
 			if(!$aFile){
 				$this->view->createMessage(
@@ -121,7 +125,7 @@ class CodeTidyView extends ControlPanel{
 			if($aSubFso instanceof Folder){
 				$arrSub['children']=$this->getTree($aSubFso);
 			}else{
-				$arrSub['path'] = Folder::relativePath(Folder::singleton(),$aSubFso->path() );
+				$arrSub['path'] = Folder::relativePath(Platform::singleton()->installFolder(true),$aSubFso->path());
 			}
 			$arr[]=$arrSub;
 		}

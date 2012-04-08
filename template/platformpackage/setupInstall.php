@@ -158,7 +158,7 @@ DBSETTINGS;
 		
 		try{
 			// 清理缓存
-			\org\opencomb\platform\system\PlatformSerializer::singleton()->clearRestoreCache();
+			\org\opencomb\platform\service\ServiceSerializer::singleton()->clearRestoreCache();
 			
 			// 安装
 			$aExtMeta = \org\opencomb\platform\ext\ExtensionSetup::singleton()->install($aExtFolder , $aMessageQueue ) ;

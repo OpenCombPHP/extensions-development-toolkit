@@ -14,7 +14,7 @@ use org\jecat\framework\io\IOutputStream ;
 use org\jecat\framework\io\OutputStreamBuffer ;
 use org\jecat\framework\ui\xhtml\UIFactory ;
 use org\opencomb\development\toolkit\extension\ExtensionPackages ;
-use org\opencomb\platform\Platform ;
+use org\opencomb\platform\service\Service ;
 use org\jecat\framework\util\Version ;
 
 class CreatePackage extends ControlPanel
@@ -241,7 +241,7 @@ class CreatePackage extends ControlPanel
 		$arrExtInfo = array(
 			'title' => '蜂巢平台' ,
 			'extname' => 'platform' ,
-			'extversion' => Platform::singleton()->version() ,
+			'extversion' => Service::singleton()->version() ,
 			'installPath' => '/' ,
 		);
 		generateLicence( $arrVariables['licenceList'] , $arrExtInfo );
@@ -340,7 +340,7 @@ class CreatePackage extends ControlPanel
 		$sName = 'public' ;
 		$git = 0 ;
 		// file list and folder list
-		$aPlatform = Platform::singleton();
+		$aPlatform = Service::singleton();
 		$arrFileList = array();
 		foreach($aPlatform->publicFolders()->folderIterator('development-toolkit.oc.setup') as $aFolder){
 			$aFSIterator = $aFolder->iterator(FSIterator::CONTAIN_FILE | FSIterator::CONTAIN_FOLDER | FSIterator::RETURN_FSO | FSIterator::RECURSIVE_SEARCH );

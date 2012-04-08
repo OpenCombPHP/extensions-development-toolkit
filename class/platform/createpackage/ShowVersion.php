@@ -6,7 +6,7 @@ use org\opencomb\coresystem\auth\Id;
 use org\opencomb\coresystem\mvc\controller\ControlPanel ;
 use org\opencomb\platform\ext\ExtensionManager ;
 use org\jecat\framework\util\Version ;
-use org\opencomb\platform\Platform ;
+use org\opencomb\platform\service\Service ;
 use org\opencomb\platform\ext\dependence\RequireItem ;
 use org\jecat\framework\lang\Exception ;
 
@@ -129,7 +129,7 @@ class ShowVersion extends ControlPanel
 	}
 	
 	private function getOpenCombVersion(){
-		return Platform::singleton()->version()->toString();
+		return Service::singleton()->version()->toString();
 	}
 	
 	private $arrExtension = array();

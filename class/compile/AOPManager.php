@@ -5,9 +5,7 @@ use org\opencomb\platform\lang\compile\OcCompilerFactory;
 
 use org\jecat\framework\lang\oop\Package;
 
-use org\opencomb\platform\system\PlatformSerializer;
-
-use org\opencomb\platform\Platform;
+use org\opencomb\platform\service\Service;
 
 use org\opencomb\platform\system\PlatformFactory;
 
