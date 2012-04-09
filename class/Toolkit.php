@@ -28,14 +28,14 @@ class Toolkit extends Extension
 						'org\\jecat\\framework\\mvc\\model\\db\\Model::data()' ,
 						// advice
 						array('org\\opencomb\\development\\toolkit\\aspect\\ModelDataUsefulDetecter','data')						
-				),__CLASS__)
+				),__FILE__)
 				
 				->registerBean(array(
 						// jointpoint
 						'org\\jecat\\framework\\mvc\\model\\db\\Model::printStructData()' ,
 						// advice
 						array('org\\opencomb\\development\\toolkit\\aspect\\ModelDataUsefulDetecter','printStructData')
-				),__CLASS__) ;
+				),__FILE__) ;
 		}
 	}
 	
