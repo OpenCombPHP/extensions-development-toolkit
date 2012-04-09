@@ -1,6 +1,7 @@
 <?php
 namespace org\opencomb\development\toolkit ;
 
+use org\opencomb\platform\mvc\view\widget\Menu;
 use org\opencomb\platform\service\Service;
 use org\jecat\framework\bean\BeanFactory;
 use org\jecat\framework\lang\aop\AOP;
@@ -11,12 +12,17 @@ class Toolkit extends Extension
 {
 	public function load()
 	{
-		$aAop = AOP::singleton() ;
-		$aAop->register('org\\opencomb\\development\\toolkit\\aspect\\ControlPanelFrameAspect') ;
+		// 注册菜单build事件的处理函数
+		Menu::registerBuildHandle(
+				'org\\opencomb\\coresystem\\mvc\\controller\\ControlPanelFrame'
+				, 'frameView'
+				, 'mainMenu'
+				, array(__CLASS__,'buildControlPanelMenu')
+		) ;
 
 		if(Service::singleton()->isDebugging())
 		{
-			$aAop->register('org\\opencomb\\development\\toolkit\\aspect\\ModelDataUsefulDetecter') ;
+			AOP::singleton()->register('org\\opencomb\\development\\toolkit\\aspect\\ModelDataUsefulDetecter') ;
 			
 			/*$aAop->registerBean(array(
 					// jointponts
@@ -32,6 +38,16 @@ class Toolkit extends Extension
 			
 			
 		}
+	}
+	
+	static public function buildControlPanelMenu(array & $arrConfig)
+	{
+		// 合并配置数组，增加菜单
+		BeanFactory::mergeConfig(
+				$arrConfig
+				, BeanFactory::singleton()->findConfig('widget/control-panel-frame-menu','development-toolkit')
+		) ;
+		
 	}
 	
 }
