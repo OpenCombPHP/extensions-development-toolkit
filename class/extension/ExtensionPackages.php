@@ -2,9 +2,7 @@
 namespace org\opencomb\development\toolkit\extension ;
 
 use org\opencomb\platform\service\Service;
-
 use org\opencomb\coresystem\auth\Id;
-
 use org\opencomb\coresystem\mvc\controller\ControlPanel;
 use org\jecat\framework\message\Message ;
 use org\opencomb\platform\ext\ExtensionManager ;
@@ -12,7 +10,6 @@ use org\opencomb\platform\ext\Extension ;
 use org\jecat\framework\fs\Folder ;
 use org\jecat\framework\fs\FSIterator ;
 use org\jecat\framework\fs\imp\LocalFSO ;
-use org\opencomb\platform\service\Service ;
 
 // /?c=org.opencomb.development.toolkit.extension.ExtensionPackages
 
@@ -67,7 +64,7 @@ class ExtensionPackages extends ControlPanel{
 			if($aZip->open($filePath,\ZIPARCHIVE::CREATE) !== TRUE){
 				$this->extensionPackages->createMessage(Message::notice,"can not open file <$filePath>");
 			}else{
-				$installFolder = Folder::singleton()->findFolder($package['installPath']);
+				$installFolder = new Folder($package['installPath']);
 				if($debug){
 					$this->extensionPackages->createMessage(Message::notice,'扩展安装目录:%s',$installFolder->path());
 				}
@@ -155,7 +152,7 @@ class ExtensionPackages extends ControlPanel{
 	}
 	
 	static private function getPackageFolder(){
-		return Extension::flyweight('development-toolkit')->publicFolder()->findFolder('extensionPackages',Folder::FIND_AUTO_CREATE);
+		return Extension::flyweight('development-toolkit')->filesFolder()->findFolder('extensionPackages',Folder::FIND_AUTO_CREATE);
 	}
 	
 	/**

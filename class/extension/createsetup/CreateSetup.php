@@ -66,14 +66,14 @@ class CreateSetup extends ControlPanel{
 			$this->setting = $this->getSettings();
 		}
 		// file
-		if($bContainFile and $this->aExtension->publicFolder()->exists() ){
+		if($bContainFile and $this->aExtension->filesFolder()->exists() ){
 			$this->sDataFolder = $this->aExtension->metainfo()->installPath().'/data/public';
 			try{
 				$aToFolder = Folder::singleton()->findFolder($this->sDataFolder);
 				if($aToFolder->exists()){
 					$aToFolder->delete(true);
 				}
-				$this->aExtension->publicFolder()->copy($this->sDataFolder);
+				$this->aExtension->filesFolder()->copy($this->sDataFolder);
 			}catch(\Exception $e){
 				$this->createSetup->createMessage(Message::error,'copy folder error :%s',$e->message());
 			}

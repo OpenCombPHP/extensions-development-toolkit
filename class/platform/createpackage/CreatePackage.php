@@ -171,7 +171,7 @@ class CreatePackage extends ControlPanel
 	
 	private function createWriter(){
 		$aFile = Extension::flyweight('development-toolkit')
-				->publicFolder()
+				->filesFolder()
 					->findFile('setup.php',Folder::FIND_AUTO_CREATE);
 		return $aFile->openWriter();
 	}

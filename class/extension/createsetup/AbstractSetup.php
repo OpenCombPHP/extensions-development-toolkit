@@ -40,7 +40,7 @@ abstract class AbstractSetup implements ISetup{
 	}
 	
 	protected function getToFolder(){
-		return $this->aExtension ->publicFolder()->path();
+		return $this->aExtension ->filesFolder()->path();
 	}
 	
 	private $aMetainfo = null ;
