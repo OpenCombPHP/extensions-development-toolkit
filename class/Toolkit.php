@@ -22,21 +22,20 @@ class Toolkit extends Extension
 
 		if(Service::singleton()->isDebugging())
 		{
-			AOP::singleton()->register('org\\opencomb\\development\\toolkit\\aspect\\ModelDataUsefulDetecter') ;
-			
-			/*$aAop->registerBean(array(
-					// jointponts
-					'org\\jecat\\framework\\mvc\\controller\\Controller::__construct()' ,
-					'org\\jecat\\framework\\mvc\\controller\\Controller::process()[derived]' ,
-					'org\\jecat\\framework\\mvc\\controller\\Response::process()' ,
-					'org\\jecat\\framework\\ui\\UI::render()' ,
-					// advices
-					array('org\\opencomb\\development\\toolkit\\aspect\\SysteExecuteTimeLog','executeTimeLogger') ,
-			),__FILE__) ;
-			*/
-			// 
-			
-			
+			AOP::singleton()
+				->registerBean(array(
+						// jointpoint
+						'org\\jecat\\framework\\mvc\\model\\db\\Model::data()' ,
+						// advice
+						array('org\\opencomb\\development\\toolkit\\aspect\\ModelDataUsefulDetecter','data')						
+				),__CLASS__)
+				
+				->registerBean(array(
+						// jointpoint
+						'org\\jecat\\framework\\mvc\\model\\db\\Model::printStructData()' ,
+						// advice
+						array('org\\opencomb\\development\\toolkit\\aspect\\ModelDataUsefulDetecter','printStructData')
+				),__CLASS__) ;
 		}
 	}
 	
