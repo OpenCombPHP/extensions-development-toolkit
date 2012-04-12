@@ -1,86 +1,66 @@
+<msgqueue />
+
+<script>
+function switchPackMode(chkbox)
+{
+	jquery(chkbox.parentNode.parentNode).find('a').toggle() ;
+}
+</script>
+
 <a href='{=$packageFolder}'>浏览全部下载项</a>
+
 <table border='6'>
     <tr>
-        <th rowspan='2'>
-            名称
-        </th>
-        <th rowspan='2'>
-            标题
-        </th>
-        <th rowspan='2'>
-            版本
-        </th>
-        <th rowspan='2'>
-            安装位置
-        </th>
-        <th colspan='2'>
-            不含版本库
-        </th>
-        <th colspan='2'>
-            包含版本库
-        </th>
-    </tr>
-    <tr>
         <th>
-            打包
+            扩展
         </th>
         <th>
-            下载
+            安装路径
         </th>
         <th>
-            打包
+            操作
         </th>
         <th>
-            下载
+            安装包
         </th>
     </tr>
     <foreach for='{=$packageList}' item='package'>
         <tr>
             <td>
-                {=$package['name']}
-            </td>
-            <td>
-                {=$package['title']}
-            </td>
-            <td>
-                {=$package['version']}
+                <b>{=$package['title']}</b>
+				({=$package['name']}:{=$package['version']})
             </td>
             <td>
                 {=$package['installPath']}
             </td>
             <td>
-                <a href='{=$package['link']['package']}'>
-                    <if "$package['hasPackaged']">
-                        重新打包
-                    <else />
-                        打包
-                    </if>
+            	<a href="?c=org.opencomb.development.toolkit.extension.createsetup.SelectItem&extName={=$package['name']}">生成数据安装脚本</a>
+            	　|　
+            	<label title="安装包中是否包含 .git 或 .svn 等版本库">
+            		<input type="checkbox" onchange="switchPackMode(this)" />
+            		包含版本库
+            	</label>
+                <a href='{=$package['link']['package']}' class="commonPack">
+                	<button>打包</button>
+                </a>
+                <a href='{=$package['link']['packageVl']}' style="display:none" class="repsPack">
+                	<button>打包</button>
                 </a>
             </td>
             <td>
                 <if "$package['hasPackaged']">
-                    <a href="{=$package['link']['download']}"><button>下载</button></a>
-                <else />
-                    尚未打包
+                    <a href="{=$package['link']['download']}">
+                    	下载 [{=$package['link']['pkgbytes']}]
+                    </a>
                 </if>
-            </td>
-            <td>
-                <a href='{=$package['link']['packageVl']}'>
-                    <if "$package['hasPackagedVl']">
-                        重新打包
-                    <else />
-                        打包
-                    </if>
-                </a>
-            </td>
-            <td>
+                
                 <if "$package['hasPackagedVl']">
-                    <a href="{=$package['link']['downloadVl']}"><button>下载</button></a>
-                <else />
-                    尚未打包
+                    <br />
+                    <a href="{=$package['link']['downloadVl']}" title="该版本的安装包中包含了 .git 或 .svn 版本库">
+                   		下载（开发版本） [{=$package['link']['pkgbytesVl']}]
+                   	</a>
                 </if>
             </td>
         </tr>
     </foreach>
 </table>
-<msgqueue />

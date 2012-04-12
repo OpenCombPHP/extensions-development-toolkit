@@ -47,13 +47,21 @@ class CreateSetup extends ControlPanel{
 			$tableInfo = $this->getShowCreateTable($s);
 			$this->arrTableInfoList[$s] = $tableInfo ;
 		}
-		foreach($data as $d){
-			$data = $this->getTableData($d);
-			if(empty($data)){
+		foreach($data as $d)
+		{
+			list($this->arrTableInfoList[$d]['keys'],$this->arrTableInfoList[$d]['data']) = $this->getTableData($d) ;
+			
+			if(empty($this->arrTableInfoList[$d]['data']))
+			{
 				$this->arrTableInfoList[$d]['data'] = '1';// 此表不包含数据
-			}else{
-				$this->arrTableInfoList[$d]['data'] = $data;
-				$this->arrTableInfoList[$d]['keys'] = array_keys($data[0]);
+			}
+			else
+			{
+				foreach($this->arrTableInfoList[$d]['keys'] as $nIdx=>&$col)
+				{
+					$col = "`{$col}`" ;
+					$this->arrTableInfoList[$d]['factors'][] = '@'.($nIdx+1) ;
+				}
 			}
 		}
 		$this->aExtension = Extension::flyweight($extName);
@@ -86,17 +94,18 @@ class CreateSetup extends ControlPanel{
 				break;
 			}
 		}
-		$aCodeFile = $aPackage->folder()->findFile('setup/Setup.php',Folder::CREATE_RECURSE_DIR | Folder::FIND_AUTO_CREATE );
+		$aCodeFile = $aPackage->folder()->findFile('setup/DataInstaller.php',Folder::CREATE_RECURSE_DIR | Folder::FIND_AUTO_CREATE );
 		$aWriter = $aCodeFile->openWriter();
 		$aWriter->write($strSetupCode);
 		$aWriter->flush();
 		// update meta info
 		if($bUpdateMetainfo){
-			$sInstallPath = $this->aExtension->metainfo()->installPath() ;
-			$sMetainfoFilePath = Folder::singleton()->find($sInstallPath.'/metainfo.xml')->path();
+			$sMetainfoFilePath = $this->aExtension->metainfo()->installPath().'/metainfo.xml';
 			$aSimpleXML = simplexml_load_file($sMetainfoFilePath) ;
-			$aSimpleXML->data->setup = $this->ns.'\setup\Setup';
+			$aSimpleXML->data->installer = $this->ns.'\setup\DataInstaller';
 			$aSimpleXML->asXML($sMetainfoFilePath);
+			
+			$this->createMessage(Message::success,"更型了扩展 %s 的 metainfo 文件：%s",array($extName,$sMetainfoFilePath)) ;
 		}
 		// template
 		$this->createSetup->variables()->set('extName',$extName);
@@ -104,24 +113,39 @@ class CreateSetup extends ControlPanel{
 		$this->createSetup->variables()->set('setting',$this->setting);
 		$this->createSetup->variables()->set('dataFolder',$this->sDataFolder);
 		$this->createSetup->variables()->set('setupCode',$strSetupCode);
+		
+		$this->createMessage(Message::success,"生成了扩展 %s 的数据安装类：%s",array($extName,$aCodeFile->path())) ;
 	}
 	
 	private function getShowCreateTable($tableName){
 		$aDB = DB::singleton() ;
-		$aRecordset = $aDB->query("SHOW CREATE TABLE `$tableName`");
-		$arr = $aRecordset->current();
-		return $arr ;
+		$arrRes = $aDB->query("SHOW CREATE TABLE `$tableName`")->fetch() ;
+		
+		// 加入 "if not exists"
+		$arrRes['Create Table'] = str_replace('CREATE TABLE','CREATE TABLE IF NOT EXISTS',$arrRes['Create Table']) ;
+		
+		return $arrRes ;
 	}
 	
-	private function getTableData($tableName){
-		$aDB = DB::singleton() ;
-		$aDriver = $aDB->driver(true);
-		$aRecordset = $aDriver->query("select * from `$tableName`");
-		$arr = array();
-		foreach($aRecordset as $v){
-			$arr [] = $v;
+	private function getTableData($tableName)
+	{
+		$arrData = $arrCols = array() ;		
+		$aRecordset = DB::singleton()->query("select * from `$tableName`");
+		
+		foreach($aRecordset as $row)
+		{
+			if(!$arrCols)
+			{
+				$arrCols = array_keys($row) ;
+			}
+			
+			foreach($row as &$cell)
+			{
+				$cell = $cell===null? '': ('"'.addslashes($cell).'"') ;
+			}
+			$arrData[] = $row ;
 		}
-		return $arr ;
+		return array($arrCols,$arrData) ;
 	}
 	
 	private function getSettings(IKey $aKey = null,$parentPath=''){
@@ -157,7 +181,7 @@ class CreateSetup extends ControlPanel{
 			'dataFolder' => $this->sDataFolder,
 			'setting' => $this->setting,
 		);
-		$aUI->display('development-toolkit:createsetup.php',$variables,$aBuffer);
+		$aUI->display('development-toolkit:createsetup.php.tpl',$variables,$aBuffer);
 		return (string)$aBuffer ;
 	}
 	
