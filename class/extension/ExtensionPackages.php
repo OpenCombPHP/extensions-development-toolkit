@@ -142,17 +142,37 @@ class ExtensionPackages extends ControlPanel{
 								'downloadVl' => $this->createLink('download',$ext->name(),$ext->version(),1),
 							),
 					);
+				
+				$this->arrPackageList[$name]['link']['pkgbytes'] = self::formatBytes(self::getPackagedFSO($ext->name(),$ext->version(),0)->length()) ;
+				$this->arrPackageList[$name]['link']['pkgbytesVl'] = self::formatBytes(self::getPackagedFSO($ext->name(),$ext->version(),1)->length()) ;
 			}
 		}
 		return $this->arrPackageList;
+	}
+	
+	static private function formatBytes($nBytes)
+	{
+		if( $nBytes>1024*1024 )
+		{
+			return round($nBytes/(1024*1024),2) . ' MB' ;
+		}
+		else if( $nBytes>1024 )
+		{
+			return round($nBytes/(1024),2) . ' KB' ;
+		}
+		else 
+		{
+			return $nBytes . ' Byte' ;
+		}
 	}
 	
 	static private function getDebug(){
 		return Service::singleton()->isDebugging();
 	}
 	
-	static private function getPackageFolder(){
-		return Extension::flyweight('development-toolkit')->filesFolder()->findFolder('extensionPackages',Folder::FIND_AUTO_CREATE);
+	static private function getPackageFolder()
+	{
+		return Extension::flyweight('development-toolkit')->filesFolder()->findFolder('extensionPackages',Folder::FIND_AUTO_CREATE) ;
 	}
 	
 	/**
@@ -163,13 +183,12 @@ class ExtensionPackages extends ControlPanel{
 	 * <extension name>-<version>-repos.ocp.zip
 	 */
 	static public function getPackagedFSO($name,$version , $vl){
-		$sVl = '';
 		if(empty($vl)){
 			$sVl = '';
 		}else{
 			$sVl = '-repos';
 		}
-		return self::getPackageFolder()->findFile($name.'-'.$version.$sVl.'.ocp.zip',Folder::FIND_AUTO_CREATE_OBJECT);
+		return self::getPackageFolder()->findFile($name.'-'.$version.$sVl.'.zip',Folder::FIND_AUTO_CREATE_OBJECT);
 	}
 	
 	static public function hasPackaged($name,$version , $vl){
@@ -186,7 +205,7 @@ class ExtensionPackages extends ControlPanel{
 			}
 			break;
 		case 'download':
-			return Folder::relativePath(Folder::singleton(),self::getPackagedFSO($name,$version,$vl)->path());
+			return self::getPackagedFSO($name, $version, $vl)->httpUrl() ;
 			break;
 		}
 	}
