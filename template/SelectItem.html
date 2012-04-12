@@ -11,50 +11,74 @@
 }
 </style>
 <div>扩展名：{=$extName}</div>
-<form id='form'>
+<form id='form' onsubmit="on_submit()">
 	<input type='hidden' name='c' value='org.opencomb.development.toolkit.extension.createsetup.CreateSetup' />
 	<input type='hidden' name='extName' value='{=$extName}' />
-	<if 'empty($tableList)'>
-		<div>此扩展不包含数据表</div>
-	<else />
-		选择数据表：
-		<table class="select_table">
+
+	<h2>数据表</h2>
+	<table class="select_table">
+		<tr>
+			<th>数据表名称</th>
+			<th>是否包含数据表结构</th>
+			<th>是否包含数据</th>
+		</tr>
+		<tr>
+			<td></td>
+			<td>
+				<input type='button' value='全选' onclick='setStructCheck("a")' />
+				<input type='button' value='全取消' onclick='setStructCheck("n")' />
+				<input type='button' value='反选' onclick='setStructCheck("o")' />
+			</td>
+		</tr>
+		<foreach for='$tableList' item='tableName' >
 			<tr>
-				<th>数据表名称</th>
-				<th>是否包含数据表结构</th>
-				<th>是否包含数据</th>
+				<td>{=$tableName}</td>
+				<td><input class='struct' type='checkbox' name="struct[]" value='{=$tableName}' /></td>
+				<td><input class='data' type='checkbox' name='data[]' value='{=$tableName}' /></td>
 			</tr>
-			<tr>
-				<td></td>
-				<td>
-					<input type='button' value='全选' onclick='setStructCheck("a")' />
-					<input type='button' value='全取消' onclick='setStructCheck("n")' />
-					<input type='button' value='反选' onclick='setStructCheck("o")' />
-				</td>
-			</tr>
-			<foreach for='$tableList' item='tableName' >
-				<tr>
-					<td>{=$tableName}</td>
-					<td><input class='struct' type='checkbox' name="struct[]" value='{=$tableName}' /></td>
-					<td><input class='data' type='checkbox' name='data[]' value='{=$tableName}' /></td>
-				</tr>
-			</foreach>
-		</table>
-	</if>
-	<div>包含配置<input type='checkbox' name='conf' /></div>
+		<foreach:else />
+			<div>此扩展不包含数据表</div>
+		</foreach>
+	</table>
+		
 	<div>
-		包含文件
-		<input type='checkbox' name='file' onchange='on_check(this,"注意：将会覆盖已包含的数据文件","")' />
+		<h2>配置</h2>
+		<label>
+			<input type='checkbox' name='conf' />
+			使用配置(Setting)
+		</label>
+	</div>
+	<div>
+		<h2>文件</h2>
+		<label>
+			<input type='checkbox' name='file' onchange='on_check(this,"注意：将会覆盖已包含的数据文件","")' />
+			使用文件
+		</label>
+		
 		<div id="warning_file" class="warning"></div>
 		<ul class="warning" id='file_list'>
-			<foreach for='$aDataFileFolderIterator' item='file'>
+			<foreach for='$aDataFileFolder->iterator()' item='file'>
 				<li>{=$file}</li>
 			</foreach>
 		</ul>
 	</div>
-	<div>更新metainfo.xml<input type='checkbox' name='updatemetainfo' /></div>
-	<div><div class="warning">注意：将会覆盖已有的安装程序</div></div>
-	<a href='#' onclick='on_submit()'>产生setup</a>
+	
+	<div>
+		<h2>其它</h2>
+		<label>
+			<input type='checkbox' name='updatemetainfo' />
+			更新metainfo.xml
+		</label>
+	</div>
+	
+	<br /><br />
+	<div>
+		<div class="warning">注意：将会覆盖已有的安装程序</div>
+	</div>
+	
+	
+	
+	<input type="submit" value="生成数据安装类" />
 </form>
 <script type="text/javascript">
 function on_check(o,y,n){
@@ -71,10 +95,6 @@ function on_check(o,y,n){
 function on_submit(){
 	var c = confirm('将会覆盖已有的安装程序，是否继续');
 	console.log(c);
-	if(c){
-		var form = document.getElementById('form');
-		form.submit();
-	}
 }
 function bindClickForStruct(){
 	jQuery('.struct').change(

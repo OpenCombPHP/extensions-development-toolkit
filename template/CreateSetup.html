@@ -1,5 +1,10 @@
-<div>扩展名称：{=$extName}</div>
+<h1>生成扩展的数据安装类：{=$extName}</h1>
 <msgqueue />
+
+{=highlight_string($setupCode,true)}
+
+<hr />
+详细：
 <table border='1'>
 	<foreach for='$arrTableInfoList' item='tableinfo'>
 		<tr>
@@ -36,5 +41,3 @@
 <if '!empty($dataFolder)'>
 	文件：{=$dataFolder}
 </if>
-<br />
-{=highlight_string($setupCode,true)}
