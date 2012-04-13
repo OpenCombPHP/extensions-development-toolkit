@@ -1,121 +1,90 @@
-<style>
-.error{
-	display:inline;
-	color:red;
-}
-</style>
-<script type='text/javascript' >
-// t: a , n , o
-// all , none , opposite
-function setSelect(t){
-	var arrCheck = document.getElementsByName('ext[]');
-	for(var i=0;i<arrCheck.length;++i){
-		var aCheck = arrCheck[i];
-		switch(t){
-		case 'a':
-			aCheck.checked = true;
-			break;
-		case 'n':
-			aCheck.checked = false;
-			break;
-		case 'o':
-			aCheck.checked = !aCheck.checked;
-			break;
-		}
-	}
-}
-</script>
-<h1>选择扩展</h1>
-<button onclick='setSelect("a")' >全选</button>
-<button onclick='setSelect("n")' >清空</button>
-<button onclick='setSelect("o")' >反选</button>
-<form method='get' >
-	<input type='hidden' name='c' value='org.opencomb.development.toolkit.platform.createpackage.ShowVersion' />
+<h1>制作发行版本</h1>
+
+
+<hr />
+
+<form method='post' action="?c=org.opencomb.development.toolkit.platform.createpackage.CreatePackage" >
+
+	<h2>发型版本信息</h2>
+	<div>
+		产品标题：<input type="text" name="distributionTitle" value="蜂巢平台" />
+	</div>
+	<div>
+		产品名称：<input type="text" name="distributionName" value="oc-platform" /> 建议：避免使用中文
+	</div>
+	<div>
+		版　　本：<input type="text" name="distributionVersion" value="1.0.0.0"  />
+	</div>
+
+	<h2>基础系统</h2>
+	<li style="width:600px">
+		JeCat框架(framework)
+		version: {= \org\jecat\framework\VERSION }
+		<label style="float:right">
+			<input type=checkbox name="framework-debug" value='1' />
+			使用开发版本（携带.git/.svn/.cvs 等版本库）
+		</label>
+	</li>
 	
-	<table>
-		<tr>
-			<th>
-				项目名称
-			</th>
-			<th>
+	<li style="width:600px">
+		蜂巢平台(OpenComb Platform)
+		version: {= \org\opencomb\platform\Platform::singleton()->version() }
+		<label style="float:right">
+			<input type=checkbox name="platform-debug" value='1' />
+			使用开发版本（携带.git/.svn/.cvs 等版本库）
+		</label>
+	</li>
+	
+	<h2>选择扩展</h2>
+	
+	<foreach for='$arrExtension' item='ext'>
+	<li style="width:600px">
+		<span>
+			{=$ext->title()} ({=$ext->name()}:{=$ext->version()})
+		</span>
+		
+		<span style="float:right">
+			
+			<if '$arrPackageState[$ext->name()][0] or $arrPackageState[$ext->name()][1]' >
+			
+				<if '$arrPackageState[$ext->name()][0]' >
+					<label>
+						<input type='checkbox' id="chk-{=$ext->name()}-release" name='ext[{=$ext->name()}]' value='{=$arrPackageState[$ext->name()][0]}' onclick="jquery('#chk-{=$ext->name()}-debug').attr('checked',!this.checked)" />
+						正式版本
+					</label>
+				</if>
 				
-			</th>
-			<th>
-				是否选择此项目
-			</th>
-			<th>
-				是否携带版本仓库
-			</th>
-		</tr>
-		<tr>
-			<td>framework</td>
-			<td></td>
-			<td>必须选择此项目</td>
-			<td>
-				<input type='radio' name='git[framework]' value='0' checked='checked' />否
-				<input type='radio' name='git[framework]' value='1' />是
-			</td>
-		</tr>
-		<tr>
-			<td>platform</td>
-			<td></td>
-			<td>必须选择此项目</td>
-			<td>
-				<input type='radio' name='git[platform]' value='0' checked='checked' />否
-				<input type='radio' name='git[platform]' value='1' />是
-			</td>
-		</tr>
-		<tr>
-			<td>public</td>
-			<td></td>
-			<td>必须选择此项目</td>
-			<td>
-				此项目无版本仓库
-			</td>
-		</tr>
-		<tr>
-			<th>
-				扩展名称
-			</th>
-			<th>
-				版本
-			</th>
-			<th>
-				是否选择此扩展
-				<div class='error'>若扩展尚未打包，则无法选择，请进入<a href='/?c=org.opencomb.development.toolkit.extension.ExtensionPackages'>扩展打包</a>页面进行打包</div>
-			</th>
-			<th>
-				是否携带版本仓库
-			</th>
-		</tr>
-		<foreach for='$arrExtension' item='ext'>
-			<tr>
-				<td>
-					{=$ext->name()}
-				</td>
-				<td>
-					{=$ext->version()}
-				</td>
-				<td>
-					<if '$arrPackageState[$ext->name()][0] or $arrPackageState[$ext->name()][1]'>
-						<input type='checkbox' name='ext[]' value='{=$ext->name()}' />
-					</if>
-				</td>
-				<td>
-					<if '$arrPackageState[$ext->name()][0]'>
-						<input type='radio' name='git[{=$ext->name()}]' value='0' checked='checked' />否
-					</if>
-					<if '$arrPackageState[$ext->name()][1]'>
-						<if '$arrPackageState[$ext->name()][0]'>
-							<input type='radio' name='git[{=$ext->name()}]' value='1' />是
-						<else />
-							<input type='radio' name='git[{=$ext->name()}]' value='1' checked='checked' />是
-						</if>
-					</if>
-				</td>
-			</tr>
-		</foreach>
-	</table>
-	<br />
-	<input type='submit' value='确定' />
+				<if '$arrPackageState[$ext->name()][1]' >
+					<label>
+						<input type='checkbox' id="chk-{=$ext->name()}-debug" name='ext[{=$ext->name()}]' value='{=$arrPackageState[$ext->name()][1]}' onclick="jquery('#chk-{=$ext->name()}-release').attr('checked',!this.checked)" />
+						开发版本
+					</label>
+				</if>
+			
+			<else />
+			
+				<a href="?c=org.opencomb.development.toolkit.extension.ExtensionPackages">扩展尚未打包</a>
+			
+			</if>
+			
+			
+		</span>
+	</li>
+	</foreach>
+
+	<div style='color:red'>若扩展尚未打包，则无法选择，请进入<a href='?c=org.opencomb.development.toolkit.extension.ExtensionPackages'>扩展打包</a>页面进行打包</div>
+
+	<label style="display:block">
+		<input type='checkbox' name='sae-package' value='1' />
+		新浪云计算平台(SAE)应用包		
+	</label>
+	
+	<label style="display:block">
+		<input type='checkbox' name='single-file-installer' value='1' />
+		单文件安装程序	
+	</label>
+		
+	
+	<input type='submit' value='生成安装程序' class="coresystem-form-button" />
+	
 </form>

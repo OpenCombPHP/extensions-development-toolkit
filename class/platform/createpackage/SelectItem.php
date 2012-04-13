@@ -48,7 +48,14 @@ class SelectItem extends ControlPanel
 			$sExtName = $aMetainfo->name();
 			$sExtVersion = $aMetainfo->version();
 			for($i=0;$i<=1;++$i){
-				$arrPackageState[$sExtName][$i] = ExtensionPackages::hasPackaged($sExtName , $sExtVersion,$i) ;
+				if( $aPackage=ExtensionPackages::getPackagedFSO($sExtName,$sExtVersion,$i) and $aPackage->exists() )
+				{
+					$arrPackageState[$sExtName][$i] = $aPackage->path() ;
+				}
+				else
+				{
+					$arrPackageState[$sExtName][$i] = null ;
+				}
 			}
 		}
 		return $arrPackageState ;

@@ -88,18 +88,13 @@
 		</ul>
 	</li>
 </ul>
-<div class='section1'>将会把以下扩展打包</div>
+<div class='section1'>将会把以下扩展打包到发型版本中</div>
 <form method='get'>
 	<input type='hidden' name='c' value='org.opencomb.development.toolkit.platform.createpackage.CreatePackage' />
-	<foreach for='$arrContainGit' key='key' item='value'>
-		<input type='hidden' name='git[{=$key}]' value='{=$value}' />
-	</foreach>
 	<table>
 		<tr>
-			<th>name</th>
-			<th>title</th>
-			<th>version</th>
-			<th>dependence</th>
+			<th>扩展</th>
+			<th>依赖</th>
 		</tr>
 		<foreach for='$arrExtension' key='sExtName' item='ext'>
 			<tr>
@@ -107,17 +102,10 @@
 					<td>{=$sExtName}</td>
 					<td><div class='error'>未安装此扩展</div></td>
 				<else />
-					<td>{=$ext->name()}<input type='hidden' name='ext[]' value='{=$ext->name()}' />
-						{? $cGit = 0 ;
-							if( !empty($arrContainGit[$sExtName] ) ) $cGit=$arrContainGit[$sExtName];
-						}
-						<if '$arrPackageState[$sExtName][$cGit] === false'>
-							<span class='error2'>此扩展尚未打包，请进入扩展打包页面进行打包</span>
-							{?$error = true}
-						</if>
+					<td>
+						<input type='hidden' name='ext[{=$ext->name()}]' value='{=$arrPackage[$ext->name()]}' />
+						{=$ext->title()} ({=$ext->name()}:{=$ext->version()})
 					</td>
-					<td>{=$ext->title()}</td>
-					<td>{=$ext->version()}</td>
 					<td>
 						<foreach for='$ext->dependence()->iterator()' item='dep'>
 							{=$dep->type()},{=$dep->itemName()},{=$dep->versionScope()->toString(true)},<br />
@@ -127,6 +115,13 @@
 			</tr>
 		</foreach>
 	</table>
+	
+
+	<input type='hidden' name='ext[{=$ext->name()}]' value='{=$arrPackage[$ext->name()]}' />
+	<input type='hidden' name='ext[{=$ext->name()}]' value='{=$arrPackage[$ext->name()]}' />
+	<input type='hidden' name='ext[{=$ext->name()}]' value='{=$arrPackage[$ext->name()]}' />
+	<input type='hidden' name='ext[{=$ext->name()}]' value='{=$arrPackage[$ext->name()]}' />
+	
 	<if '$error === false'>
 		<input type='submit' value='确认，下一步' />
 	<else />

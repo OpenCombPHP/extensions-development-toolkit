@@ -1,8 +1,14 @@
 <?php
 namespace org\opencomb\development\toolkit\platform\createpackage ;
 
-use org\opencomb\coresystem\auth\Id;
+use org\jecat\framework\message\Message;
 
+use org\jecat\framework\fs\LocalFolderIterator;
+
+use org\jecat\framework as jc;
+use org\jecat\framework\lang\Exception;
+use org\opencomb\platform\Platform;
+use org\opencomb\coresystem\auth\Id;
 use org\opencomb\coresystem\mvc\controller\ControlPanel ;
 use org\opencomb\platform\ext\Extension ;
 use org\opencomb\platform\ext\ExtensionManager ;
@@ -36,10 +42,85 @@ class CreatePackage extends ControlPanel
 	public function process(){
 		
 		$this->checkPermissions('您没有使用这个功能的权限,无法继续浏览',array()) ;
+
+		$sDistrTitle = $this->params()->get('distributionTitle') ;
+		$sDistrVersion = $this->params()->get('distributionVersion') ;
+		$sDistrName = $this->params()->get('distributionName') ;
+		
+		// 创建压缩包		
+		$aDistributionZip = new \ZipArchive();
+		$sDistributionZipFilename = $sDistrName.'-'.$sDistrVersion.'.zip' ;
+		$sDistributionFolder = Extension::flyweight('development-toolkit')->filesFolder()->path().'/distributions' ;
+		if(!is_dir($sDistributionFolder))
+		{
+			mkdir($sDistributionFolder,0777&Folder::CREATE_DEFAULT,true) ;
+		}
+		$sPackagePath = $sDistributionFolder.'/'.$sDistributionZipFilename ;
+		if(!file_exists($sPackagePath))
+		{
+			unlink($sPackagePath) ;
+		}
+		if( $aDistributionZip->open( $sPackagePath, \ZIPARCHIVE::CREATE )!==TRUE )
+		{
+			$this->createMessage(Message::error, "无法写入文件:%s",$sPackagePath) ;
+			return ;
+		}
+		
+		$aDistributionZip->addEmptyDir('/setup') ;
+		$aDistributionZip->addEmptyDir('/setup/packages') ;
+		
+		// 打包 framework
+		$sJcPackageName = 'jecat-framework-'.jc\VERSION.($this->params->bool("framework-debug")?'-repo':'').'.zip' ;
+		$sJcPackagePath = Extension::flyweight('development-toolkit')->filesFolder()->path() . '/extensionPackages/'.$sJcPackageName ;
+		$aZip = $this->packageFolder( $sJcPackagePath, jc\PATH, $this->params->bool("framework-debug") ) ;
+		$aDistributionZip->addFile($sJcPackagePath,'/setup/packages/'.$sJcPackageName) ;
+		
+		// 打包 opencomb
+		$sOcPackageName = 'opencomb-platform-'.Platform::singleton()->version(true).($this->params->bool("framework-debug")?'-repo':'').'.zip' ;
+		$sOcPakcagePath = Extension::flyweight('development-toolkit')->filesFolder()->path() . '/extensionPackages/' . $sOcPackageName ; 
+		$aZip = $this->packageFolder( $sOcPakcagePath, jc\PATH, $this->params->bool("framework-debug") ) ;
+		$aDistributionZip->addFile($sOcPakcagePath,'/setup/packages/'.$sOcPackageName) ;
+		
+		// 打包扩展
+		foreach($this->params['ext'] as $sExtPackagePath) 
+		{
+			$sPackFilename = basename($sExtPackagePath) ;
+			$aDistributionZip->addFile($sExtPackagePath,'/setup/packages/'.$sPackFilename) ;
+		}
+		
+		// 打包常规文件
+		foreach(array(
+			'index.php' ,
+			'oc.init.php' ,
+		) as $sFileSubpath)
+		{
+			$aDistributionZip->addFile(Platform::singleton()->installFolder(true).'/'.$sFileSubpath,'/'.$sFileSubpath) ;
+		}
+		
+		// 生成文件安装程序并打包
+		
+		
+		// $aDistributionZip->close() ;
+		return ;
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
 		
 		// input
 		$arrExtName = $this->params['ext'];
-		$git = $this->params['git'] ;
+		// $git = $this->params['git'] ;
 		
 		if(empty($arrExtName)){
 			$arrExtName = array();
@@ -66,17 +147,24 @@ class CreatePackage extends ControlPanel
 		// packagePublicSetup
 		$arrZipFiles[] = $this->packagePublicSetup();
 		 
-		// package framework and platform
-		$arr = array('framework','platform') ;
-		foreach($arr as $s){
+		foreach(array(
+				'framework' => \org\jecat\framework\VERSION ,
+				'platform' => Platform::singleton()->version(true) ,
+		) as $s=>$sVersion){
 			if(!isset($git[$s])){
 				$git[$s] = 0;
 			}
 			$uc = ucwords($s);
-			$aZipFile = ExtensionPackages::getPackagedFSO($s , 'version' ,$git[$s] ) ;
+			$aZipFile = ExtensionPackages::getPackagedFSO($s,$sVersion,$git[$s]) ;
 			$aZip = $this->createZip($aZipFile);
-			$sFun = 'package'.$uc;
-			$this->$sFun($aZip , $git[$s]);
+			
+			$this->package(
+					$aZip
+					, Platform::singleton()->installFolder()->findFolder($s)
+					, ''
+					, empty($git[$s])? '`^\\.(git|svn|cvs)(/|$|ignore)`': ''
+			) ;
+			
 			$aZip->close();
 			$arrZipFiles[$s]['reader'] = $aZipFile->openReader();
 			$arrZipFiles[$s]['localpath'] = $aZipFile->path();
@@ -86,7 +174,7 @@ class CreatePackage extends ControlPanel
 		$this->calcDependence($arrExtName);
 
 		$aExtensionManager = ExtensionManager::singleton();
-		foreach($arrExtName as $sExtName){
+		foreach($arrExtName as $sExtName=>$sPackagePath){
 			$aMetainfo = $aExtensionManager->extensionMetainfo($sExtName);
 			$sName = $aMetainfo->name();
 			$sVersion = $aMetainfo->version()->toString();
@@ -96,8 +184,7 @@ class CreatePackage extends ControlPanel
 				$bGit = $git[$sName] ;
 			}
 			$aFile = ExtensionPackages::getPackagedFSO($sName , $sVersion ,$bGit ) ;
-			$arrZipFiles [] = 
-			array(
+			$arrZipFiles [] = array(
 				'name' => $sName ,
 				'path' => 'extensions/'.$sName ,
 				'reader' => $aFile->openReader() ,
@@ -125,27 +212,45 @@ class CreatePackage extends ControlPanel
 		return $aZip ;
 	}
 	
-	private function packageFramework(\ZIPARCHIVE $aZip , $git ){
-		$aFolder = Folder::singleton()->findFolder('/framework');
-		$sExcludePattern = '';
-		if(empty($git)){
-			$sExcludePattern = '`^\\.(git|svn|cvs)(/|$|ignore)`' ;
-		}else{
-			$sExcludePattern = '' ;
+	private function packageFolder($sZipPath,$sFolderPath,$bRepo)
+	{
+		if( file_exists($sZipPath) )
+		{
+			unlink($sZipPath) ;
 		}
-		return $this->package($aZip,$aFolder,'',$sExcludePattern);
+		
+		$aZip = new \ZipArchive;
+		if( $aZip->open($sZipPath,\ZIPARCHIVE::CREATE)!==TRUE )
+		{
+			throw new Exception("can not open file <%s>",$sFilePath);
+		}
+		
+		
+		$aFolder = new Folder($sFolderPath) ;
+		foreach($aIterator=$aFolder->iterator( FSIterator::FILE | FSIterator::FOLDER | FSIterator::RECURSIVE_SEARCH ) as $sPath)
+		{
+			if( !$bRepo and preg_match('`(^|/)\\.(git|svn|cvs|gitignore)(/|$)`',$sPath))
+			{
+				// echo 'ignore ', $sPath, '<br />' ;
+				continue;
+			}
+			$sInZipPath = '/'.$sPath;
+			if( $aIterator->isFolder() ){
+				$bR = $aZip->addEmptyDir($sInZipPath);
+				if($bR === false){
+					//echo $aZip->getStatusString();
+				}
+			}else{
+				$sLocalPath = $aFolder->path().'/'.$sPath;
+				$bR = $aZip->addFile($sLocalPath , $sInZipPath);
+				if($bR === false){
+					// echo $aZip->getStatusString();
+				}
+			}
+		}
+		
 	}
 	
-	private function packagePlatform(\ZIPARCHIVE $aZip , $git ){
-		$aFolder = Folder::singleton()->findFolder('/');
-		$sExcludePattern = '';
-		if(empty($git)){
-			$sExcludePattern = '`^(\\.(git|svn|cvs)|(framework|data|extensions|settings|.settings)(/|$))`' ;
-		}else{
-			$sExcludePattern = '`^(framework|data|extensions|settings|.settings)(/|$)`' ;
-		}
-		return $this->package($aZip,$aFolder,'',$sExcludePattern);
-	}
 	
 	private function package(\ZIPARCHIVE $aZip,Folder $aFolder , $sPrefix , $sExcludePattern){
 		$aIterator = $aFolder->iterator( FSIterator::FILE | FSIterator::FOLDER | FSIterator::RECURSIVE_SEARCH ) ;
@@ -200,7 +305,7 @@ class CreatePackage extends ControlPanel
 		);
 		
 		function generateLicence(array &$arrLicenceList , array $arrExtInfo){
-			$aExtFolder = Folder::singleton()->findFolder($arrExtInfo['installPath']) ;
+			$aExtFolder = new Folder($arrExtInfo['installPath']) ;
 			$aLicenceFolder = $aExtFolder->findFolder('licence');
 			if( null !== $aLicenceFolder ){
 				$aLicenceIterator = $aLicenceFolder->iterator( FSIterator::CONTAIN_FILE | FSIterator::RETURN_FSO ) ;
@@ -241,8 +346,8 @@ class CreatePackage extends ControlPanel
 		$arrExtInfo = array(
 			'title' => '蜂巢平台' ,
 			'extname' => 'platform' ,
-			'extversion' => Service::singleton()->version() ,
-			'installPath' => '/' ,
+			'extversion' => Platform::singleton()->version() ,
+			'installPath' => '/platform' ,
 		);
 		generateLicence( $arrVariables['licenceList'] , $arrExtInfo );
 		
@@ -313,8 +418,11 @@ class CreatePackage extends ControlPanel
 				);
 		}
 		$arrRequireExtension = array();
-		foreach($arrExtName as $sExtensionName){
-			$aExtension = ExtensionManager::singleton()->extensionMetainfo($sExtensionName);
+		foreach($arrExtName as $sExtensionName=>$sPackagePath){
+			if(!$aExtension = ExtensionManager::singleton()->extensionMetainfo($sExtensionName))
+			{
+				throw new Exception("指定的扩展 %s 不存在",$sExtensionName) ;
+			}
 			$this->arrExtension[$sExtensionName] = $aExtension ;
 			if($aExtension){
 				$aDependence = $aExtension->dependence();
@@ -359,13 +467,13 @@ class CreatePackage extends ControlPanel
 			if( $aFSO instanceof Folder ){
 				$bR = $aZip->addEmptyDir($sInZipPath);
 				if($bR === false){
-					echo $aZip->getStatusString();
+					//echo $aZip->getStatusString();
 				}
 			}else{
 				$sLocalPath = $aFSO->path();
 				$bR = $aZip->addFile($sLocalPath , $sInZipPath);
 				if($bR === false){
-					echo $aZip->getStatusString();
+					//echo $aZip->getStatusString();
 				}
 			}
 		}

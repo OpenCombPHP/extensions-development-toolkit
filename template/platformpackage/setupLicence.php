@@ -48,7 +48,7 @@ window.onload = function(){
 
 </script> 
 <div class="xy_check"><label><input id="chkAgree" type="checkbox" onChange="agreeLicense(this.checked);" />已阅读GNU General Public License version 3并同意全部内容</label></div>
-<a id="btnNext" href="/setup.php?step=2" class="step_btn">下一步</a>
+<a id="btnNext" href="setup.php?step=2" class="step_btn">下一步</a>
 <!---->
 
   </div>

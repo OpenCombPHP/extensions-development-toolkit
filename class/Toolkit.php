@@ -36,6 +36,8 @@ class Toolkit extends Extension
 						// advice
 						array('org\\opencomb\\development\\toolkit\\aspect\\ModelDataUsefulDetecter','printStructData')
 				),__FILE__) ;
+				
+			$aAop = AOP::singleton() ;
 		}
 	}
 	

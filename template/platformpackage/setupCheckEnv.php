@@ -152,7 +152,7 @@ LANGMODS;
 	}
 	
 	if($bHasNext){
-		$sNext = '<a id="btnNext" href="/setup.php?step=1" class="step_btn">下一步</a>' ;
+		$sNext = '<a id="btnNext" href="setup.php?step=1" class="step_btn">下一步</a>' ;
 	}else{
 		$sNext = '' ;
 	}

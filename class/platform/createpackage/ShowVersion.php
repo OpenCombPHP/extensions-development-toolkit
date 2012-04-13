@@ -1,6 +1,8 @@
 <?php
 namespace org\opencomb\development\toolkit\platform\createpackage ;
 
+use org\opencomb\platform\Platform;
+
 use org\opencomb\coresystem\auth\Id;
 
 use org\opencomb\coresystem\mvc\controller\ControlPanel ;
@@ -43,10 +45,11 @@ class ShowVersion extends ControlPanel
 		$arrVersion['jecat'] = $this->getJeCatVersion();
 		$arrVersion['opencomb'] = $this->getOpenCombVersion();
 		// extension
-		$this->arrExtension = array();
-		foreach($arrExtName as $extName){
+		$this->arrExtension = $arrPackage = array();
+		foreach($arrExtName as $extName=>$sPackagePath){
 			$aMetainfo = $this->getExtensionMetainfo($extName);
 			$this->arrExtension[$extName] = $aMetainfo;
+			$arrPackage[$extName] = $sPackagePath;
 			$arrVersion[$extName] = $aMetainfo->version()->toString();
 		}
 		$this->getDependenceList($arrExtName);
@@ -59,6 +62,7 @@ class ShowVersion extends ControlPanel
 		$this->view->variables()->set('arrDependence',$this->arrDependence);
 		$this->view->variables()->set('version',$arrVersion);
 		$this->view->variables()->set('arrPackageState',$arrPackageState);
+		$this->view->variables()->set('arrPackage',$arrPackage);
 		$this->view->variables()->set('arrContainGit',$arrContainGit);
 	}
 	
@@ -129,7 +133,7 @@ class ShowVersion extends ControlPanel
 	}
 	
 	private function getOpenCombVersion(){
-		return Service::singleton()->version()->toString();
+		return Platform::singleton()->version()->toString();
 	}
 	
 	private $arrExtension = array();

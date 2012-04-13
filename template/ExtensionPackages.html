@@ -1,14 +1,5 @@
 <msgqueue />
 
-<script>
-function switchPackMode(chkbox)
-{
-	jquery(chkbox.parentNode.parentNode).find('a').toggle() ;
-}
-</script>
-
-<a href='{=$packageFolder}'>浏览全部下载项</a>
-
 <table border='6'>
     <tr>
         <th>
@@ -37,7 +28,7 @@ function switchPackMode(chkbox)
             	<a href="?c=org.opencomb.development.toolkit.extension.createsetup.SelectItem&extName={=$package['name']}">生成数据安装脚本</a>
             	　|　
             	<label title="安装包中是否包含 .git 或 .svn 等版本库">
-            		<input type="checkbox" onchange="switchPackMode(this)" />
+            		<input type="checkbox" />
             		包含版本库
             	</label>
                 <a href='{=$package['link']['package']}' class="commonPack">
