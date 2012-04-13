@@ -19,24 +19,21 @@ class Toolkit extends Extension
 				, 'mainMenu'
 				, array(__CLASS__,'buildControlPanelMenu')
 		) ;
-
-		if(Service::singleton()->isDebugging())
-		{
-			AOP::singleton()
-				->registerBean(array(
-						// jointpoint
-						'org\\jecat\\framework\\mvc\\model\\db\\Model::data()' ,
-						// advice
-						array('org\\opencomb\\development\\toolkit\\aspect\\ModelDataUsefulDetecter','data')						
-				),__FILE__)
-				
-				->registerBean(array(
-						// jointpoint
-						'org\\jecat\\framework\\mvc\\model\\db\\Model::printStructData()' ,
-						// advice
-						array('org\\opencomb\\development\\toolkit\\aspect\\ModelDataUsefulDetecter','printStructData')
-				),__FILE__) ;
-		}
+		
+		AOP::singleton()
+			->registerBean(array(
+					// jointpoint
+					'org\\jecat\\framework\\mvc\\model\\db\\Model::data()' ,
+					// advice
+					array('org\\opencomb\\development\\toolkit\\aspect\\ModelDataUsefulDetecter','data')						
+			),__FILE__)
+			
+			->registerBean(array(
+					// jointpoint
+					'org\\jecat\\framework\\mvc\\model\\db\\Model::printStructData()' ,
+					// advice
+					array('org\\opencomb\\development\\toolkit\\aspect\\ModelDataUsefulDetecter','printStructData')
+			),__FILE__) ;
 	}
 	
 	static public function buildControlPanelMenu(array & $arrConfig)
