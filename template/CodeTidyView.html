@@ -65,15 +65,15 @@ function submit(){
 <msgqueue />
 <ul>
 	<li>
-		<h4>JeCat框架</h4>
+		<h3>JeCat框架</h3>
 		<div id='folder_framework' class='folderTree ztree' ns='org.jecat.framework'></div>
 	</li>
 	<li>
-		<h4>蜂巢平台</h4>
+		<h3>蜂巢平台</h3>
 		<div id='folder_platform' class='folderTree ztree' ns='org.opencomb.platform'></div>
 	</li>
 	<li>
-		<h4>扩展</h4>
+		<h3>扩展</h3>
 		<foreach for='$arrExtPackageList' item='arrExtPackage'>
 			<h5>{=$arrExtPackage['meta']->title()}（{=$arrExtPackage['meta']->name()}）</h5>
 			<ul>
