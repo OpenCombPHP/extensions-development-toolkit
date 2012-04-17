@@ -51,20 +51,20 @@ jQuery(function(){
 				<tr>
 					<th>管理员用户</th>
 					<td class="tit">用户名：</td>
-					<td><input name="adminName" value="root" class="in" /></td>
+					<td><input name="adminName" value="admin" class="in" /></td>
 					<td><div class="checkinput"></div></td>
 				</tr>
 				<tr>
 					<th></th>
 					<td class="tit">密码：</td>
-					<td><input type="password" name="adminPswd" value="111111" class="in" /></td>
+					<td><input type="password" name="adminPswd" value="" class="in" /></td>
 					<td><div class="checkinput"></div></td>
 				</tr>
 				<tr>
 					<th></th>
 					<td class="tit">安全模式密码：</td>
 					<td>
-						<input type="password" name="safeAdminPswd" value="111111" class="in" />
+						<input type="password" name="safeAdminPswd" value="" class="in" />
 						当系统遇到错误时用于恢复系统
 					</td>
 					<td><div class="checkinput"></div></td>
@@ -72,13 +72,13 @@ jQuery(function(){
 				<tr>
 					<th>数据库</th>
 					<td class="tit">数据库地址：</td>
-					<td><input name="dbAddress" value="192.168.1.1" class="in" /></td>
+					<td><input name="dbAddress" value="127.0.0.1" class="in" /></td>
 					<td><div class="checkinput"></div></td>
 				</tr>
 				<tr>
 					<th></th>
 					<td class="tit">数据库名：</td>
-					<td><input name="dbName" value="oc4" class="in" /></td>
+					<td><input name="dbName" value="" class="in" /></td>
 					<td><div class="checkinput"></div></td>
 				</tr>
 				<tr>
@@ -90,7 +90,7 @@ jQuery(function(){
 				<tr>
 					<th></th>
 					<td class="tit">密码：</td>
-					<td><input type="password" name="dbPswd" value="1" class="in" /></td>
+					<td><input type="password" name="dbPswd" value="" class="in" /></td>
 					<td><div class="checkinput"></div></td>
 				</tr>
 				<tr>
@@ -103,7 +103,7 @@ jQuery(function(){
 				<tr>
 					<th>网站信息</th>
 					<td class="tit">名称：</td>
-					<td><input name="websiteName" class="in" value="蜂巢系统" /></td>
+					<td><input name="websiteName" class="in" value="{=$sDistributionTitle}" /></td>
 					<td><div class="checkinput"></div></td>
 				</tr>
 				<tr>

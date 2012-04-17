@@ -150,10 +150,8 @@ class CreatePackage extends ControlPanel
 		$this->createMessage(Message::success,"%s 安装程序制作完成 (<a href='%s'>下载</a>)",array($this->params['sDistributionTitle'],$aPackageFile->httpUrl())) ;
 		
 		//Folder::createInstance('/local/d/project/otp/oc-setup')->deleteChild('*',true) ; ;
-		//$aDistributionZip->open($sPackagePath) ;
 		//$aDistributionZip->extract('/local/d/project/otp/oc-setup/') ;
 		return ;
-		
 	}
 	
 	private function packageFolder($sZipPath,$sFolderPath,$bRepo)
