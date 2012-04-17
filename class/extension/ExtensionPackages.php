@@ -1,6 +1,7 @@
 <?php
 namespace org\opencomb\development\toolkit\extension ;
 
+use net\phpconcept\pclzip\PclZip;
 use org\opencomb\platform\service\Service;
 use org\opencomb\coresystem\auth\Id;
 use org\opencomb\coresystem\mvc\controller\ControlPanel;
@@ -51,68 +52,40 @@ class ExtensionPackages extends ControlPanel{
 		$packageList = $this->packageList();
 		$package = $packageList[$name];
 		$bSuccess = true;
-		if(!empty($package)){
+		if(!empty($package))
+		{
 			$aPackagedFSO = $this->getPackagedFSO($package['name'],$package['version'],$includeGit);
-			$aZip = new \ZipArchive();
-			$filename = $aPackagedFSO->name();
-			$filePath = $aPackagedFSO->path();
-			if($debug){
-				$this->extensionPackages->createMessage(Message::notice,'即将创建压缩文件:%s : %s',array($aPackagedFSO->path(),$filePath));
-			}else{
-				$this->extensionPackages->createMessage(Message::notice,'创建扩展包，在:%s',$aPackagedFSO->path());
-			}
-			if($aZip->open($filePath,\ZIPARCHIVE::CREATE) !== TRUE){
-				$this->extensionPackages->createMessage(Message::notice,"can not open file <$filePath>");
-			}else{
-				$installFolder = new Folder($package['installPath']);
-				if($debug){
-					$this->extensionPackages->createMessage(Message::notice,'扩展安装目录:%s',$installFolder->path());
-				}
-				if($debug){
-					if($includeGit){
-						$this->extensionPackages->createMessage(Message::notice,'包含git\svn\cvs目录');
-					}
-				}
-				foreach($installFolder->iterator(FSIterator::FILE | FSIterator::FOLDER | FSIterator::RECURSIVE_SEARCH | FSIterator::RETURN_FSO) as $it){
-					if(preg_match('`/\\.(git|svn|cvs)(/|$)`',$it->path())){
-						if(empty($includeGit)){
-							continue;
-						}
-					}
-					if($it instanceof Folder){
-						$path = $it->path();
-						$path = Folder::relativePath($installFolder,$it);
-						$bSuccess = $bSuccess and $aZip->addEmptyDir($path);
-						if($debug){
-							$this->extensionPackages->createMessage(Message::notice, '创建目录：%s : %s',array($path,$aZip->getStatusString()));
-						}
-					}else{
-						$path = $it->path();
-						$path = Folder::relativePath($installFolder,$it);
-						$bSuccess = $bSuccess and $aZip->addFile($it->path(),$path);
-						if($debug){
-							$this->extensionPackages->createMessage(Message::notice, '压缩文件 %s 来自 %s : %s',array($path,$it->path(),$aZip->getStatusString()));
-						}
-					}
-				}
-				$bSuccess = $bSuccess and $aZip->close();
-				if($debug){
-					$this->extensionPackages->createMessage(Message::notice,'关闭压缩文件:%s',array($aPackagedFSO->path()));
-				}
-				if($debug){
-					if($bSuccess){
-						$this->extensionPackages->createMessage(Message::notice,'%s打包成功',array($name));
-					}else{
-						$this->extensionPackages->createMessage(Message::notice,'%s打包失败',array($name));
-					}
-				}else{
-					if($bSuccess){
-						$this->extensionPackages->createMessage(Message::notice,'%s打包成功',array($name));
-					}else{
-						$this->extensionPackages->createMessage(Message::notice,'%s打包失败',array($name));
-					}
+			
+			if(file_exists($aPackagedFSO->path()))
+			{
+				if(!unlink($aPackagedFSO->path()))
+				{
+					$this->extensionPackages->createMessage(Message::error,'清除原有扩展包文件失败:%s',$aPackagedFSO->path());
+					return ;
 				}
 			}
+			
+			$aZip = new PclZip($aPackagedFSO->path()) ;
+			$installFolder = new Folder($package['installPath']);
+			foreach($installFolder->iterator(FSIterator::FILE|FSIterator::FOLDER|FSIterator::RECURSIVE_SEARCH) as $sSubPath)
+			{
+				if( empty($includeGit) and preg_match('`(^|/)\\.(git|svn|cvs)(/|$)`',$sSubPath) )
+				{
+					continue ;
+				}
+				$sPath = $package['installPath'].'/'.$sSubPath ;
+				if( $aZip->add($sPath,PCLZIP_OPT_REMOVE_PATH,$package['installPath'])===0 )
+				{
+					$this->extensionPackages->createMessage(Message::error,'打包文件时出错:%s',$sPath);
+					return ;
+				}
+				else
+				{
+					$this->extensionPackages->createMessage(Message::success,'打包文件:%s',$sPath);
+				}
+			}
+
+			$this->extensionPackages->createMessage(Message::notice,'%s打包成功',array($name));
 			
 			// disable tempsave
 			$this->arrPackageList = null;

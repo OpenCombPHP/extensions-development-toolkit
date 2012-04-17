@@ -52,7 +52,7 @@ class SelectItem extends ControlPanel{
 		$sKey = 'Tables_in_'.$strDBName ;
 		foreach( $aDbReflecter->tableNameIterator() as $tableName ){
 			if( self::startsWith($tableName,$prefix.$extName.'_')){
-				$arrTableList [] = $tableName;
+				$arrTableList [] = substr($tableName,strlen($prefix)) ;
 			}
 		}
 		return $arrTableList ;

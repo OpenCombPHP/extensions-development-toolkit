@@ -7,13 +7,13 @@
 
 	<h2>发型版本信息</h2>
 	<div>
-		产品标题：<input type="text" name="distributionTitle" value="蜂巢平台" />
+		产品标题：<input type="text" name="sDistributionTitle" value="蜂巢平台" />
 	</div>
 	<div>
-		产品名称：<input type="text" name="distributionName" value="oc-platform" /> 建议：避免使用中文
+		产品名称：<input type="text" name="sDistributionName" value="oc-platform" /> 建议：避免使用中文
 	</div>
 	<div>
-		版　　本：<input type="text" name="distributionVersion" value="1.0.0.0"  />
+		版　　本：<input type="text" name="sDistributionVersion" value="1.0.0.0"  />
 	</div>
 
 	<h2>基础系统</h2>
@@ -49,14 +49,14 @@
 			
 				<if '$arrPackageState[$ext->name()][0]' >
 					<label>
-						<input type='checkbox' id="chk-{=$ext->name()}-release" name='ext[{=$ext->name()}]' value='{=$arrPackageState[$ext->name()][0]}' onclick="jquery('#chk-{=$ext->name()}-debug').attr('checked',!this.checked)" />
+						<input type='checkbox' id="chk-{=$ext->name()}-release" name='arrExtensions[{=$ext->name()}]' value='{=$arrPackageState[$ext->name()][0]}' onclick="jquery('#chk-{=$ext->name()}-debug').attr('checked',!this.checked)" />
 						正式版本
 					</label>
 				</if>
 				
 				<if '$arrPackageState[$ext->name()][1]' >
 					<label>
-						<input type='checkbox' id="chk-{=$ext->name()}-debug" name='ext[{=$ext->name()}]' value='{=$arrPackageState[$ext->name()][1]}' onclick="jquery('#chk-{=$ext->name()}-release').attr('checked',!this.checked)" />
+						<input type='checkbox' id="chk-{=$ext->name()}-debug" name='arrExtensions[{=$ext->name()}]' value='{=$arrPackageState[$ext->name()][1]}' onclick="jquery('#chk-{=$ext->name()}-release').attr('checked',!this.checked)" />
 						开发版本
 					</label>
 				</if>

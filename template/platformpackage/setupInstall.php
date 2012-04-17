@@ -1,230 +1,285 @@
-<?php
 
-$arrExtensionList = array();
-/**
- * @return array(
- *             'success' => true,
- *             'error' => array(
- *                  'error1',
- *             )
- *         );
- */
-function extractFiles(){
-	$arrResult = array(
-		'success' => true,
-		'error' => array(
-		),
-	);
-	
-	$fZip = null ;
-	$sName = '' ;
-	$sInstallPath = '';
-	
-	function startsWith($haystack, $needle){
-		$length = strlen($needle);
-		return (substr($haystack, 0, $length) === $needle);
-	}
-	
-	function isExtension($sPath){
-		if( startsWith($sPath,'extensions/') ){
-			return true;
-		}
-		return false;
-	}
-	
-	function processLine($sLine){
-		global $fZip ;
-		global $sName ;
-		global $sInstallPath ;
-		global $arrExtensionList ;
-		$sZipKey = '{=$sZipKey}';
-		$nLenKey = strlen($sZipKey);
-		if( substr( $sLine , 0 , $nLenKey ) === $sZipKey ){
-			$arrLine = explode(':',$sLine);
-			if( 3 === count($arrLine)){
-				$sName = $arrLine[1];
-				$sFileName = $sName.'.zip' ;
-				$fZip = fopen($sFileName,'w');
-				$sInstallPath = $arrLine[2];
-			}else if( 2 === count($arrLine)){
-				fclose($fZip);
-				$fZip = null ;
-				
-				$sFileName = $sName.'.zip' ;
-				$zip = new ZipArchive;
-				if ($zip->open($sFileName) === TRUE) {
-					$zip->extractTo($sInstallPath);
-					$zip->close();
-					unlink($sFileName);
-					
-					if(isExtension($sInstallPath)){
-						$arrExtensionList [] =
-							array(
-								'name' => $sName ,
-								'path' => $sInstallPath ,
-							);
-					}
-				} else {
-					$arrResult ['success'] = false;
-					$arrResult ['error'] [] = 'open failed.';
-				}
-			}
-		}else if( null !== $fZip ){
-			fwrite($fZip , base64_decode($sLine) );
-		}
-	}
-	$fp = fopen(__FILE__,'r');
-	if(!$fp){
-		$arrResult ['success'] = false;
-		$arrResult ['error'] [] = 'Could not open file '.__FILE__;
-	}else{
-		$sLine = '' ;
-		while( false !== ($char = fgetc($fp))){
-			if($char === "\n"){
-				processLine($sLine);
-				$sLine = '';
-			}else{
-				$sLine .= $char ;
-			}
-		}
-	}
-	
-	return $arrResult ;
+$sFrameworkPackageFilename = '{=$sFrameworkPackageFilename}' ;
+$sPlatformPackageFilename = '{=$sPlatformPackageFilename}' ;
+$arrExtensionPackages = {=var_export($arrExtensionPackages,true)} ;
+
+
+$arrMessageQueue = array() ;
+function output($sMessage,$nType='success')
+{
+	global $arrMessageQueue ;
+	$arrMessageQueue[] = "<div class='msg-{$nType}'>{$sMessage}</div>" ;
 }
 
-function writeInfo(){
-	// settings
-	// 1. /platform:name
-	$name = $_GET['websiteName'];
-	$str = <<<PLATFORMCONFIG
-<?php
-return array (
-'name' => '$name',
-) ;
-PLATFORMCONFIG;
-	mkdir('settings/platform',0755,true);
-	file_put_contents('settings/platform/items.php',$str);
-	// 2. /platform/db:config = 'www'
-	$str = <<<DBCONFIG
-<?php
-return array (
-'config' => 'www',
-) ;
-DBCONFIG;
-	mkdir('settings/platform/db',0755,true);
-	file_put_contents('settings/platform/db/items.php',$str);
-	// 3. /platform/db/www:dsn
-	//    /platform/db/www:username
-	//    /platform/db/www:password
-	//    /platform/db/www:options= array(1002 => "SET NAMES 'utf8'")
-	$dbAddress = $_GET['dbAddress'];
-	$dbName = $_GET['dbName'];
-	$dbUsername = $_GET['dbUsername'];
-	$dbPswd = $_GET['dbPswd'];
-	$str = <<<DBSETTINGS
-<?php
-return array (
-'dsn' => 'mysql:host=$dbAddress;dbname=$dbName',
-'username' => '$dbUsername',
-'password' => '$dbPswd',
-'options' => 
-array (
-1002 => 'SET NAMES \'utf8\'',
-),
-) ;
-DBSETTINGS;
-	mkdir('settings/platform/db/www',0755,true);
-	file_put_contents('settings/platform/db/www/items.php',$str);
-	
-	global $arrExtensionList;
-	
-	// 简单配置启动 OC platform
-	$aPlatform = require 'oc.init.php' ;
-	
-	// data upgrader
-	$aDataUpgrader = \org\opencomb\platform\system\upgrader\PlatformDataUpgrader::singleton() ; 
-	
-	$aMessageQueue = new \org\jecat\framework\message\MessageQueue;
-	
-	$aDataUpgrader->process($aMessageQueue) ;
-	
-	foreach($arrExtensionList as $arrExtension){
-		$sPath = $arrExtension['path'] ;
-		if( !$aExtFolder = \org\jecat\framework\fs\Folder::singleton()->findFolder($sPath) )
+// 解压zip函数
+function unzip($sPackagePath,$sToFolder)
+{
+	$aZip = new PclZip($sPackagePath) ;
+	return $aZip->extract($sToFolder)>0 ;
+}
+
+function extractFiles()
+{
+	global $sFrameworkFolder, $sPlatformFolder, $sFrameworkPackageFilename, $sPlatformPackageFilename ;
+
+	// 释放 jecat framework
+	foreach( array(
+		$sFrameworkPackageFilename => $sFrameworkFolder ,
+		$sPlatformPackageFilename => $sPlatformFolder ,
+	) as $sPackage=>$sFolder)
+	{
+		if( !unzip(setup_folder.'/packages/'.$sPackage,$sFolder) )
 		{
-			$aMessageQueue->create(\org\jecat\framework\message\Message::error,'输入的路径不存在:%s',$sPath) ;
-			break ;
+			return false ;
+		}
+	}
+	
+	return true ;
+}
+
+function setupSetting($sService,$sDbTablePrefix)
+{
+	global $sServicesFolder ;
+	
+	// 写入 setting -----------------------------
+	$name = $_REQUEST['websiteName'];
+	$arrSettings = array(
+		'service/items.php'		=> array('name'=>$_REQUEST['websiteName']) ,
+		'service/db/items.php'		=> array('config'=>'www') ,
+		'service/db/www/items.php'	=> array(
+										'dsn' => "mysql:host={$_REQUEST['dbAddress']};dbname={$_REQUEST['dbName']}",
+										'username' => $_REQUEST['dbUsername'],
+										'password' => $_REQUEST['dbPswd'],
+										'options' => array (1002 => "SET NAMES 'utf8'",) ,												
+										'table_prefix' => $sDbTablePrefix ,
+				) ,
+	) ;
+	foreach($arrSettings as $sFile=>$arrValue)
+	{
+		$sItemPath = $sServicesFolder.'/'.$sService.'/setting/'.$sFile ;
+		$sItemFolderPath = dirname($sItemPath) ;
+		if( !file_exists($sItemFolderPath) and !mkdir($sItemFolderPath,0775,true) )
+		{
+			output("无法创建目录：{$sItemFolderPath}/",'error') ;
+			return false ;
+		}
+		if( !file_put_contents($sItemPath,'{='<?php'} return '.var_export($arrValue,true).';') )
+		{
+			output("无法将配置写入文件：{$sItemPath}",'error') ;
+			return false ;
+		}
+
+		output("写入配置文件：{$sItemPath}",'error') ;
+	}
+	
+	// 写入 services setting --------------------------
+	if( !file_put_contents($sServicesFolder.'/settings.inc.php','{='<?php'} return '.var_export(array(
+			'default' => array(
+				'domains' => array('*',$_REQUEST['websiteHost']) ,
+			) ,
+			'safemode' => array(
+				'domains' => array('safemode') ,
+			) ,
+	),true).';') )
+	{
+		output("无法将配置写入文件：{$sServicesFolder}/settings.inc.php",'error') ;
+		return false ;
+	}
+	
+	// 写入 oc.config.php
+	if( !file_put_contents(install_root.'/oc.config.php',"{='<?php'}
+namespace org\opencomb\platform ;
+
+define('org\\opencomb\\platform\\ROOT',__DIR__) ;
+define('org\\opencomb\\platform\\PLATFORM_FOLDER',ROOT.'/platform') ;
+define('org\\opencomb\\platform\\EXTENSIONS_FOLDER',ROOT.'/extensions') ;
+define('org\\opencomb\\platform\\SERVICES_FOLDER',ROOT.'/services') ;
+define('org\\opencomb\\platform\\PUBLIC_UI_FOLDER',ROOT.'/public/ui') ;
+define('org\\opencomb\\platform\\PUBLIC_UI_URL','public/ui') ;
+define('org\\opencomb\\platform\\PUBLIC_FILES_FOLDER',ROOT.'/public/files') ;
+define('org\\opencomb\\platform\\PUBLIC_FILES_URL','public/files') ;
+
+") )
+	{
+		output("无法将配置写入文件：".install_root.'/oc.config.php','error') ;
+		return false ;
+	}
+	
+	return true ;
+}
+
+function installExtensions()
+{
+	global $sExtensionsFolder, $arrExtensionPackages ;
+	foreach($arrExtensionPackages as $sExtFolder=>$sPackageName)
+	{
+		// 解压扩展
+		$sPackagePath = setup_folder.'/packages/'.$sPackageName ;
+		$sInstallFolder = $sExtensionsFolder.'/'.$sExtFolder ;
+		if( !unzip($sPackagePath,$sInstallFolder) )
+		{
+			output("无法将扩展包 {$sPackagePath} 解压到目录 {$sInstallFolder}") ;
+			return false ;
+		}
+
+		if( !$aDomMetainfo = simplexml_load_file($sInstallFolder.'/metainfo.xml') )
+		{
+			output("无法读取扩展包 {$sPackagePath} 中的 metainfo.xml 文件") ;
+			return false ;
 		}
 		
+		// 安装扩展
+		$aMessageQueue = new \org\jecat\framework\message\MessageQueue() ;
 		try{
-			// 清理缓存
-			\org\opencomb\platform\service\ServiceSerializer::singleton()->clearRestoreCache();
-			
-			// 安装
-			$aExtMeta = \org\opencomb\platform\ext\ExtensionSetup::singleton()->install($aExtFolder , $aMessageQueue ) ;
-			
-			$aMessageQueue->create(
-					\org\jecat\framework\message\Message::success
-					, "扩展% s(%s:%s) 已经成功安装到平台中。"
-					, array( $aExtMeta->title(), $aExtMeta->name(), $aExtMeta->version() )
-			) ;
-
-			// 激活
+			$aExtMeta = \org\opencomb\platform\ext\ExtensionSetup::singleton()->install(new \org\jecat\framework\fs\Folder($sInstallFolder),$aMessageQueue) ;
+		}catch(\org\jecat\framework\db\ExecuteException $e){
+			output("无法连接到数据库，数据库设置错误。",'error') ;
+			return false ;
+		}catch(\Exception $e){}
+		
+		foreach($aMessageQueue->iterator() as $aMessage)
+		{
+			output($aMessage->message(),$aMessage->type()) ;
+		}
+		if(!empty($e))
+		{
+			output($e->getMessage(),'error') ;
+			return false ;
+		}
+		
+		output('安装扩展：'.$aExtMeta->title().'('.$aExtMeta->name().':'.$aExtMeta->version().')','success') ;
+		
+		// 激活扩展
+		$aMessageQueue = new \org\jecat\framework\message\MessageQueue() ;
+		try{
 			\org\opencomb\platform\ext\ExtensionSetup::singleton()->enable($aExtMeta->name()) ;
-			
-			$aMessageQueue->create(
-					\org\jecat\framework\message\Message::success
-					, "扩展 %s(%s:%s) 已经激活使用。"
-					, array( $aExtMeta->title(), $aExtMeta->name(), $aExtMeta->version() )
-			) ;
-		}catch(Exception $e){
-			$aMessageQueue->create(\org\jecat\framework\message\Message::error,$e->getMessage(),$e->messageArgvs()) ;
+		}catch(\Exception $e)
+		{
+			output($e->getMessage(),'error') ;
+			return false ;
+		}
+		
+		output('激活扩展：'.$aExtMeta->title().'('.$aExtMeta->name().':'.$aExtMeta->version().')','success') ;
+		
+	}
+
+	// 加载所有扩展
+	\org\opencomb\platform\ext\ExtensionLoader::singleton()->loadAllExtensions() ;
+	
+	return true ;
+}
+
+function insertAdminUser()
+{
+	$aDB = \org\jecat\framework\db\DB::singleton() ;
+	
+	// 管理员用户组
+	$arrSQL[] = "insert into `coresystem_group` (gid,name,lft,rgt) values (1,'系统管理员组',1,2)" ;
+	$arrSQL[] = "insert into `coresystem_purview` (type,id,extension,name) values ('group',1,'coresystem','PLATFORM_ADMIN')" ;
+
+	// 管理员帐号
+	$sUsername = addslashes($_REQUEST['adminName']) ;
+	$sPassword = md5( md5(md5($_REQUEST['adminName'])) . md5($_REQUEST['adminPswd']) ) ;
+	$nNow = time() ;
+	$sIp = $_SERVER['REMOTE_ADDR'] ;
+	$arrSQL[] = "insert into `coresystem_user` (uid,username,password,registerTime,registerIp) values (1,'{$sUsername}','{$sPassword}',{$nNow},'{$sIp}')" ;
+	$arrSQL[] = "insert into `coresystem_group_user_link` (uid,gid) values (1,1)" ;
+	
+	foreach($arrSQL as $sSQL)
+	{
+		if(!$aDB->execute($sSQL))
+		{
+			output('向数据库导入数据时遇到了错误:'.$sSQL,'error') ;
+			return false ;
 		}
 	}
-	
-	return $aMessageQueue ;
+	return true ;
 }
 
-function install(){
-	$arrResult = extractFiles();
-	
-	$str = '';
-	if( $arrResult['success'] ){
-		$aMessageQueue = writeInfo();
-		$aBuffer = new \org\jecat\framework\io\OutputStreamBuffer ;
-		$aMessageQueue->display(null,$aBuffer);
-		$str = $aBuffer -> __toString() ;
+function install()
+{
+	// 解压文件
+	if( !extractFiles() )
+	{
+		return false ;
 	}
 	
-	$sCode = {='<<<'}CODE
-
-<div class="main">
-	<div class="content">
-		<div class="topbar">
-			<h1>蜂巢平台 <span class="azxd">安装向导</span><span class="topversion">版本号</span></h1>
-		</div>
+	// 写入 setting
+	if( !setupSetting('default',$_REQUEST['dbPrefix']) )
+	{
+		return false ;
+	}
+	if( !setupSetting('safemode','ocsafe_') )
+	{
+		return false ;
+	}
 	
-		<div class="stepbar">
-			<ul>
-				<li>1. 检查运行环境</li>
-				<li>2. 确认协议</li>
-				<li>3. 填入必要信息</li>
-				<li class="this-step">4. 完成</li>
-			</ul>
-		</div>
-		<div class="step3">
-			<div class="bottombar">
-				<h1><span>完成</span></h1>
-				<div class="inner">
-					$str
-				</div>
-				<a id="btnNext" href="/" class="step_btn">进入系统</a>
-			</div>
-		</div>
-	</div>
-</div>
-CODE;
-	echo $sCode ;
+	// 启动系统
+	$aService = include install_root.'/oc.init.php' ;
+	if( !($aService instanceof \org\opencomb\platform\service\Service) )
+	{
+		output("无法启动系统，安装失败。",'error') ;
+		return false ;
+	}
+	
+	// 安装扩展
+	if(!installExtensions())
+	{
+		return false ;
+	}
+	
+	// 设置管理员用户
+	if(!insertAdminUser())
+	{
+		return false ;
+	}
+	
+	// 从各个扩展 导入 public ui 目录
+	$aService->publicFolders()->importFromSourceFolders() ;
+	
+	// 禁止写入缓存
+	\org\opencomb\platform\service\ServiceSerializer::singleton()->clearSystemObjects() ;
+
+	
+	output("系统安装完毕，感谢使用{=$sDistributionTitle}。") ;
+
+
+	// \org\jecat\framework\db\DB::singleton()->executeLog(true) ;
+	
+	return true ;
 }
 
+
+$bInstallSuccess = install() ;
 ?>
+
+<div class="step3">
+	<div class="bottombar">
+		
+		<div class="inner">
+			{='<?php'}
+			foreach($arrMessageQueue as $sMessage)
+			{
+				echo $sMessage, "\r\n" ;
+			}
+			{='?>'}
+		</div>
+		
+		
+		{='<?php'}
+		if($bInstallSuccess) {
+		{='?>'}
+		
+		<h1>
+			<span>完成</span>
+		</h1>
+		
+		<a id="btnNext" href="/" class="step_btn">进入系统</a>
+		
+		{='<?php'}
+		}
+		{='?>'}
+	</div>
+</div>
+
+<?php 

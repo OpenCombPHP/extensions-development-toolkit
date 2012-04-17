@@ -118,8 +118,16 @@ class CreateSetup extends ControlPanel{
 	}
 	
 	private function getShowCreateTable($tableName){
+		
 		$aDB = DB::singleton() ;
 		$arrRes = $aDB->query("SHOW CREATE TABLE `$tableName`")->fetch() ;
+		
+		// 去掉数据表前缀
+		if($sTablePrefix=$aDB->tableNamePrefix())
+		{
+			$sRealTablename = $sTablePrefix.$tableName ;
+			$arrRes['Create Table'] = str_replace($sRealTablename,$tableName,$arrRes['Create Table']) ;
+		}
 		
 		// 加入 "if not exists"
 		$arrRes['Create Table'] = str_replace('CREATE TABLE','CREATE TABLE IF NOT EXISTS',$arrRes['Create Table']) ;
