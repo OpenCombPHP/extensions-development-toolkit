@@ -30,11 +30,9 @@ return array(
 			'menu' => 1 ,
 			'item:create-package' => array(
 				'title' => '二次发布' ,
-				'link' => '?c=org.opencomb.development.toolkit.platform.createpackage.SelectItem' ,
+				'link' => '?c=org.opencomb.development.toolkit.platform.CreateDistribution' ,
 				'query' => array(
-						'c=org.opencomb.development.toolkit.platform.createpackage.SelectItem' ,
-						'c=org.opencomb.development.toolkit.platform.createpackage.ShowVersion' ,
-						'c=org.opencomb.development.toolkit.platform.createpackage.CreatePackage' ,
+						'c=org.opencomb.development.toolkit.platform.CreateDistribution' ,
 				),
 			),
 		),

@@ -6,9 +6,6 @@
             扩展
         </th>
         <th>
-            安装路径
-        </th>
-        <th>
             操作
         </th>
         <th>
@@ -20,21 +17,19 @@
             <td>
                 <b>{=$package['title']}</b>
 				({=$package['name']}:{=$package['version']})
-            </td>
-            <td>
-                {=$package['installPath']}
+                <div style="color:#bbb">{=$package['installPath']}</div>
             </td>
             <td>
             	<a href="?c=org.opencomb.development.toolkit.extension.createsetup.SelectItem&extName={=$package['name']}">生成数据安装脚本</a>
             	　|　
             	<label title="安装包中是否包含 .git 或 .svn 等版本库">
-            		<input type="checkbox" />
+            		<input type="checkbox" onchange="switchRepo(this)" />
             		包含版本库
             	</label>
-                <a href='{=$package['link']['package']}' class="commonPack">
+                <a href='{=$package['link']['package']}' class="release">
                 	<button>打包</button>
                 </a>
-                <a href='{=$package['link']['packageVl']}' style="display:none" class="repsPack">
+                <a href='{=$package['link']['packageVl']}' style="display:none" class="debug">
                 	<button>打包</button>
                 </a>
             </td>
@@ -55,3 +50,11 @@
         </tr>
     </foreach>
 </table>
+
+<script>
+function switchRepo(wndCheckbox)
+{
+	jquery(wndCheckbox.parentNode.parentNode).find('.release').toggle() ;
+	jquery(wndCheckbox.parentNode.parentNode).find('.debug').toggle() ;
+}
+</script>

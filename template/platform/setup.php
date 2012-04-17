@@ -56,7 +56,7 @@ switch(@$_GET['action'])
 // ---------------------------------------------------------------------------------
 // 第一步 检查服务器环境 -----------------------------------------------------------------
 default:
-	<include file="development-toolkit:platformpackage/setupCheckEnv.php" />
+	<include file="development-toolkit:platform/setupCheckEnv.php" />
 	break ;
 
 	
@@ -64,7 +64,7 @@ default:
 // -------------------------------------------------------------------------------
 // 第二步 确认协议 -----------------------------------------------------------------
 case 'licence' :
-	<include file="development-toolkit:platformpackage/setupLicence.php" />
+	<include file="development-toolkit:platform/setupLicence.php" />
 	break ;
 
 	
@@ -72,7 +72,7 @@ case 'licence' :
 // ---------------------------------------------------------------------------------
 // 第三步 输入信息 -----------------------------------------------------------------
 case 'input' :
-	<include file="development-toolkit:platformpackage/setupInput.php" />
+	<include file="development-toolkit:platform/setupInput.php" />
 	break ;
 
 	
@@ -80,7 +80,7 @@ case 'input' :
 // ---------------------------------------------------------------------------------
 // 第四步 执行安装 -------------------------------------------------------------------
 case 'install' :
-	<include file="development-toolkit:platformpackage/setupInstall.php" />
+	<include file="development-toolkit:platform/setupInstall.php" />
 	break ;
 	
 	

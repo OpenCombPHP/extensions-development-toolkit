@@ -1,5 +1,5 @@
 <?php
-namespace org\opencomb\development\toolkit\platform\createpackage ;
+namespace org\opencomb\development\toolkit\platform ;
 
 use net\phpconcept\pclzip\PclZip;
 use org\jecat\framework\message\Message;
@@ -22,12 +22,14 @@ use org\opencomb\development\toolkit\extension\ExtensionPackages ;
 use org\opencomb\platform\service\Service ;
 use org\jecat\framework\util\Version ;
 
-class CreatePackage extends ControlPanel
+class CreateDistribution extends ControlPanel
 {
 	public function createBeanConfig(){
 		return array(
+			'title'=>'创建发行版本',
 			'view:view' => array(
-				'template' => 'platformpackage/CreatePackage.html' ,
+				'template' => 'platform/CreateDistribution.html' ,
+				'class' => 'form' ,
 			),
 			'perms' => array(
 					// 权限类型的许可
@@ -41,7 +43,34 @@ class CreatePackage extends ControlPanel
 	public function process()
 	{
 		$this->checkPermissions('您没有使用这个功能的权限,无法继续浏览',array()) ;
+		
+		if( $this->doActions() )
+		{
+			$this->view->hideForm() ;
+			return ;
+		}
+		
 
+		// extension list
+		$arrExtension = ExtensionManager::singleton()->metainfoIterator() ;
+		
+		// package state
+		$arrPackageState = array( );
+		$aMetainfoIterator = ExtensionManager::singleton()->metainfoIterator() ;
+		foreach($aMetainfoIterator as $aMetainfo)
+		{
+			$sExtName = $aMetainfo->name();
+			$arrPackageState[$sExtName][0] = ExtensionPackages::getPackagedFSO($sExtName,$aMetainfo->version(),0,0) ;
+			$arrPackageState[$sExtName][1] = ExtensionPackages::getPackagedFSO($sExtName,$aMetainfo->version(),1,0) ;			
+		}
+		
+		// template
+		$this->view->variables()->set('arrExtension',$arrExtension);
+		$this->view->variables()->set('arrPackageState',$arrPackageState);
+	}
+	
+	protected function actionSubmit()
+	{
 		$sDistrVersion = $this->params()->get('sDistributionVersion') ;
 		$sDistrName = $this->params()->get('sDistributionName') ;
 		
@@ -139,7 +168,7 @@ class CreatePackage extends ControlPanel
 		
 		// 生成文件安装程序并打包
 		$aStream = new OutputStreamBuffer() ;
-		UIFactory::singleton()->create()->display('development-toolkit:platformpackage/setup.php',$this->params(),$aStream) ;
+		UIFactory::singleton()->create()->display('development-toolkit:platform/setup.php',$this->params(),$aStream) ;
 		$aSetupTmp = Extension::flyweight('development-toolkit')->tmpFolder()->createChildFile('setup.php') ;
 		$aSetupTmp->openWriter()->write($aStream) ;
 		

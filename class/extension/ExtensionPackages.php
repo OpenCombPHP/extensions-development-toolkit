@@ -155,13 +155,13 @@ class ExtensionPackages extends ControlPanel{
 	 * 2.包含版本库
 	 * <extension name>-<version>-repos.ocp.zip
 	 */
-	static public function getPackagedFSO($name,$version , $vl){
+	static public function getPackagedFSO($name,$version,$vl,$nFlag=Folder::FIND_AUTO_CREATE_OBJECT){
 		if(empty($vl)){
 			$sVl = '';
 		}else{
 			$sVl = '-repos';
 		}
-		return self::getPackageFolder()->findFile($name.'-'.$version.$sVl.'.zip',Folder::FIND_AUTO_CREATE_OBJECT);
+		return self::getPackageFolder()->findFile($name.'-'.$version.$sVl.'.zip',$nFlag);
 	}
 	
 	static public function hasPackaged($name,$version , $vl){
