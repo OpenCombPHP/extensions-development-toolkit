@@ -39,15 +39,17 @@ $sOcConfigFile = {=$sFileOcConfig} ;
 $arrExtensionFolders = {=var_export($arrExtensionFolders,true)} ;
 
 
-<foreach for="$arrLibClassCode" item="sSourceCode">
-	{=$sSourceCode}
+<foreach for="$arrLibClasses" item="sClassFilename">
+include_once setup_folder.'/lib/{=$sClassFilename}' ;
 </foreach>
+
+
+{= isset($arrPlatformInfo['arrInitCodes'])? $arrPlatformInfo['arrInitCodes']: '' }
 
 
 if( file_exists($sOcConfigFile) )
 {
 ?>
-	
 	<div>
 		系统已经安装完毕，请尽快删除系统根目录下的 setup 目录，以消除安全隐患。
 	</div>
@@ -56,11 +58,6 @@ if( file_exists($sOcConfigFile) )
 }
 else
 {
-
-	// 注册 SAE wrapper
-	stream_wrapper_unregister('saestor') ;
-	stream_wrapper_register('saestor','SaeStorageWrapperEx') ;
-	
 	switch(@$_GET['action'])
 	{
 		
@@ -68,31 +65,25 @@ else
 	// ---------------------------------------------------------------------------------
 	// 第一步 检查服务器环境 -----------------------------------------------------------------
 	default:
-		<include file="development-toolkit:platform/setupCheckEnv.php" />
+		include_once setup_folder.'/lib/setupCheckEnv.php' ;
 		break ;
-	
 		
-	
 	// -------------------------------------------------------------------------------
 	// 第二步 确认协议 -----------------------------------------------------------------
 	case 'licence' :
-		<include file="development-toolkit:platform/setupLicence.php" />
+		include_once setup_folder.'/lib/setupLicence.php' ;
 		break ;
-	
-		
 		
 	// ---------------------------------------------------------------------------------
 	// 第三步 输入信息 -----------------------------------------------------------------
 	case 'input' :
-		<include file="development-toolkit:platform/setupInput.php" />
+		include_once setup_folder.'/lib/setupInput.php' ;
 		break ;
 	
-		
-		
 	// ---------------------------------------------------------------------------------
 	// 第四步 执行安装 -------------------------------------------------------------------
 	case 'install' :
-		<include file="development-toolkit:platform/setupInstall.php" />
+		include_once setup_folder.'/lib/setupInstall.php' ;
 		break ;
 		
 		

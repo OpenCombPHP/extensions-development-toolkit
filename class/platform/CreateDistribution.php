@@ -1,6 +1,10 @@
 <?php
 namespace org\opencomb\development\toolkit\platform ;
 
+use org\jecat\framework\lang\oop\Package;
+
+use org\jecat\framework\lang\oop\ClassLoader;
+
 use net\phpconcept\pclzip\PclZip;
 use org\jecat\framework\message\Message;
 use org\jecat\framework\fs\LocalFolderIterator;
@@ -51,24 +55,26 @@ class CreateDistribution extends ControlPanel
 		}
 		
 		// template
+		$this->view->variables()->set('arrPlatforms',self::$arrPlatforms);
 		$this->view->variables()->set('arrExtension',ExtensionManager::singleton()->metainfoIterator());
 	}
 	
 	protected function actionSubmit()
 	{
+		if(empty($this->params['platform']) or !isset(self::$arrPlatforms[$this->params['platform']]))
+		{
+			$this->createMessage(Message::error,"缺少有效的参数：platform") ;
+			return ;
+		}
+		$arrPlatformInfo = self::$arrPlatforms[$this->params['platform']] ;
+		
 		$sDistrVersion = $this->params()->get('sDistributionVersion') ;
 		$sDistrName = $this->params()->get('sDistributionName') ;
 		
 		$bIncludeRepos = $this->params->bool("debug-version") ;
 		
 		// 创建压缩包		
-		$sDistributionZipFilename = $sDistrName.'-'.$sDistrVersion ;
-		if($this->params()->bool('sae-package'))
-		{
-			$sDistributionZipFilename.= '-sae' ;
-		}
-		$sDistributionZipFilename.= '.zip' ;
-		
+		$sDistributionZipFilename = $sDistrName.'-'.$sDistrVersion.'-'.$this->params['platform'].'.zip' ;
 		$aDistributionFolder = Extension::flyweight('development-toolkit')->filesFolder()->findFolder('distributions',Folder::FIND_AUTO_CREATE) ; 
 		$aPackageFile = $aDistributionFolder->findFile($sDistributionZipFilename,Folder::FIND_AUTO_CREATE_OBJECT) ;
 		$sPackagePath = $aPackageFile->path() ;
@@ -125,71 +131,57 @@ class CreateDistribution extends ControlPanel
 			}
 		}
 		
-		// 打包安装时所需的工具类
+		// 安装程序上默认的输入内容
+		if( !empty($arrPlatformInfo['installer-default-input']) )
+		{
+			foreach($arrPlatformInfo['installer-default-input'] as $sName=>$sContent)
+			{
+				$this->params[$sName] = $sContent ;
+			}
+		}
+
+		$this->params['arrPlatformInfo'] = $arrPlatformInfo ;
+		$this->params['bCheckRootWritable'] = $arrPlatformInfo['bCheckRootWritable'] ;
+		$this->params['sFileOcConfig'] = $arrPlatformInfo['sFileOcConfig'] ;
+		
+		// 打包一些工具类
 		$arrLibClasses = array() ;
-		$arrLibClassCode = array() ;
-		if($this->params()->bool('sae-package'))
+		if( !empty($arrPlatformInfo['arrLibClasses']) )
 		{
-			$arrLibClasses[] = "org\\jecat\\framework\\fs\\wrapper\\SaeStorageWrapperEx" ;
+			foreach($arrPlatformInfo['arrLibClasses'] as $sClass)
+			{
+				$sClassFile = ClassLoader::singleton()->searchClass( $sClass, Package::nocompiled ) ;
+				$aDistributionZip->add($sClassFile,'/setup/lib',dirname($sClassFile)) ;
+				$arrLibClasses[] = str_replace('\\','.',$sClass).'.php' ;
+			}
 		}
-		foreach($arrLibClasses as $sClass)
+		$this->params['arrLibClasses'] = $arrLibClasses ;
+
+		// 打包前 的处理程序
+		if(!empty($arrPlatformInfo['process-before-package']))
 		{
-			$sSourceCode = file_get_contents( \org\jecat\framework\lang\oop\ClassLoader::singleton()->searchClass(
-					$sClass, \org\jecat\framework\lang\oop\Package::nocompiled
-			) ) ;
-			$sSourceCode = str_replace('<?php','',$sSourceCode) ;
-			$sSourceCode = str_replace('<?','',$sSourceCode) ;
-			$sSourceCode = str_replace('?>','',$sSourceCode) ;
-			$sSourceCode = preg_replace('|namespace[^;]+;|','',$sSourceCode) ;
-			$arrLibClassCode[$sClass] = $sSourceCode ;
-		}
-		$this->params['arrLibClassCode'] = $arrLibClassCode ;
-		
-		$this->params['bCheckRootWritable'] = true ;
-		
-		// 安装路径
-		$this->params['sFileOcConfig'] = "ROOT.'/oc.config.php'" ;
-		$this->params['sServicesFolder'] = 'services' ;
-		$this->params['sPublicFilesFolder'] = 'public/files' ;
-		$this->params['sPublicFileUrl'] = 'public/files' ;
-		
-		$this->params['sDBServer'] = "192.168.1.1" ;
-		$this->params['sDBUsername'] = "root" ;
-		$this->params['sDBPassword'] = "1" ;
-		$this->params['sDBName'] = "oc".rand(0,999) ;
-
-		// (新浪云平台)
-		if($this->params()->bool('sae-package'))
-		{
-			$this->params['sFileOcConfig'] = "'saestor://ocstor/oc.config.php'" ;
-			$this->params['sServicesFolder'] = 'saestor://ocstor/services' ;
-			$this->params['sPublicFilesFolder'] = 'saestor://ocstor/public/files' ;
-			$this->params['sPublicFileUrl'] = "http://<?php echo \$_SERVER['HTTP_APPNAME']?>-ocstor.stor.sinaapp.com/public/files" ;
-
-			$this->params['sDBServer'] = "<?php echo SAE_MYSQL_HOST_M ?>:<?php echo SAE_MYSQL_PORT ?>" ;
-			$this->params['sDBUsername'] = "<?php echo SAE_MYSQL_USER ?>" ;
-			$this->params['sDBPassword'] = "<?php echo SAE_MYSQL_PASS ?>" ;
-			$this->params['sDBName'] = "<?php echo SAE_MYSQL_DB ?>" ;
-			
-			// 生成 sae_app_wizard.xml
-			$this->packFileByTemplate(null,'sae_app_wizard.xml','development-toolkit:platform/sae_app_wizard.xml',$aDistributionZip) ;
-
-			$this->params['bCheckRootWritable'] = false ;
+			call_user_func($arrPlatformInfo['process-before-package'],$this,$aDistributionZip) ;
 		}
 		
 		// 生成文件安装程序并打包
 		$this->packFileByTemplate(null,'oc.init.php','development-toolkit:platform/oc.init.php',$aDistributionZip) ;
 		$this->packFileByTemplate('/setup','setup.php','development-toolkit:platform/setup.php',$aDistributionZip) ;
-		
+		$this->packFileByTemplate('/setup','setupCheckEnv.php','development-toolkit:platform/setupCheckEnv.php',$aDistributionZip) ;
+		$this->packFileByTemplate('/setup','setupInput.php','development-toolkit:platform/setupInput.php',$aDistributionZip) ;
+		$this->packFileByTemplate('/setup','setupInstall.php','development-toolkit:platform/setupInstall.php',$aDistributionZip) ;
+
+		// 打包后 的处理程序
+		if(!empty($arrPlatformInfo['process-after-package']))
+		{
+			call_user_func($arrPlatformInfo['after-before-package'],$this,$aDistributionZip) ;
+		}
 		
 		$this->createMessage(Message::success,"%s 安装程序制作完成 (<a href='%s'>下载</a>)",array($this->params['sDistributionTitle'],$aPackageFile->httpUrl())) ;
 		
-		Folder::createInstance('/local/d/project/otp/oc-setup')->deleteChild('*',true) ; ;
-		$aDistributionZip->extract('/local/d/project/otp/oc-setup/') ;
 		return ;
 	}
 	
-	private function packFileByTemplate($sPackageFolder,$sFileName,$sTemplate,PclZip $aZip)
+	public function packFileByTemplate($sPackageFolder,$sFileName,$sTemplate,PclZip $aZip)
 	{
 		$aStream = new OutputStreamBuffer() ;
 		UIFactory::singleton()->create()->display($sTemplate,$this->params(),$aStream) ;
@@ -200,7 +192,7 @@ class CreateDistribution extends ControlPanel
 		$aSetupTmp->delete() ;
 	}
 
-	private function packFolder($sFolderPath,$sPackageFolder,PclZip $aZip,$bRepo)
+	public function packFolder($sFolderPath,$sPackageFolder,PclZip $aZip,$bRepo)
 	{	
 		$sPath = null ;
 		foreach( explode('/',ltrim($sPackageFolder,'/')) as $sFolderName )
@@ -208,7 +200,7 @@ class CreateDistribution extends ControlPanel
 			$sPath.= $sFolderName . '/' ;
 			$aZip->add($sFolderPath,$sPath,$sFolderPath) ;
 		}
-			
+
 		$aFolder = new Folder($sFolderPath) ;
 		foreach($aIterator=$aFolder->iterator( FSIterator::FILE | FSIterator::FOLDER | FSIterator::RECURSIVE_SEARCH ) as $sPath)
 		{
@@ -223,7 +215,83 @@ class CreateDistribution extends ControlPanel
 				return ;
 			}
 		}
-
 	}
-		
+	
+	
+	static public $arrPlatforms = array(
+			
+			'standard' => array(
+				'title' => '标准安装包' ,	
+				'essential-extensions' => array('coresystem') ,
+
+				// 检查根目录的可写权限
+				'bCheckRootWritable' => true ,
+					
+				// oc.config.php 文件的位置
+				'sFileOcConfig' => "ROOT.'/oc.config.php'" ,
+					
+				// 安装程序上的默认输入
+				'installer-default-input' => array(
+						'sServicesFolder' => 'services' ,
+						'sPublicFilesFolder' => 'public/files' ,
+						'sPublicFileUrl' => "public/files" ,
+						'sDBServer' => "127.0.0.1" ,
+						'sDBUsername' => "root" ,
+						'sDBPassword' => "" ,
+						'sDBName' => "" ,
+				) ,
+			) ,
+			
+
+			'singlefile' => array(
+					'title' => '单文件安装程序' ,
+					'essential-extensions' => array('coresystem') ,
+			
+					// 检查根目录的可写权限
+					'bCheckRootWritable' => true ,
+					
+					// oc.config.php 文件的位置
+					'sFileOcConfig' => "ROOT.'/oc.config.php'" ,
+						
+					// 安装程序上的默认输入
+					'installer-default-input' => array(
+							'sServicesFolder' => 'services' ,
+							'sPublicFilesFolder' => 'public/files' ,
+							'sPublicFileUrl' => "public/files" ,
+							'sDBServer' => "127.0.0.1" ,
+							'sDBUsername' => "root" ,
+							'sDBPassword' => "" ,
+							'sDBName' => "" ,
+					) ,
+			) ,
+			
+
+
+			'debug' => array(
+					'title' => '调式' ,
+					'essential-extensions' => array('coresystem') ,
+					'bCheckRootWritable' => true ,
+					'sFileOcConfig' => "ROOT.'/oc.config.php'" ,
+					'installer-default-input' => array(
+							'sServicesFolder' => 'services' ,
+							'sPublicFilesFolder' => 'public/files' ,
+							'sPublicFileUrl' => "public/files" ,
+							'sDBServer' => "192.168.1.1" ,
+							'sDBUsername' => "root" ,
+							'sDBPassword' => "111111" ,
+							'sDBName' => "oc4" ,
+					) ,
+					'process-after-package' => array( __CLASS__, 'debugProcessAfterPackage' ) ,
+			) ,
+			
+
+				
+	) ;
+	
+	protected static function debugProcessAfterPackage(self $aDistributionMaker, PclZip $aPackage)
+	{
+		// 解压到 测试安装程序的目录内
+		Folder::createInstance('/local/d/project/otp/oc-setup')->deleteChild('*',true) ; ;
+		$aPackage->extract('/local/d/project/otp/oc-setup/') ;
+	}
 }
