@@ -34,14 +34,9 @@ if(false){
 
 define('setup_folder',dirname(__FILE__)) ;
 define('install_root',dirname(setup_folder)) ;
-$sFrameworkFolder = install_root.'/framework' ;
-$sPlatformFolder = install_root.'/platform' ;
-$sExtensionsFolder = install_root.'/extensions' ;
-$sServicesFolder = install_root.'/services' ;
-$sPublicFolder = install_root.'/public' ;
-$sPublicUrl = 'http://'.$_SERVER['HTTP_HOST']. dirname(dirname($_SERVER['SCRIPT_NAME'])) ;
-
-	
+define('ROOT',install_root) ;
+$sOcConfigFile = {=$sFileOcConfig} ;
+$arrExtensionFolders = {=var_export($arrExtensionFolders,true)} ;
 
 
 <foreach for="$arrLibClassCode" item="sSourceCode">
@@ -49,51 +44,70 @@ $sPublicUrl = 'http://'.$_SERVER['HTTP_HOST']. dirname(dirname($_SERVER['SCRIPT_
 </foreach>
 
 
-switch(@$_GET['action'])
+if( file_exists($sOcConfigFile) )
 {
+?>
 	
+	<div>
+		系统已经安装完毕，请尽快删除系统根目录下的 setup 目录，以消除安全隐患。
+	</div>
 	
-// ---------------------------------------------------------------------------------
-// 第一步 检查服务器环境 -----------------------------------------------------------------
-default:
-	<include file="development-toolkit:platform/setupCheckEnv.php" />
-	break ;
+<?php
+}
+else
+{
 
+	// 注册 SAE wrapper
+	stream_wrapper_unregister('saestor') ;
+	stream_wrapper_register('saestor','SaeStorageWrapperEx') ;
 	
-
-// -------------------------------------------------------------------------------
-// 第二步 确认协议 -----------------------------------------------------------------
-case 'licence' :
-	<include file="development-toolkit:platform/setupLicence.php" />
-	break ;
-
+	switch(@$_GET['action'])
+	{
+		
+		
+	// ---------------------------------------------------------------------------------
+	// 第一步 检查服务器环境 -----------------------------------------------------------------
+	default:
+		<include file="development-toolkit:platform/setupCheckEnv.php" />
+		break ;
+	
+		
+	
+	// -------------------------------------------------------------------------------
+	// 第二步 确认协议 -----------------------------------------------------------------
+	case 'licence' :
+		<include file="development-toolkit:platform/setupLicence.php" />
+		break ;
+	
+		
+		
+	// ---------------------------------------------------------------------------------
+	// 第三步 输入信息 -----------------------------------------------------------------
+	case 'input' :
+		<include file="development-toolkit:platform/setupInput.php" />
+		break ;
+	
+		
+		
+	// ---------------------------------------------------------------------------------
+	// 第四步 执行安装 -------------------------------------------------------------------
+	case 'install' :
+		<include file="development-toolkit:platform/setupInstall.php" />
+		break ;
+		
+		
+	}
 	
 	
-// ---------------------------------------------------------------------------------
-// 第三步 输入信息 -----------------------------------------------------------------
-case 'input' :
-	<include file="development-toolkit:platform/setupInput.php" />
-	break ;
-
 	
 	
-// ---------------------------------------------------------------------------------
-// 第四步 执行安装 -------------------------------------------------------------------
-case 'install' :
-	<include file="development-toolkit:platform/setupInstall.php" />
-	break ;
 	
+#################################################################################################################
 	
 }
 
-
-
-
-
-#################################################################################################################
 	echo '<!--' ;
 }
-
 ?>
 -->
 

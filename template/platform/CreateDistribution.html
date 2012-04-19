@@ -5,36 +5,30 @@
 
 <form method='post' action="?c=org.opencomb.development.toolkit.platform.CreateDistribution" >
 
-	<h2>发型版本信息</h2>
+	<h2>发行版本信息</h2>
 	<div>
-		产品标题：<input type="text" name="sDistributionTitle" value="蜂巢平台" />
+		产品标题：<input type="text" name="sDistributionTitle" value="蜂巢平台发行版" />
 	</div>
 	<div>
-		产品名称：<input type="text" name="sDistributionName" value="oc-platform" /> 建议：避免使用中文
+		产品名称：<input type="text" name="sDistributionName" value="oc-platform-distr" /> 建议：避免使用中文
 	</div>
 	<div>
 		版　　本：<input type="text" name="sDistributionVersion" value="1.0.0.0"  />
 	</div>
 
+	<br />
 	<h2>基础系统</h2>
 	<li style="width:600px">
 		JeCat框架(framework)
 		version: {= \org\jecat\framework\VERSION }
-		<label style="float:right">
-			<input type=checkbox name="framework-debug" value='1' />
-			使用开发版本（携带.git/.svn/.cvs 等版本库）
-		</label>
 	</li>
 	
 	<li style="width:600px">
 		蜂巢平台(OpenComb Platform)
 		version: {= \org\opencomb\platform\Platform::singleton()->version() }
-		<label style="float:right">
-			<input type=checkbox name="platform-debug" value='1' />
-			使用开发版本（携带.git/.svn/.cvs 等版本库）
-		</label>
 	</li>
 	
+	<br />
 	<h2>选择扩展</h2>
 	<script>
 	var mapExtensionDependences = {} ;
@@ -43,57 +37,40 @@
 	mapExtensionRevertDependences['{=$ext->name()}'] = {} ;
 	</foreach>
 	
-	function onClickExtension(sExtName,sType,wndInput)
+	function onClickExtension(sExtName,wndInput)
 	{
 		if(wndInput.checked)
 		{
-			// 翻转另一个打包版本
-			var mapRevertType = {
-					'debug': 'release'
-					, 'release': 'debug'
-			} ;
-			jquery('#chk-'+sExtName+'-'+mapRevertType[sType]).attr('checked',false) ;
-			
-
 			// 检查并自动选择依赖扩展
 			for(var idx in mapExtensionDependences[sExtName])
 			{
 				var sDepenExtName = mapExtensionDependences[sExtName][idx] ;
-				if( jquery('#chk-'+sDepenExtName+'-release').size()>0 )
+				if( jquery('#chk-'+sDepenExtName).size()>0 )
 				{
-					jquery('#chk-'+sDepenExtName+'-release').attr('checked',true) ;
+					jquery('#chk-'+sDepenExtName).attr('checked',true) ;
 					// 递归
-					onClickExtension(sDepenExtName,'release',jquery('#chk-'+sDepenExtName+'-release').get(0)) ;
-				}
-				else if( jquery('#chk-'+sDepenExtName+'-debug').size()>0 )
-				{
-					jquery('#chk-'+sDepenExtName+'-debug').attr('checked',true) ;
-					// 递归
-					onClickExtension(sDepenExtName,'debug',jquery('#chk-'+sDepenExtName+'-debug').get(0)) ;
-				}
-				else
-				{
-					alert('无法选择扩展'+sExtName+'，依赖的扩展'+sDepenExtName+'尚未打包') ;
-					wndInput.checked = false ;
-					return ;
+					onClickExtension(sDepenExtName,jquery('#chk-'+sDepenExtName).get(0)) ;
 				}
 			}
 		}
 		
 		else
 		{
+			// 禁止取消 coresystem
+			if( sExtName==='coresystem' )
+			{
+				wndInput.checked = true ;
+				alert('不能取消扩展 coresystem ') ;
+				return ;
+			}
+			
 			// 反向取消扩展
 			for(var sRevertDepenExtName in mapExtensionRevertDependences[sExtName])
 			{
-				if( jquery('#chk-'+sRevertDepenExtName+'-release').size()>0 )
+				if( jquery('#chk-'+sRevertDepenExtName).size()>0 )
 				{
-					jquery('#chk-'+sRevertDepenExtName+'-release').attr('checked',false) ;
-					onClickExtension(sDepenExtName,'release',jquery('#chk-'+sRevertDepenExtName+'-release').get(0)) ;
-				}
-				if( jquery('#chk-'+sRevertDepenExtName+'-debug').size()>0 )
-				{
-					jquery('#chk-'+sRevertDepenExtName+'-debug').attr('checked',false) ;
-					onClickExtension(sDepenExtName,'debug',jquery('#chk-'+sRevertDepenExtName+'-debug').get(0)) ;
+					jquery('#chk-'+sRevertDepenExtName).attr('checked',false) ;
+					onClickExtension(sDepenExtName,jquery('#chk-'+sRevertDepenExtName).get(0)) ;
 				}
 			}
 			
@@ -103,36 +80,12 @@
 	</script>
 	<foreach for='$arrExtension' item='ext'>
 	<li style="width:600px">
-		<span>
-			{=$ext->title()} ({=$ext->name()}:{=$ext->version()})
-		</span>
 		
-		<span style="float:right">
-			
-			<if '$arrPackageState[$ext->name()][0] or $arrPackageState[$ext->name()][1]' >
-			
-				<if '$arrPackageState[$ext->name()][0]' >
-					<label>
-						<input type='checkbox' id="chk-{=$ext->name()}-release" name='arrExtensions[{=$ext->name()}]' value='{=$arrPackageState[$ext->name()][0]->path()}' onclick="onClickExtension('{=$ext->name()}','release',this) ;" />
-						正式版本
-					</label>
-				</if>
-				
-				<if '$arrPackageState[$ext->name()][1]' >
-					<label>
-						<input type='checkbox' id="chk-{=$ext->name()}-debug" name='arrExtensions[{=$ext->name()}]' value='{=$arrPackageState[$ext->name()][1]->path()}' onclick="onClickExtension('{=$ext->name()}','debug',this) ;" />
-						开发版本
-					</label>
-				</if>
-			
-			<else />
-			
-				<a href="?c=org.opencomb.development.toolkit.extension.ExtensionPackages">扩展尚未打包</a>
-			
-			</if>
-			
-			
-		</span>
+		<label>
+			<input type='checkbox' id="chk-{=$ext->name()}" name='arrExtensions[{=$ext->name()}]' value='{=$ext->name()}' onclick="onClickExtension('{=$ext->name()}',this) ;" />
+			{=$ext->title()} ({=$ext->name()}:{=$ext->version()})
+		</label>
+		
 		<script>
 		mapExtensionDependences['{=$ext->name()}'] = [] ;
 		<foreach for="$ext->dependence()->iterator()" item="aRequire">
@@ -144,20 +97,30 @@
 		</script>
 	</li>
 	</foreach>
+	<script>
+	jquery('#chk-coresystem').attr('checked',true) ;
+	</script>
 
-	<div style='color:red'>若扩展尚未打包，则无法选择，请进入<a href='?c=org.opencomb.development.toolkit.extension.ExtensionPackages'>扩展打包</a>页面进行打包</div>
 
-	<label style="display:block">
-		<input type='checkbox' name='sae-package' value='1' />
-		新浪云计算平台(SAE)应用包		
-	</label>
-	
-	<label style="display:block">
-		<input type='checkbox' name='single-file-installer' value='1' />
-		单文件安装程序	
-	</label>
+	<br />
+	<h2>安装包选项</h2>
+	<div>
+		<label style="display:block">
+			<input type='checkbox' name='sae-package' value='1' />
+			新浪云计算平台(SAE)应用包		
+		</label>
 		
-	
+		<label style="display:block">
+			<input type='checkbox' name='single-file-installer' value='1' />
+			单文件安装程序	
+		</label>
+			
+		<label style="display:block">
+			<input type=checkbox name="debug-version" value='1' />
+			使用开发版本（携带.git/.svn/.cvs 等版本库）
+		</label>
+	</div>
+
 	<input type='submit' value='生成安装程序' class="coresystem-form-button" />
 	
 </form>

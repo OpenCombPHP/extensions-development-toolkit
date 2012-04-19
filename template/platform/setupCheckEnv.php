@@ -141,6 +141,7 @@ if($bMysql){
 	$sMysqlSuccess = "<em class='fail'>失败</em>";
 }
 
+<if $bCheckRootWritable>
 $bWritable = is_writable('.');
 if( false === $bWritable){
 	$bHasNext = false;
@@ -151,6 +152,7 @@ if($bWritable){
 }else{
 	$sWritableSuccess = "<em class='fail'>失败</em>";
 }
+</if>
 ?>
 
 <div class="stepbar">
@@ -187,6 +189,7 @@ if($bWritable){
 				</li>
 			</ul>
 		</li>
+		<if $bCheckRootWritable>
 		<li>
 			文件写入权限
 			<ul>
@@ -196,6 +199,7 @@ if($bWritable){
 				</li>
 			</ul>
 		</li>
+		</if>
 	</ul>
 	</div>
 	

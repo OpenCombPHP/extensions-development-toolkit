@@ -1,36 +1,47 @@
 
-$sFrameworkPackageFilename = '{=$sFrameworkPackageFilename}' ;
-$sPlatformPackageFilename = '{=$sPlatformPackageFilename}' ;
-$arrExtensionPackages = {=var_export($arrExtensionPackages,true)} ;
+$arrInstallFolders = array() ;
+foreach($_REQUEST['arrFolder'] as $const=>&$sPath)
+{
+	// 相对路径前面拼上 __DIR__
+	if( @$sPath[0]!=='/' and @$sPath[0]!=='\\' and strstr($sPath,'://')===false )
+	{
+		$arrInstallFolders[$const] = "ROOT.'/" . addslashes($sPath) . "'" ;
+		$sPath = ROOT.'/' . $sPath ;
+	}
+	else
+	{
+		$arrInstallFolders[$const] = "'" . addslashes($sPath) . "'" ;
+	}
+}
 
 
 $arrMessageQueue = array() ;
 function output($sMessage,$nType='success')
 {
-	global $arrMessageQueue ;
-	$arrMessageQueue[] = "<div class='msg-{$nType}'>{$sMessage}</div>" ;
+	//global $arrMessageQueue ;
+	//$arrMessageQueue[] = "<div class='msg-{$nType}'>{$sMessage}</div>" ;
+	echo "<div class='msg-{$nType}'>{$sMessage}</div>\r\n" ;
 }
 
-// 解压zip函数
-function unzip($sPackagePath,$sToFolder)
+function checkDbSetting()
 {
-	$aZip = new PclZip($sPackagePath) ;
-	return $aZip->extract($sToFolder)>0 ;
-}
-
-function extractFiles()
-{
-	global $sFrameworkFolder, $sPlatformFolder, $sFrameworkPackageFilename, $sPlatformPackageFilename ;
-
-	// 释放 jecat framework
-	foreach( array(
-		$sFrameworkPackageFilename => $sFrameworkFolder ,
-		$sPlatformPackageFilename => $sPlatformFolder ,
-	) as $sPackage=>$sFolder)
+	if( !mysql_connect($_REQUEST['dbAddress'],$_REQUEST['dbUsername'],$_REQUEST['dbPswd']) )
 	{
-		if( !unzip(setup_folder.'/packages/'.$sPackage,$sFolder) )
+		output('无法连接到数据库服务器，请返回检查数据库配置是否正确。','error') ;
+		return false ;
+	}
+	
+	if( !mysql_select_db($_REQUEST['dbName']) )
+	{
+		if( !mysql_query("CREATE DATABASE `{$_REQUEST['dbName']}`") )
 		{
+			output("数据库 {$_REQUEST['dbName']} 无效，并且无法自动创建。",'error') ;
 			return false ;
+		}
+		
+		else
+		{
+			output("创建数据库 {$_REQUEST['dbName']} 成功。",'success') ;
 		}
 	}
 	
@@ -39,8 +50,6 @@ function extractFiles()
 
 function setupSetting($sService,$sDbTablePrefix)
 {
-	global $sServicesFolder ;
-	
 	// 写入 setting -----------------------------
 	$name = $_REQUEST['websiteName'];
 	$arrSettings = array(
@@ -56,7 +65,7 @@ function setupSetting($sService,$sDbTablePrefix)
 	) ;
 	foreach($arrSettings as $sFile=>$arrValue)
 	{
-		$sItemPath = $sServicesFolder.'/'.$sService.'/setting/'.$sFile ;
+		$sItemPath = $_REQUEST['arrFolder']['SERVICES_FOLDER'].'/'.$sService.'/setting/'.$sFile ;
 		$sItemFolderPath = dirname($sItemPath) ;
 		if( !file_exists($sItemFolderPath) and !mkdir($sItemFolderPath,0775,true) )
 		{
@@ -73,7 +82,7 @@ function setupSetting($sService,$sDbTablePrefix)
 	}
 	
 	// 写入 services setting --------------------------
-	if( !file_put_contents($sServicesFolder.'/settings.inc.php','{='<?php'} return '.var_export(array(
+	if( !file_put_contents($_REQUEST['arrFolder']['SERVICES_FOLDER'].'/settings.inc.php','{='<?php'} return '.var_export(array(
 			'default' => array(
 				'domains' => array('*',$_REQUEST['websiteHost']) ,
 			) ,
@@ -82,26 +91,25 @@ function setupSetting($sService,$sDbTablePrefix)
 			) ,
 	),true).';') )
 	{
-		output("无法将配置写入文件：{$sServicesFolder}/settings.inc.php",'error') ;
+		output("无法将配置写入文件：{$_REQUEST['arrFolder']['SERVICES_FOLDER']}/settings.inc.php",'error') ;
 		return false ;
 	}
 	
 	// 写入 oc.config.php
-	if( !file_put_contents(install_root.'/oc.config.php',"{='<?php'}
-namespace org\opencomb\platform ;
-
-define('org\\opencomb\\platform\\ROOT',__DIR__) ;
-define('org\\opencomb\\platform\\PLATFORM_FOLDER',ROOT.'/platform') ;
-define('org\\opencomb\\platform\\EXTENSIONS_FOLDER',ROOT.'/extensions') ;
-define('org\\opencomb\\platform\\SERVICES_FOLDER',ROOT.'/services') ;
-define('org\\opencomb\\platform\\PUBLIC_UI_FOLDER',ROOT.'/public/ui') ;
-define('org\\opencomb\\platform\\PUBLIC_UI_URL','public/ui') ;
-define('org\\opencomb\\platform\\PUBLIC_FILES_FOLDER',ROOT.'/public/files') ;
-define('org\\opencomb\\platform\\PUBLIC_FILES_URL','public/files') ;
-
-") )
+	global $arrInstallFolders, $sOcConfigFile ;
+	
+	$sFolderConfig = "{='<?php'}\r\nnamespace org\opencomb\platform ;\r\n\r\n" ;
+	$sFolderConfig.= "define('org\\opencomb\\platform\\FRAMEWORK_FOLDER',ROOT.'/framework') ;\r\n" ;
+	$sFolderConfig.= "define('org\\opencomb\\platform\\PLATFORM_FOLDER',ROOT.'/platform') ;\r\n" ;
+	$sFolderConfig.= "define('org\\opencomb\\platform\\EXTENSIONS_FOLDER',ROOT.'/extensions') ;\r\n" ;
+	$sFolderConfig.= "define('org\\opencomb\\platform\\EXTENSIONS_URL','extensions') ;\r\n" ;
+	foreach($arrInstallFolders as $const=>&$sPath)
 	{
-		output("无法将配置写入文件：".install_root.'/oc.config.php','error') ;
+		$sFolderConfig.= "define('org\\opencomb\\platform\\{$const}',{$sPath}) ;\r\n" ;
+	}
+	if( !file_put_contents($sOcConfigFile,$sFolderConfig) )
+	{
+		output("无法将配置写入文件：".$sOcConfigFile,'error') ;
 		return false ;
 	}
 	
@@ -110,18 +118,10 @@ define('org\\opencomb\\platform\\PUBLIC_FILES_URL','public/files') ;
 
 function installExtensions()
 {
-	global $sExtensionsFolder, $arrExtensionPackages ;
-	foreach($arrExtensionPackages as $sExtFolder=>$sPackageName)
+	global $arrExtensionFolders ;
+	foreach($arrExtensionFolders as $sExtName=>$sExtFolder)
 	{
-		// 解压扩展
-		$sPackagePath = setup_folder.'/packages/'.$sPackageName ;
-		$sInstallFolder = $sExtensionsFolder.'/'.$sExtFolder ;
-		if( !unzip($sPackagePath,$sInstallFolder) )
-		{
-			output("无法将扩展包 {$sPackagePath} 解压到目录 {$sInstallFolder}") ;
-			return false ;
-		}
-
+		$sInstallFolder = install_root.'/'.$sExtFolder ;
 		if( !$aDomMetainfo = simplexml_load_file($sInstallFolder.'/metainfo.xml') )
 		{
 			output("无法读取扩展包 {$sPackagePath} 中的 metainfo.xml 文件") ;
@@ -174,32 +174,66 @@ function insertAdminUser()
 	$aDB = \org\jecat\framework\db\DB::singleton() ;
 	
 	// 管理员用户组
-	$arrSQL[] = "insert into `coresystem_group` (gid,name,lft,rgt) values (1,'系统管理员组',1,2)" ;
-	$arrSQL[] = "insert into `coresystem_purview` (type,id,extension,name) values ('group',1,'coresystem','PLATFORM_ADMIN')" ;
+	insertTableRow('coresystem_group',array(
+			'gid' => 1 ,
+			'name' => '系统管理员组' ,
+			'lft' => 1 ,
+			'rgt' => 2 ,
+	)) ;
+	insertTableRow('coresystem_purview',array(
+			'type' => 'group' ,
+			'id' => 1 ,
+			'extension' => 'coresystem' ,
+			'name' => 'PLATFORM_ADMIN' ,
+	)) ;
 
 	// 管理员帐号
-	$sUsername = addslashes($_REQUEST['adminName']) ;
-	$sPassword = md5( md5(md5($_REQUEST['adminName'])) . md5($_REQUEST['adminPswd']) ) ;
-	$nNow = time() ;
-	$sIp = $_SERVER['REMOTE_ADDR'] ;
-	$arrSQL[] = "insert into `coresystem_user` (uid,username,password,registerTime,registerIp) values (1,'{$sUsername}','{$sPassword}',{$nNow},'{$sIp}')" ;
-	$arrSQL[] = "insert into `coresystem_group_user_link` (uid,gid) values (1,1)" ;
+	insertTableRow('coresystem_group',array(
+			'uid' => 1 ,
+			'username' => $_REQUEST['adminName'] ,
+			'password' => md5( md5(md5($_REQUEST['adminName'])) . md5($_REQUEST['adminPswd']) ) ,
+			'registerTime' => time() ,
+			'registerIp' => $_SERVER['REMOTE_ADDR'] ,
+	)) ;
+	insertTableRow('coresystem_group_user_link',array(
+			'uid' => 1 ,
+			'gid' => 1 ,
+	)) ;
 	
-	foreach($arrSQL as $sSQL)
+	return true ;
+}
+function insertTableRow($sTable,$arrData)
+{
+	foreach($arrData as $sColumn=>&$value)
 	{
-		if(!$aDB->execute($sSQL))
+		if(is_string($value))
+		{
+			$value = "'" . addslashes($value) . "'" ;
+		}
+	}
+	$sSql = "insert into `{$sTable}` (" .implode(',',array_keys($arrData)) .') values (' . implode(',',$arrData). ") ;" ;
+
+	try{
+		if(!\org\jecat\framework\db\DB::singleton()->execute($sSql))
 		{
 			output('向数据库导入数据时遇到了错误:'.$sSQL,'error') ;
 			return false ;
 		}
+	}catch(\org\jecat\framework\db\ExecuteException $e){
+		if( $e->isDuplicate() )
+		{
+			output('写入数据时遇到重复数据:'.$sSql,'error') ;
+			return false ;
+		}
 	}
+	
 	return true ;
 }
 
 function install()
 {
-	// 解压文件
-	if( !extractFiles() )
+	// 检查数据库设置
+	if( !checkDbSetting() )
 	{
 		return false ;
 	}
@@ -234,9 +268,6 @@ function install()
 		return false ;
 	}
 	
-	// 从各个扩展 导入 public ui 目录
-	$aService->publicFolders()->importFromSourceFolders() ;
-	
 	// 禁止写入缓存
 	\org\opencomb\platform\service\ServiceSerializer::singleton()->clearSystemObjects() ;
 
@@ -248,9 +279,6 @@ function install()
 	
 	return true ;
 }
-
-
-$bInstallSuccess = install() ;
 ?>
 
 <div class="step3">
@@ -258,10 +286,7 @@ $bInstallSuccess = install() ;
 		
 		<div class="inner">
 			{='<?php'}
-			foreach($arrMessageQueue as $sMessage)
-			{
-				echo $sMessage, "\r\n" ;
-			}
+			$bInstallSuccess = install() ;
 			{='?>'}
 		</div>
 		
@@ -274,7 +299,7 @@ $bInstallSuccess = install() ;
 			<span>完成</span>
 		</h1>
 		
-		<a id="btnNext" href="/" class="step_btn">进入系统</a>
+		<a id="btnNext" href="../" class="step_btn">进入系统</a>
 		
 		{='<?php'}
 		}

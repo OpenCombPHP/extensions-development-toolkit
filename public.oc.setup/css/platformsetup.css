@@ -116,7 +116,7 @@ a:hover.step_btn{ background-position:0 -30px; color:#fff;text-shadow:0 1px 1px 
 .step2 table th{ font-weight:bold; width:100px; padding-top:2px}
 .step2 table tr{ vertical-align:top}
 .step2 table td{width:240px; padding-bottom:10px;}
-.step2 .tit{ text-align:right; width:100px;padding-right:10px; padding-top:2px;}
+.step2 .tit{ text-align:right; width:150px;padding-right:10px; padding-top:2px;}
 .in{ height:24px; width:220px; border:1px solid #ccc; border-radius:3px; color:#333; font-size:12px;padding:0 2px;}
 .in:focus{border:1px solid #3ED9FF; background:#F4FEFF; color:#0CF}
 .check_right{background:url(../images/mark1.png) no-repeat center; width:24px; height:24px;}
@@ -143,3 +143,5 @@ a:hover.step_btn{ background-position:0 -30px; color:#fff;text-shadow:0 1px 1px 
 .xyinner a:hover{color:#f90}
 .xy_check{ width:816px; margin:0 auto; color:#333; font-weight:bold}
 .xy_check input{ margin-right:4px; vertical-align:-2px;}
+
+.trFolder { display:none }

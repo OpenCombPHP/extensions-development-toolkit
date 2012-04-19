@@ -50,23 +50,8 @@ class CreateDistribution extends ControlPanel
 			return ;
 		}
 		
-
-		// extension list
-		$arrExtension = ExtensionManager::singleton()->metainfoIterator() ;
-		
-		// package state
-		$arrPackageState = array( );
-		$aMetainfoIterator = ExtensionManager::singleton()->metainfoIterator() ;
-		foreach($aMetainfoIterator as $aMetainfo)
-		{
-			$sExtName = $aMetainfo->name();
-			$arrPackageState[$sExtName][0] = ExtensionPackages::getPackagedFSO($sExtName,$aMetainfo->version(),0,0) ;
-			$arrPackageState[$sExtName][1] = ExtensionPackages::getPackagedFSO($sExtName,$aMetainfo->version(),1,0) ;			
-		}
-		
 		// template
-		$this->view->variables()->set('arrExtension',$arrExtension);
-		$this->view->variables()->set('arrPackageState',$arrPackageState);
+		$this->view->variables()->set('arrExtension',ExtensionManager::singleton()->metainfoIterator());
 	}
 	
 	protected function actionSubmit()
@@ -74,8 +59,16 @@ class CreateDistribution extends ControlPanel
 		$sDistrVersion = $this->params()->get('sDistributionVersion') ;
 		$sDistrName = $this->params()->get('sDistributionName') ;
 		
+		$bIncludeRepos = $this->params->bool("debug-version") ;
+		
 		// 创建压缩包		
-		$sDistributionZipFilename = $sDistrName.'-'.$sDistrVersion.'.zip' ;
+		$sDistributionZipFilename = $sDistrName.'-'.$sDistrVersion ;
+		if($this->params()->bool('sae-package'))
+		{
+			$sDistributionZipFilename.= '-sae' ;
+		}
+		$sDistributionZipFilename.= '.zip' ;
+		
 		$aDistributionFolder = Extension::flyweight('development-toolkit')->filesFolder()->findFolder('distributions',Folder::FIND_AUTO_CREATE) ; 
 		$aPackageFile = $aDistributionFolder->findFile($sDistributionZipFilename,Folder::FIND_AUTO_CREATE_OBJECT) ;
 		$sPackagePath = $aPackageFile->path() ;
@@ -85,26 +78,8 @@ class CreateDistribution extends ControlPanel
 		}
 		$aDistributionZip = new PclZip($sPackagePath) ;
 		
-		// 打包 framework
-		$sJcPackageName = 'jecat-framework-'.jc\VERSION.($this->params->bool("framework-debug")?'-repo':'').'.zip' ;
-		$sJcPackagePath = Extension::flyweight('development-toolkit')->filesFolder()->path() . '/extensionPackages/'.$sJcPackageName ;
-		$aZip = $this->packageFolder( $sJcPackagePath, jc\PATH, $this->params->bool("framework-debug") ) ;
-		$aDistributionZip->add($sJcPackagePath,'/setup/packages/',dirname($sJcPackagePath)) ;
-		$this->params['sFrameworkPackageFilename'] = $sJcPackageName ;
-		
-		// 打包 opencomb
-		$sOcPackageName = 'opencomb-platform-'.Platform::singleton()->version(true).($this->params->bool("framework-debug")?'-repo':'').'.zip' ;
-		$sOcPakcagePath = Extension::flyweight('development-toolkit')->filesFolder()->path() . '/extensionPackages/' . $sOcPackageName ; 
-		$aZip = $this->packageFolder( $sOcPakcagePath, \org\opencomb\platform\PLATFORM_FOLDER, $this->params->bool("framework-debug") ) ;
-		$aDistributionZip->add($sOcPakcagePath,'/setup/packages/',dirname($sOcPakcagePath)) ;
-		$this->params['sPlatformPackageFilename'] = $sOcPackageName ;
-		
 		// 打包扩展
-		if(!$this->params['arrExtensions'])
-		{
-			$this->params['arrExtensions'] = array() ;
-		}
-		$arrExtensionPackages = $arrLicenceList = array() ;
+		$arrExtensionFolders = $arrLicenceList = array() ;
 		foreach($this->params['arrExtensions'] as $sExtName=>$sExtPackagePath) 
 		{
 			$aExtMetainfo = ExtensionManager::singleton()->extensionMetainfo($sExtName) ;
@@ -122,18 +97,18 @@ class CreateDistribution extends ControlPanel
 			}
 			
 			// 安装包
-			$aDistributionZip->add($sExtPackagePath,'setup/packages/',dirname($sExtPackagePath)) ;
-			$arrExtensionPackages[$sExtName.'/'.$aExtMetainfo->version()] = basename($sExtPackagePath) ;
+			$sSubPath = 'extensions/'.$sExtName.'/'.$aExtMetainfo->version() ;
+			$this->packFolder($aExtMetainfo->installPath(),$sSubPath,$aDistributionZip,$bIncludeRepos) ;
+			$arrExtensionFolders[$sExtName] = $sSubPath ;
 		}
-		$this->params['arrExtensionPackages'] = $arrExtensionPackages ;
+		$this->params['arrExtensionFolders'] = $arrExtensionFolders ;
 		$this->params['arrLicenceList'] = $arrLicenceList ;
-			
-		// 打包常规文件
+
+		// 打包系统文件
 		$sPlatformRoot = Platform::singleton()->installFolder(true) ;
-		foreach( array('index.php','oc.init.php') as $sFileSubpath )
-		{
-			$aDistributionZip->add($sPlatformRoot.'/'.$sFileSubpath,PCLZIP_OPT_REMOVE_PATH,$sPlatformRoot) ;
-		}
+		$aDistributionZip->add($sPlatformRoot.'/index.php',PCLZIP_OPT_REMOVE_PATH,$sPlatformRoot) ;
+		$this->packFolder($sPlatformRoot.'/framework','framework',$aDistributionZip,$bIncludeRepos) ;
+		$this->packFolder($sPlatformRoot.'/platform','platform',$aDistributionZip,$bIncludeRepos) ;
 		
 		// 打包 setup ui fiels
 		foreach(Service::singleton()->publicFolders()->folderIterator('development-toolkit.oc.setup') as $aFolder)
@@ -151,12 +126,16 @@ class CreateDistribution extends ControlPanel
 		}
 		
 		// 打包安装时所需的工具类
+		$arrLibClasses = array() ;
 		$arrLibClassCode = array() ;
-		foreach(array("net\\phpconcept\\pclzip\\PclZip") as $sClass)
+		if($this->params()->bool('sae-package'))
+		{
+			$arrLibClasses[] = "org\\jecat\\framework\\fs\\wrapper\\SaeStorageWrapperEx" ;
+		}
+		foreach($arrLibClasses as $sClass)
 		{
 			$sSourceCode = file_get_contents( \org\jecat\framework\lang\oop\ClassLoader::singleton()->searchClass(
-					"net\\phpconcept\\pclzip\\PclZip"
-					,\org\jecat\framework\lang\oop\Package::nocompiled
+					$sClass, \org\jecat\framework\lang\oop\Package::nocompiled
 			) ) ;
 			$sSourceCode = str_replace('<?php','',$sSourceCode) ;
 			$sSourceCode = str_replace('<?','',$sSourceCode) ;
@@ -166,33 +145,70 @@ class CreateDistribution extends ControlPanel
 		}
 		$this->params['arrLibClassCode'] = $arrLibClassCode ;
 		
-		// 生成文件安装程序并打包
-		$aStream = new OutputStreamBuffer() ;
-		UIFactory::singleton()->create()->display('development-toolkit:platform/setup.php',$this->params(),$aStream) ;
-		$aSetupTmp = Extension::flyweight('development-toolkit')->tmpFolder()->createChildFile('setup.php') ;
-		$aSetupTmp->openWriter()->write($aStream) ;
+		$this->params['bCheckRootWritable'] = true ;
 		
-		$aDistributionZip->add($aSetupTmp->path(),'/setup',$aSetupTmp->dirPath()) ;
-		$aSetupTmp->delete() ;
+		// 安装路径
+		$this->params['sFileOcConfig'] = "ROOT.'/oc.config.php'" ;
+		$this->params['sServicesFolder'] = 'services' ;
+		$this->params['sPublicFilesFolder'] = 'public/files' ;
+		$this->params['sPublicFileUrl'] = 'public/files' ;
+		
+		$this->params['sDBServer'] = "192.168.1.1" ;
+		$this->params['sDBUsername'] = "root" ;
+		$this->params['sDBPassword'] = "1" ;
+		$this->params['sDBName'] = "oc".rand(0,999) ;
+
+		// (新浪云平台)
+		if($this->params()->bool('sae-package'))
+		{
+			$this->params['sFileOcConfig'] = "'saestor://ocstor/oc.config.php'" ;
+			$this->params['sServicesFolder'] = 'saestor://ocstor/services' ;
+			$this->params['sPublicFilesFolder'] = 'saestor://ocstor/public/files' ;
+			$this->params['sPublicFileUrl'] = "http://<?php echo \$_SERVER['HTTP_APPNAME']?>-ocstor.stor.sinaapp.com/public/files" ;
+
+			$this->params['sDBServer'] = "<?php echo SAE_MYSQL_HOST_M ?>:<?php echo SAE_MYSQL_PORT ?>" ;
+			$this->params['sDBUsername'] = "<?php echo SAE_MYSQL_USER ?>" ;
+			$this->params['sDBPassword'] = "<?php echo SAE_MYSQL_PASS ?>" ;
+			$this->params['sDBName'] = "<?php echo SAE_MYSQL_DB ?>" ;
+			
+			// 生成 sae_app_wizard.xml
+			$this->packFileByTemplate(null,'sae_app_wizard.xml','development-toolkit:platform/sae_app_wizard.xml',$aDistributionZip) ;
+
+			$this->params['bCheckRootWritable'] = false ;
+		}
+		
+		// 生成文件安装程序并打包
+		$this->packFileByTemplate(null,'oc.init.php','development-toolkit:platform/oc.init.php',$aDistributionZip) ;
+		$this->packFileByTemplate('/setup','setup.php','development-toolkit:platform/setup.php',$aDistributionZip) ;
 		
 		
 		$this->createMessage(Message::success,"%s 安装程序制作完成 (<a href='%s'>下载</a>)",array($this->params['sDistributionTitle'],$aPackageFile->httpUrl())) ;
 		
-		//Folder::createInstance('/local/d/project/otp/oc-setup')->deleteChild('*',true) ; ;
-		//$aDistributionZip->extract('/local/d/project/otp/oc-setup/') ;
+		Folder::createInstance('/local/d/project/otp/oc-setup')->deleteChild('*',true) ; ;
+		$aDistributionZip->extract('/local/d/project/otp/oc-setup/') ;
 		return ;
 	}
 	
-	private function packageFolder($sZipPath,$sFolderPath,$bRepo)
+	private function packFileByTemplate($sPackageFolder,$sFileName,$sTemplate,PclZip $aZip)
 	{
-		if( file_exists($sZipPath) )
+		$aStream = new OutputStreamBuffer() ;
+		UIFactory::singleton()->create()->display($sTemplate,$this->params(),$aStream) ;
+		$aSetupTmp = Extension::flyweight('development-toolkit')->tmpFolder()->createChildFile($sFileName) ;
+		$aSetupTmp->openWriter()->write($aStream) ;
+
+		$aZip->add($aSetupTmp->path(),$sPackageFolder,$aSetupTmp->dirPath()) ;
+		$aSetupTmp->delete() ;
+	}
+
+	private function packFolder($sFolderPath,$sPackageFolder,PclZip $aZip,$bRepo)
+	{	
+		$sPath = null ;
+		foreach( explode('/',ltrim($sPackageFolder,'/')) as $sFolderName )
 		{
-			unlink($sZipPath) ;
+			$sPath.= $sFolderName . '/' ;
+			$aZip->add($sFolderPath,$sPath,$sFolderPath) ;
 		}
-		
-		$aZip = new PclZip($sZipPath);
-		
-		
+			
 		$aFolder = new Folder($sFolderPath) ;
 		foreach($aIterator=$aFolder->iterator( FSIterator::FILE | FSIterator::FOLDER | FSIterator::RECURSIVE_SEARCH ) as $sPath)
 		{
@@ -201,12 +217,13 @@ class CreateDistribution extends ControlPanel
 				continue;
 			}
 			$sLocalPath = $aFolder->path().'/'.$sPath;
-			if($aZip->add($sLocalPath,PCLZIP_OPT_REMOVE_PATH,$aFolder->path())===0)
+			if($aZip->add($sLocalPath,$sPackageFolder,$aFolder->path())===0)
 			{
 				$this->extensionPackages->createMessage(Message::error,'打包文件时出错:%s',$sPath);
 				return ;
 			}
 		}
+
 	}
-	
+		
 }

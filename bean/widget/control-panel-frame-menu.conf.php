@@ -7,7 +7,7 @@ return array(
 		// items
 		'menu' => 1,
 		'item:extension' => array(
-			'title' => '扩展' ,
+			'title' => '发布' ,
 			'link' => '?c=org.opencomb.development.toolkit.extension.ExtensionPackages' ,
 			
 			// items
@@ -22,14 +22,8 @@ return array(
 					'link' => '?c=org.opencomb.development.toolkit.extension.ExtensionPackages' ,
 					'query' => 'c=org.opencomb.development.toolkit.extension.ExtensionPackages' ,
 			) ,
-		),
-		'item:platform' => array(
-			'title' => '平台' ,
-			'link' => '?c=org.opencomb.development.toolkit.platform.createpackage.SelectItem' ,
-			'query' => 'c=org.opencomb.development.toolkit.platform.createpackage.SelectItem' ,
-			'menu' => 1 ,
 			'item:create-package' => array(
-				'title' => '二次发布' ,
+				'title' => '制作发行版本' ,
 				'link' => '?c=org.opencomb.development.toolkit.platform.CreateDistribution' ,
 				'query' => array(
 						'c=org.opencomb.development.toolkit.platform.CreateDistribution' ,
@@ -57,7 +51,7 @@ return array(
 					'query' => 'c=org.opencomb.development.toolkit.compile.AOPManager' ,
 			) ,
 			'item:codeTidy' => array(
-					'title' => '源代码清理工具' ,
+					'title' => '源代码格式化' ,
 					'link' => '?c=org.opencomb.development.toolkit.compile.CodeTidyView' ,
 					'query' => 'c=org.opencomb.development.toolkit.compile.CodeTidyView' ,
 			),
