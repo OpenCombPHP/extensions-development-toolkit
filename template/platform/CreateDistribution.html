@@ -107,7 +107,7 @@
 	<div>
 		<foreach for="$arrPlatforms" item="arrPlatformInfo" key="sPlatformName" idx='nPlatformIdx'>
 			<label style="display:block">
-				<input type='radio' name='platform' value='{=$sPlatformName}' {#? if($nPlatformIdx){ #} checked {#? } #}/>
+				<input type='radio' name='platform' value='{=$sPlatformName}' {#? if($nPlatformIdx===0){ #} checked {#? } #}/>
 				{=$arrPlatformInfo['title']}
 			</label>
 		</foreach>

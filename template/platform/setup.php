@@ -39,12 +39,7 @@ $sOcConfigFile = {=$sFileOcConfig} ;
 $arrExtensionFolders = {=var_export($arrExtensionFolders,true)} ;
 
 
-<foreach for="$arrLibClasses" item="sClassFilename">
-include_once setup_folder.'/lib/{=$sClassFilename}' ;
-</foreach>
-
-
-{= isset($arrPlatformInfo['arrInitCodes'])? $arrPlatformInfo['arrInitCodes']: '' }
+{= isset($arrPlatformInfo['sSetupCodes'])? $arrPlatformInfo['sSetupCodes']: '' }
 
 
 if( file_exists($sOcConfigFile) )
@@ -65,25 +60,25 @@ else
 	// ---------------------------------------------------------------------------------
 	// 第一步 检查服务器环境 -----------------------------------------------------------------
 	default:
-		include_once setup_folder.'/lib/setupCheckEnv.php' ;
+		include_once setup_folder.'/setupCheckEnv.php' ;
 		break ;
 		
 	// -------------------------------------------------------------------------------
 	// 第二步 确认协议 -----------------------------------------------------------------
 	case 'licence' :
-		include_once setup_folder.'/lib/setupLicence.php' ;
+		include_once setup_folder.'/setupLicence.php' ;
 		break ;
 		
 	// ---------------------------------------------------------------------------------
 	// 第三步 输入信息 -----------------------------------------------------------------
 	case 'input' :
-		include_once setup_folder.'/lib/setupInput.php' ;
+		include_once setup_folder.'/setupInput.php' ;
 		break ;
 	
 	// ---------------------------------------------------------------------------------
 	// 第四步 执行安装 -------------------------------------------------------------------
 	case 'install' :
-		include_once setup_folder.'/lib/setupInstall.php' ;
+		include_once setup_folder.'/setupInstall.php' ;
 		break ;
 		
 		

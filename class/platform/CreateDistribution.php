@@ -144,18 +144,6 @@ class CreateDistribution extends ControlPanel
 		$this->params['bCheckRootWritable'] = $arrPlatformInfo['bCheckRootWritable'] ;
 		$this->params['sFileOcConfig'] = $arrPlatformInfo['sFileOcConfig'] ;
 		
-		// 打包一些工具类
-		$arrLibClasses = array() ;
-		if( !empty($arrPlatformInfo['arrLibClasses']) )
-		{
-			foreach($arrPlatformInfo['arrLibClasses'] as $sClass)
-			{
-				$sClassFile = ClassLoader::singleton()->searchClass( $sClass, Package::nocompiled ) ;
-				$aDistributionZip->add($sClassFile,'/setup/lib',dirname($sClassFile)) ;
-				$arrLibClasses[] = str_replace('\\','.',$sClass).'.php' ;
-			}
-		}
-		$this->params['arrLibClasses'] = $arrLibClasses ;
 
 		// 打包前 的处理程序
 		if(!empty($arrPlatformInfo['process-before-package']))
@@ -167,13 +155,14 @@ class CreateDistribution extends ControlPanel
 		$this->packFileByTemplate(null,'oc.init.php','development-toolkit:platform/oc.init.php',$aDistributionZip) ;
 		$this->packFileByTemplate('/setup','setup.php','development-toolkit:platform/setup.php',$aDistributionZip) ;
 		$this->packFileByTemplate('/setup','setupCheckEnv.php','development-toolkit:platform/setupCheckEnv.php',$aDistributionZip) ;
+		$this->packFileByTemplate('/setup','setupLicence.php','development-toolkit:platform/setupLicence.php',$aDistributionZip) ;
 		$this->packFileByTemplate('/setup','setupInput.php','development-toolkit:platform/setupInput.php',$aDistributionZip) ;
 		$this->packFileByTemplate('/setup','setupInstall.php','development-toolkit:platform/setupInstall.php',$aDistributionZip) ;
 
 		// 打包后 的处理程序
 		if(!empty($arrPlatformInfo['process-after-package']))
 		{
-			call_user_func($arrPlatformInfo['after-before-package'],$this,$aDistributionZip) ;
+			call_user_func($arrPlatformInfo['process-after-package'],$this,$aDistributionZip) ;
 		}
 		
 		$this->createMessage(Message::success,"%s 安装程序制作完成 (<a href='%s'>下载</a>)",array($this->params['sDistributionTitle'],$aPackageFile->httpUrl())) ;
@@ -232,8 +221,8 @@ class CreateDistribution extends ControlPanel
 					
 				// 安装程序上的默认输入
 				'installer-default-input' => array(
-						'sServicesFolder' => 'services' ,
-						'sPublicFilesFolder' => 'public/files' ,
+						'sServicesFolder' => "ROOT.'/services'" ,
+						'sPublicFilesFolder' => "ROOT.'/public/files'" ,
 						'sPublicFileUrl' => "public/files" ,
 						'sDBServer' => "127.0.0.1" ,
 						'sDBUsername' => "root" ,
@@ -255,8 +244,8 @@ class CreateDistribution extends ControlPanel
 						
 					// 安装程序上的默认输入
 					'installer-default-input' => array(
-							'sServicesFolder' => 'services' ,
-							'sPublicFilesFolder' => 'public/files' ,
+							'sServicesFolder' => "ROOT.'/services'" ,
+							'sPublicFilesFolder' => "ROOT.'/public/files'" ,
 							'sPublicFileUrl' => "public/files" ,
 							'sDBServer' => "127.0.0.1" ,
 							'sDBUsername' => "root" ,
@@ -273,8 +262,8 @@ class CreateDistribution extends ControlPanel
 					'bCheckRootWritable' => true ,
 					'sFileOcConfig' => "ROOT.'/oc.config.php'" ,
 					'installer-default-input' => array(
-							'sServicesFolder' => 'services' ,
-							'sPublicFilesFolder' => 'public/files' ,
+							'sServicesFolder' => "ROOT.'/services'" ,
+							'sPublicFilesFolder' => "ROOT.'/public/files'" ,
 							'sPublicFileUrl' => "public/files" ,
 							'sDBServer' => "192.168.1.1" ,
 							'sDBUsername' => "root" ,
@@ -288,7 +277,7 @@ class CreateDistribution extends ControlPanel
 				
 	) ;
 	
-	protected static function debugProcessAfterPackage(self $aDistributionMaker, PclZip $aPackage)
+	public static function debugProcessAfterPackage(self $aDistributionMaker, PclZip $aPackage)
 	{
 		// 解压到 测试安装程序的目录内
 		Folder::createInstance('/local/d/project/otp/oc-setup')->deleteChild('*',true) ; ;

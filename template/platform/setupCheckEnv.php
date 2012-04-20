@@ -1,3 +1,4 @@
+<?php 
 /**
  * @retval -1 , 0 , 1
  */
@@ -70,27 +71,33 @@ $arrPhpDep = $arrDependence['language']['php'] ;
 $arrPhpRequire = array();
 $sPhpVersion = PHP_MAJOR_VERSION.'.'.PHP_MINOR_VERSION.'.'.PHP_RELEASE_VERSION;
 $bPhpSuccess = true;
-foreach($arrPhpDep as $sPhpDep){
-	if(false === bothSideRequire($sPhpVersion,$sPhpDep) ) {
-		$bPhpSuccess = false;
-		$bHasNext = false;
-		break;
+if(!empty($arrPhpDep))
+{
+	foreach($arrPhpDep as $sPhpDep){
+		if(false === bothSideRequire($sPhpVersion,$sPhpDep) ) {
+			$bPhpSuccess = false;
+			$bHasNext = false;
+			break;
+		}
 	}
 }
 // language module
 $arrLangMods = $arrDependence['language_module'] ;
-foreach($arrLangMods as $name => &$arrLangMod){
-	$arrLangMod['success'] = true;
-	$sVersion = phpversion($name);
-	$arrLangMod['version'] = $sVersion ;
-	foreach($arrLangMod as $key => $sRequire){
-		if($key === 'success' or $key === 'version' ){
-			continue;
-		}
-		if( false === bothSideRequire($sVersion,$sRequire)){
-			$arrLangMod['success'] = false;
-			$bHasNext = false;
-			break;
+if(!empty($arrLangMods))
+{
+	foreach($arrLangMods as $name => &$arrLangMod){
+		$arrLangMod['success'] = true;
+		$sVersion = phpversion($name);
+		$arrLangMod['version'] = $sVersion ;
+		foreach($arrLangMod as $key => $sRequire){
+			if($key === 'success' or $key === 'version' ){
+				continue;
+			}
+			if( false === bothSideRequire($sVersion,$sRequire)){
+				$arrLangMod['success'] = false;
+				$bHasNext = false;
+				break;
+			}
 		}
 	}
 }
@@ -105,20 +112,23 @@ if($bPhpSuccess){
 }
 
 $sLangMods = '';
-foreach($arrLangMods as $name => $arrLangMod){
-	$sLangModVersion = $arrLangMod['version'];
-	$sLangModSuccess = '';
-	if($arrLangMod['success']){
-		$sLangModSuccess = "<em class='succeed'>通过</em>";
-	}else{
-		$sLangModSuccess = "<em class='fail'>失败</em>";
-		$bHasNext = false;
-	}
-	$sLangMods .= <<<LANGMODS
-			<li>$sLangModSuccess
-				$name 。版本：$sLangModVersion 。
-			</li>
+if(!empty($sLangMods))
+{
+	foreach($arrLangMods as $name => $arrLangMod){
+		$sLangModVersion = $arrLangMod['version'];
+		$sLangModSuccess = '';
+		if($arrLangMod['success']){
+			$sLangModSuccess = "<em class='succeed'>通过</em>";
+		}else{
+			$sLangModSuccess = "<em class='fail'>失败</em>";
+			$bHasNext = false;
+		}
+		$sLangMods .= <<<LANGMODS
+				<li>$sLangModSuccess
+					$name 。版本：$sLangModVersion 。
+				</li>
 LANGMODS;
+	}
 }
 
 $arrMysqlMod = array(
@@ -207,5 +217,3 @@ if($bWritable){
 	<a id="btnNext" href="setup.php?action=licence" class="step_btn">下一步</a>
 	{='<?php'} } {='?>'}
 </div>
-
-<?php

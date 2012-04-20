@@ -1,4 +1,3 @@
-?>
 <script type="text/javascript">
 function checkInput(input)
 {
@@ -152,46 +151,8 @@ jQuery(function(){
 					<td><div class="checkinput"></div></td>
 				</tr>
 				
-				<tr>
-					<th>安装路径</th>
-					<td colspan="2">
-						<a href="javascript:void(0)" onclick="$('.trFolder').toggle()">配置系统的安装目录</a>
-					</td>
-					<td></td>
-				</tr>
-				<tr class="trFolder">
-					<th></th>
-					<td class="tit" style="text-align: left;">services</td>
-					<td>
-						<input name="arrFolder[SERVICES_FOLDER]" class="in" value="{=$sServicesFolder}" />
-					</td>
-					<td><div class="checkinput"></div></td>
-				</tr>
-				<tr class="trFolder">
-					<th></th>
-					<td class="tit" style="text-align: left;">public/files</td>
-					<td>
-						<input name="arrFolder[PUBLIC_FILES_FOLDER]" class="in" value="{=$sPublicFilesFolder}" />
-					</td>
-					<td><div class="checkinput"></div></td>
-				</tr>
-				<tr class="trFolder">
-					<th></th>
-					<td class="tit" style="text-align: left;">public/files url</td>
-					<td>
-						<input name="arrFolder[PUBLIC_FILES_URL]" class="in" value="{=$sPublicFileUrl}" />
-					</td>
-					<td><div class="checkinput"></div></td>
-				</tr>
-				<tr class="trFolder">
-					<th></th>
-					<td colspan="3">
-						可以使用绝对路径，相对系统根目录路径，以及带协议的路径格式（例如 file:///some/where）
-					</td>
-				</tr>
 			</tbody>
 		</table>
 		<a id="btnNext" href="#" class="step_btn" onclick="next_step()">下一步</a>
 	</form>
 </div>
-<?

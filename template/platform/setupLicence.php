@@ -1,5 +1,3 @@
-?>
-	
 <div class="stepbar">
 	<ul>
 		<li>1. 检查运行环境</li>
@@ -52,4 +50,3 @@
 	<a id="btnNext" href="setup.php?action=input" class="step_btn">下一步</a>
 
 </div>
-<?php

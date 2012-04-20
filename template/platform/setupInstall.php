@@ -1,18 +1,4 @@
-
-$arrInstallFolders = array() ;
-foreach($_REQUEST['arrFolder'] as $const=>&$sPath)
-{
-	// 相对路径前面拼上 __DIR__
-	if( @$sPath[0]!=='/' and @$sPath[0]!=='\\' and strstr($sPath,'://')===false )
-	{
-		$arrInstallFolders[$const] = "ROOT.'/" . addslashes($sPath) . "'" ;
-		$sPath = ROOT.'/' . $sPath ;
-	}
-	else
-	{
-		$arrInstallFolders[$const] = "'" . addslashes($sPath) . "'" ;
-	}
-}
+<?php 
 
 
 $arrMessageQueue = array() ;
@@ -28,6 +14,7 @@ function checkDbSetting()
 	if( !mysql_connect($_REQUEST['dbAddress'],$_REQUEST['dbUsername'],$_REQUEST['dbPswd']) )
 	{
 		output('无法连接到数据库服务器，请返回检查数据库配置是否正确。','error') ;
+		output(mysql_error(),'error') ;
 		return false ;
 	}
 	
@@ -36,6 +23,7 @@ function checkDbSetting()
 		if( !mysql_query("CREATE DATABASE `{$_REQUEST['dbName']}`") )
 		{
 			output("数据库 {$_REQUEST['dbName']} 无效，并且无法自动创建。",'error') ;
+			output(mysql_error(),'error') ;
 			return false ;
 		}
 		
@@ -82,34 +70,17 @@ function setupSetting($sService,$sDbTablePrefix)
 	}
 	
 	// 写入 services setting --------------------------
-	if( !file_put_contents($_REQUEST['arrFolder']['SERVICES_FOLDER'].'/settings.inc.php','{='<?php'} return '.var_export(array(
+	$sServiceSetting = '{='<?php'} return '.var_export(array(
 			'default' => array(
-				'domains' => array('*',$_REQUEST['websiteHost']) ,
+					'domains' => array('*',$_REQUEST['websiteHost']) ,
 			) ,
 			'safemode' => array(
-				'domains' => array('safemode') ,
+					'domains' => array('safemode') ,
 			) ,
-	),true).';') )
+	),true).';' ;
+	if( !file_put_contents($_REQUEST['arrFolder']['SERVICES_FOLDER'].'/settings.inc.php',$sServiceSetting) )
 	{
 		output("无法将配置写入文件：{$_REQUEST['arrFolder']['SERVICES_FOLDER']}/settings.inc.php",'error') ;
-		return false ;
-	}
-	
-	// 写入 oc.config.php
-	global $arrInstallFolders, $sOcConfigFile ;
-	
-	$sFolderConfig = "{='<?php'}\r\nnamespace org\opencomb\platform ;\r\n\r\n" ;
-	$sFolderConfig.= "define('org\\opencomb\\platform\\FRAMEWORK_FOLDER',ROOT.'/framework') ;\r\n" ;
-	$sFolderConfig.= "define('org\\opencomb\\platform\\PLATFORM_FOLDER',ROOT.'/platform') ;\r\n" ;
-	$sFolderConfig.= "define('org\\opencomb\\platform\\EXTENSIONS_FOLDER',ROOT.'/extensions') ;\r\n" ;
-	$sFolderConfig.= "define('org\\opencomb\\platform\\EXTENSIONS_URL','extensions') ;\r\n" ;
-	foreach($arrInstallFolders as $const=>&$sPath)
-	{
-		$sFolderConfig.= "define('org\\opencomb\\platform\\{$const}',{$sPath}) ;\r\n" ;
-	}
-	if( !file_put_contents($sOcConfigFile,$sFolderConfig) )
-	{
-		output("无法将配置写入文件：".$sOcConfigFile,'error') ;
 		return false ;
 	}
 	
@@ -306,5 +277,3 @@ function install()
 		{='?>'}
 	</div>
 </div>
-
-<?php 
