@@ -151,7 +151,7 @@ if($bMysql){
 	$sMysqlSuccess = "<em class='fail'>失败</em>";
 }
 
-<if $bCheckRootWritable>
+<if "$arrPlatformInfo['bCheckRootWritable']">
 $bWritable = is_writable('.');
 if( false === $bWritable){
 	$bHasNext = false;

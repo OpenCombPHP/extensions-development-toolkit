@@ -152,7 +152,7 @@ class CreateExtension extends ControlPanel
 			// 立即安装
 			if( $this->viewExtension->widget('extInstallAtOnce')->value() )
 			{
-				$aSetting = Setting::singleton() ;
+				$aSetting = Service::singleton()->setting() ;
 				
 				// 安装
 				$arrInstalleds = $aSetting->item('/extensions','installeds',array()) ;

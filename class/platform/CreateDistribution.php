@@ -141,8 +141,6 @@ class CreateDistribution extends ControlPanel
 		}
 
 		$this->params['arrPlatformInfo'] = $arrPlatformInfo ;
-		$this->params['bCheckRootWritable'] = $arrPlatformInfo['bCheckRootWritable'] ;
-		$this->params['sFileOcConfig'] = $arrPlatformInfo['sFileOcConfig'] ;
 		
 
 		// 打包前 的处理程序
@@ -215,72 +213,57 @@ class CreateDistribution extends ControlPanel
 
 				// 检查根目录的可写权限
 				'bCheckRootWritable' => true ,
-					
-				// oc.config.php 文件的位置
-				'sFileOcConfig' => "ROOT.'/oc.config.php'" ,
+
+				// oc.init.php 上的常量定义
+				'oc.init.php:define-const' => array(
+						'FRAMEWORK_FOLDER' => "ROOT.'/framework'" ,
+						'PLATFORM_FOLDER' => "ROOT.'/platform'" ,
+						'EXTENSIONS_FOLDER' => "ROOT.'/extensions'" ,
+						'EXTENSIONS_URL' => "'extensions'" ,
+						'SERVICES_FOLDER' => "ROOT.'/services'" ,
+						'PUBLIC_FILES_FOLDER' => "public/files" ,
+						'PUBLIC_FILES_URL' => "public/files" ,
+				) ,
 					
 				// 安装程序上的默认输入
-				'installer-default-input' => array(
-						'sServicesFolder' => "ROOT.'/services'" ,
-						'sPublicFilesFolder' => "ROOT.'/public/files'" ,
-						'sPublicFileUrl' => "public/files" ,
+					'installer-default-input' => array(
 						'sDBServer' => "127.0.0.1" ,
 						'sDBUsername' => "root" ,
 						'sDBPassword' => "" ,
 						'sDBName' => "" ,
 				) ,
-			) ,
-			
 
-			'singlefile' => array(
-					'title' => '单文件安装程序' ,
-					'essential-extensions' => array('coresystem') ,
-			
-					// 检查根目录的可写权限
-					'bCheckRootWritable' => true ,
+				// 打包前后的处理函数
+				'process-before-package' => null ,
+				'process-after-package' => null ,
+
+				// 插入到安装程序开头的代码
+				'sSetupCodes' => null ,
 					
-					// oc.config.php 文件的位置
-					'sFileOcConfig' => "ROOT.'/oc.config.php'" ,
-						
-					// 安装程序上的默认输入
-					'installer-default-input' => array(
-							'sServicesFolder' => "ROOT.'/services'" ,
-							'sPublicFilesFolder' => "ROOT.'/public/files'" ,
-							'sPublicFileUrl' => "public/files" ,
-							'sDBServer' => "127.0.0.1" ,
-							'sDBUsername' => "root" ,
-							'sDBPassword' => "" ,
-							'sDBName' => "" ,
-					) ,
+				// 插入到oc.init.php文件中的代码
+				'sOcInitCodes' => null ,
 			) ,
-			
-
-
-			'debug' => array(
-					'title' => '调式' ,
-					'essential-extensions' => array('coresystem') ,
-					'bCheckRootWritable' => true ,
-					'sFileOcConfig' => "ROOT.'/oc.config.php'" ,
-					'installer-default-input' => array(
-							'sServicesFolder' => "ROOT.'/services'" ,
-							'sPublicFilesFolder' => "ROOT.'/public/files'" ,
-							'sPublicFileUrl' => "public/files" ,
-							'sDBServer' => "192.168.1.1" ,
-							'sDBUsername' => "root" ,
-							'sDBPassword' => "111111" ,
-							'sDBName' => "oc4" ,
-					) ,
-					'process-after-package' => array( __CLASS__, 'debugProcessAfterPackage' ) ,
-			) ,
-			
-
-				
 	) ;
 	
-	public static function debugProcessAfterPackage(self $aDistributionMaker, PclZip $aPackage)
+	static public function debugProcessAfterPackage(CreateDistribution $aDistributionMaker, PclZip $aPackage)
 	{
 		// 解压到 测试安装程序的目录内
 		Folder::createInstance('/local/d/project/otp/oc-setup')->deleteChild('*',true) ; ;
 		$aPackage->extract('/local/d/project/otp/oc-setup/') ;
 	}
 }
+
+// 单文件 版本----
+CreateDistribution::$arrPlatforms['singlefile'] = CreateDistribution::$arrPlatforms['standard'] ;
+CreateDistribution::$arrPlatforms['singlefile']['title'] = '单文件安装程序' ;
+
+// 调式 版本----
+CreateDistribution::$arrPlatforms['debug'] = CreateDistribution::$arrPlatforms['standard'] ;
+CreateDistribution::$arrPlatforms['debug']['title'] = '调式' ;
+CreateDistribution::$arrPlatforms['debug']['installer-default-input'] = array(
+		'sDBServer' => "192.168.1.1" ,
+		'sDBUsername' => "root" ,
+		'sDBPassword' => "111111" ,
+		'sDBName' => "oc4" ,
+) ;
+CreateDistribution::$arrPlatforms['debug']['process-after-package'] = array('org\\opencomb\\development\\toolkit\\platform\\CreateDistribution','debugProcessAfterPackage') ;

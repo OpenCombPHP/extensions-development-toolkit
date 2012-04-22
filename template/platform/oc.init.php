@@ -7,14 +7,9 @@ error_reporting(E_ALL^E_STRICT) ;
 define('org\\opencomb\\platform\\ROOT',__DIR__) ;
 
 // 配置目录
-define('org\\opencomb\\platform\\FRAMEWORK_FOLDER',ROOT.'/framework') ;
-define('org\\opencomb\\platform\\PLATFORM_FOLDER',ROOT.'/platform') ;
-define('org\\opencomb\\platform\\EXTENSIONS_FOLDER',ROOT.'/extensions') ;
-define('org\\opencomb\\platform\\EXTENSIONS_URL','extensions') ;
-define('org\\opencomb\\platform\\SERVICES_FOLDER',{=$sServicesFolder}) ;
-define('org\\opencomb\\platform\\PUBLIC_FILES_FOLDER',{=$sPublicFilesFolder}) ;
-define('org\\opencomb\\platform\\PUBLIC_FILES_URL',{=$sPublicFileUrl}) ;
-
+<foreach for="$arrPlatformInfo['oc.init.php:define-const']" key='sConst' item='sCode'><clear />
+define('org\\opencomb\\platform\\{=$sConst}',{=$sCode}) ;
+</foreach>
 
 // 加载 jecat framework
 require_once FRAMEWORK_FOLDER."/inc.entrance.php" ;
