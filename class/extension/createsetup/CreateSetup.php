@@ -2,15 +2,14 @@
 namespace org\opencomb\development\toolkit\extension\createsetup ;
 
 use org\opencomb\coresystem\auth\Id;
-
 use org\opencomb\coresystem\mvc\controller\ControlPanel;
-use org\opencomb\platform\ext\Extension ;
-use org\jecat\framework\db\DB ;
-use org\jecat\framework\ui\xhtml\UIFactory ;
-use org\jecat\framework\io\OutputStreamBuffer ;
-use org\jecat\framework\setting\IKey ;
-use org\jecat\framework\lang\oop\ClassLoader ;
-use org\jecat\framework\fs\Folder ;
+use org\opencomb\platform\ext\Extension;
+use org\jecat\framework\db\DB;
+use org\jecat\framework\ui\xhtml\UIFactory;
+use org\jecat\framework\io\OutputStreamBuffer;
+use org\jecat\framework\setting\IKey;
+use org\jecat\framework\lang\oop\ClassLoader;
+use org\jecat\framework\fs\Folder;
 use org\jecat\framework\message\Message;
 
 class CreateSetup extends ControlPanel{
@@ -200,3 +199,4 @@ class CreateSetup extends ControlPanel{
 	private $sDataFolder = '';
 	private $setting = array();
 }
+

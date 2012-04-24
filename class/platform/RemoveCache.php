@@ -2,15 +2,9 @@
 namespace org\opencomb\development\toolkit\platform ;
 
 use org\jecat\framework\message\Message;
-
 use org\opencomb\platform\lang\compile\OcCompilerFactory;
-use org\jecat\framework\lang\oop\Package;
-use org\jecat\framework\fs\FSO;
 use org\opencomb\coresystem\auth\Id;
-use org\jecat\framework\fs\FSIterator;
 use org\jecat\framework\lang\oop\ClassLoader;
-use org\jecat\framework\fs\Folder;
-use org\jecat\framework\setting\Setting;
 use org\opencomb\coresystem\mvc\controller\ControlPanel;
 
 class RemoveCache extends ControlPanel

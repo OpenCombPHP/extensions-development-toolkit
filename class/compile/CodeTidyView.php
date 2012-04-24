@@ -2,13 +2,11 @@
 namespace org\opencomb\development\toolkit\compile ;
 
 use org\jecat\framework\lang\oop\Package;
-
 use org\opencomb\platform\Platform;
-
 use org\opencomb\coresystem\mvc\controller\ControlPanel;
-use org\jecat\framework\fs\Folder ;
-use org\jecat\framework\fs\FSIterator ;
-use org\jecat\framework\io\OutputStreamBuffer ;
+use org\jecat\framework\fs\Folder;
+use org\jecat\framework\fs\FSIterator;
+use org\jecat\framework\io\OutputStreamBuffer;
 use org\jecat\framework\lang\oop\ClassLoader;
 use org\opencomb\platform\ext\ExtensionManager;
 use org\jecat\framework\message\Message;
@@ -132,3 +130,4 @@ class CodeTidyView extends ControlPanel{
 		return $arr ;
 	}
 }
+

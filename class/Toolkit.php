@@ -6,7 +6,6 @@ use org\opencomb\platform\service\Service;
 use org\jecat\framework\bean\BeanFactory;
 use org\jecat\framework\lang\aop\AOP;
 use org\opencomb\platform\ext\Extension;
-use org\opencomb\development\toolkit\aspect\SysteExecuteTimeLog ;
 
 class Toolkit extends Extension
 {
@@ -52,5 +51,3 @@ class Toolkit extends Extension
 	}
 	
 }
-
-?>

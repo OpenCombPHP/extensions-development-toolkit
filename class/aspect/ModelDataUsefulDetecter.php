@@ -1,7 +1,6 @@
 <?php
 namespace org\opencomb\development\toolkit\aspect ;
 
-use org\jecat\framework\lang\aop\jointpoint\JointPointMethodDefine;
 
 class ModelDataUsefulDetecter
 {
@@ -50,5 +49,3 @@ class ModelDataUsefulDetecter
 		$aOutput->write ( str_repeat ( "\t", $nDepth+1 ) . "[unuseful datas] : 'columns' => array({$sUnusefulDatas})\r\n\r\n" );
 	}
 }
-
-?>

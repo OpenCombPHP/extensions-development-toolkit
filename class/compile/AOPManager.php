@@ -2,21 +2,11 @@
 namespace org\opencomb\development\toolkit\compile ;
 
 use org\opencomb\platform\lang\compile\OcCompilerFactory;
-
 use org\jecat\framework\lang\oop\Package;
-
-use org\opencomb\platform\service\Service;
-
-use org\opencomb\platform\system\PlatformFactory;
-
 use org\opencomb\coresystem\auth\Id;
-
 use org\jecat\framework\lang\oop\ClassLoader;
-
 use org\jecat\framework\message\Message;
-
 use org\jecat\framework\lang\aop\Pointcut;
-
 use org\jecat\framework\lang\aop\jointpoint\JointPoint;
 use org\jecat\framework\lang\aop\AOP;
 use org\opencomb\coresystem\mvc\controller\ControlPanel;
@@ -114,6 +104,3 @@ class AOPManager extends ControlPanel
 		$this->aopManager->createMessage(Message::success,'重新编译 class %s ',array($this->params['class'])) ;
 	}
 }
-
-
-?>

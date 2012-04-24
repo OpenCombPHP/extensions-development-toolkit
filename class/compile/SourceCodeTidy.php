@@ -3,7 +3,7 @@ namespace org\opencomb\development\toolkit\compile ;
 
 use org\jecat\framework\io\IInputStream;
 use org\jecat\framework\io\IOutputStream;
-use org\jecat\framework\lang\Object ;
+use org\jecat\framework\lang\Object;
 
 class SourceCodeTidy extends Object{
 	/**
@@ -203,3 +203,4 @@ class SourceCodeTidy extends Object{
 		return $arrUseMap ;
 	}
 }
+

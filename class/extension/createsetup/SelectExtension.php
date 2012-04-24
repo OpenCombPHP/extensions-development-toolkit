@@ -2,9 +2,8 @@
 namespace org\opencomb\development\toolkit\extension\createsetup ;
 
 use org\opencomb\coresystem\auth\Id;
-
 use org\opencomb\coresystem\mvc\controller\ControlPanel;
-use org\opencomb\platform\ext\ExtensionManager ;
+use org\opencomb\platform\ext\ExtensionManager;
 
 class SelectExtension extends ControlPanel{
 	public function createBeanConfig(){
@@ -45,3 +44,4 @@ class SelectExtension extends ControlPanel{
 		return $arrPackageList ;
 	}
 }
+

@@ -2,7 +2,6 @@
 namespace org\opencomb\development\toolkit\aspect ;
 
 use org\jecat\framework\lang\Object;
-use org\jecat\framework\lang\aop\jointpoint\JointPointMethodDefine;
 
 class SysteExecuteTimeLog extends Object
 { 
@@ -70,5 +69,3 @@ class SysteExecuteTimeLog extends Object
 		}
 	}
 }
-
-?>

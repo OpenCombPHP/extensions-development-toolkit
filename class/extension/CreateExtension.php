@@ -2,15 +2,14 @@
 namespace org\opencomb\development\toolkit\extension ;
 
 use org\jecat\framework\fs\File;
-
 use org\opencomb\coresystem\auth\Id;
-use org\opencomb\platform as oc;
 use org\jecat\framework\fs\Folder;
 use org\jecat\framework\setting\Setting;
 use org\jecat\framework\lang\Exception;
 use org\jecat\framework\ui\xhtml\UIFactory;
 use org\jecat\framework\message\Message;
 use org\opencomb\coresystem\mvc\controller\ControlPanel;
+use org\opencomb\platform as oc;
 
 class CreateExtension extends ControlPanel
 {
@@ -207,5 +206,3 @@ class CreateExtension extends ControlPanel
 		return preg_match("/^[\\w\\-_]{".self::extname_minlen.",".self::extname_maxlen."}$/",$sName) ;
 	}
 }
-
-?>

@@ -2,7 +2,6 @@
 namespace org\opencomb\development\toolkit\platform ;
 
 use org\opencomb\coresystem\auth\Id;
-
 use org\jecat\framework\fs\Folder;
 use org\jecat\framework\message\Message;
 use org\opencomb\coresystem\mvc\controller\ControlPanel;
@@ -95,3 +94,4 @@ class ClearCache extends ControlPanel
 		}
 	}
 }
+

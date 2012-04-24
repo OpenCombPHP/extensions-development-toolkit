@@ -1,14 +1,11 @@
 <?php
 namespace org\opencomb\development\toolkit\extension\createsetup ;
 
-use org\jecat\framework\setting\Setting;
-
 use org\opencomb\coresystem\auth\Id;
-
 use org\opencomb\coresystem\mvc\controller\ControlPanel;
-use org\jecat\framework\db\DB ;
-use org\opencomb\platform\ext\Extension ;
-use org\jecat\framework\fs\Folder ;
+use org\jecat\framework\db\DB;
+use org\opencomb\platform\ext\Extension;
+use org\jecat\framework\fs\Folder;
 
 class SelectItem extends ControlPanel{
 	public function createBeanConfig(){
@@ -63,3 +60,4 @@ class SelectItem extends ControlPanel{
 		return (substr($haystack, 0, $length) === $needle);
 	}
 }
+
