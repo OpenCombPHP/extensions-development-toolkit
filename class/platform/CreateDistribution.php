@@ -170,7 +170,7 @@ class CreateDistribution extends ControlPanel
 	}
 
 	public function packFolder($sFolderPath,$sPackageFolder,PclZip $aZip,$bRepo)
-	{	
+	{
 		$sPath = null ;
 		foreach( explode('/',ltrim($sPackageFolder,'/')) as $sFolderName )
 		{
@@ -211,54 +211,64 @@ class CreateDistribution extends ControlPanel
 				'installer-default-input' => array(
 						'sServicesFolder' => "ROOT.'/services'" ,
 						'sPublicFilesFolder' => "ROOT.'/public/files'" ,
-						'sPublicFileUrl' => "public/files" ,
+						'sPublicFileUrl' => "'public/files'" ,
 						'sDBServer' => "127.0.0.1" ,
 						'sDBUsername' => "root" ,
 						'sDBPassword' => "" ,
 						'sDBName' => "" ,
 				) ,
+				
+				// service 安装位置
+				'sInstallServiceFolder' => "install_root.'/services'" ,
+				
 			) ,
 			
 
 			'singlefile' => array(
-					'title' => '单文件安装程序' ,
-					'essential-extensions' => array('coresystem') ,
-			
-					// 检查根目录的可写权限
-					'bCheckRootWritable' => true ,
+				'title' => '单文件安装程序' ,
+				'essential-extensions' => array('coresystem') ,
+		
+				// 检查根目录的可写权限
+				'bCheckRootWritable' => true ,
+				
+				// oc.config.php 文件的位置
+				'sFileOcConfig' => "ROOT.'/oc.config.php'" ,
 					
-					// oc.config.php 文件的位置
-					'sFileOcConfig' => "ROOT.'/oc.config.php'" ,
-						
-					// 安装程序上的默认输入
-					'installer-default-input' => array(
-							'sServicesFolder' => "ROOT.'/services'" ,
-							'sPublicFilesFolder' => "ROOT.'/public/files'" ,
-							'sPublicFileUrl' => "public/files" ,
-							'sDBServer' => "127.0.0.1" ,
-							'sDBUsername' => "root" ,
-							'sDBPassword' => "" ,
-							'sDBName' => "" ,
-					) ,
+				// 安装程序上的默认输入
+				'installer-default-input' => array(
+						'sServicesFolder' => "ROOT.'/services'" ,
+						'sPublicFilesFolder' => "ROOT.'/public/files'" ,
+						'sPublicFileUrl' => "'public/files'" ,
+						'sDBServer' => "127.0.0.1" ,
+						'sDBUsername' => "root" ,
+						'sDBPassword' => "" ,
+						'sDBName' => "" ,
+				) ,
+				
+				// service 安装位置
+				'sInstallServiceFolder' => "install_root.'/services'" ,
 			) ,
 			
 
 
 			'debug' => array(
-					'title' => '调式' ,
-					'essential-extensions' => array('coresystem') ,
-					'bCheckRootWritable' => true ,
-					'sFileOcConfig' => "ROOT.'/oc.config.php'" ,
-					'installer-default-input' => array(
-							'sServicesFolder' => "ROOT.'/services'" ,
-							'sPublicFilesFolder' => "ROOT.'/public/files'" ,
-							'sPublicFileUrl' => "public/files" ,
-							'sDBServer' => "192.168.1.1" ,
-							'sDBUsername' => "root" ,
-							'sDBPassword' => "111111" ,
-							'sDBName' => "oc4" ,
-					) ,
-					'process-after-package' => array( __CLASS__, 'debugProcessAfterPackage' ) ,
+				'title' => '调式' ,
+				'essential-extensions' => array('coresystem') ,
+				'bCheckRootWritable' => true ,
+				'sFileOcConfig' => "ROOT.'/oc.config.php'" ,
+				'installer-default-input' => array(
+						'sServicesFolder' => "ROOT.'/services'" ,
+						'sPublicFilesFolder' => "ROOT.'/public/files'" ,
+						'sPublicFileUrl' => "'public/files'" ,
+						'sDBServer' => "192.168.1.1" ,
+						'sDBUsername' => "root" ,
+						'sDBPassword' => "111111" ,
+						'sDBName' => "oc4" ,
+				) ,
+				'process-after-package' => array( __CLASS__, 'debugProcessAfterPackage' ) ,
+				
+				// service 安装位置
+				'sInstallServiceFolder' => "install_root.'/services'" ,
 			) ,
 			
 

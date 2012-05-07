@@ -15,9 +15,15 @@ define('org\\opencomb\\platform\\SERVICES_FOLDER',{=$sServicesFolder}) ;
 define('org\\opencomb\\platform\\PUBLIC_FILES_FOLDER',{=$sPublicFilesFolder}) ;
 define('org\\opencomb\\platform\\PUBLIC_FILES_URL',{=$sPublicFileUrl}) ;
 
-
 // 加载 jecat framework
 require_once FRAMEWORK_FOLDER."/inc.entrance.php" ;
+
+// 检查是否完成安装
+if( !is_dir(SERVICES_FOLDER) and is_file(__DIR__.'/setup/setup.php') )
+{
+	echo '<a href="setup/setup.php">Install ... </a>' ;
+	exit() ;
+}
 
 // load jecat core class
 require_once \org\jecat\framework\CLASSPATH."/system/HttpAppFactory.php" ;

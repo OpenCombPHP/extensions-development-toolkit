@@ -53,7 +53,7 @@ function setupSetting($sService,$sDbTablePrefix)
 	) ;
 	foreach($arrSettings as $sFile=>$arrValue)
 	{
-		$sItemPath = $_REQUEST['arrFolder']['SERVICES_FOLDER'].'/'.$sService.'/setting/'.$sFile ;
+		$sItemPath = install_service.'/'.$sService.'/setting/'.$sFile ;
 		$sItemFolderPath = dirname($sItemPath) ;
 		if( !file_exists($sItemFolderPath) and !mkdir($sItemFolderPath,0775,true) )
 		{
@@ -78,9 +78,9 @@ function setupSetting($sService,$sDbTablePrefix)
 					'domains' => array('safemode') ,
 			) ,
 	),true).';' ;
-	if( !file_put_contents($_REQUEST['arrFolder']['SERVICES_FOLDER'].'/settings.inc.php',$sServiceSetting) )
+	if( !file_put_contents(install_service.'/settings.inc.php',$sServiceSetting) )
 	{
-		output("无法将配置写入文件：{$_REQUEST['arrFolder']['SERVICES_FOLDER']}/settings.inc.php",'error') ;
+		output("无法将配置写入文件：{install_service}/settings.inc.php",'error') ;
 		return false ;
 	}
 	
@@ -159,7 +159,7 @@ function insertAdminUser()
 	)) ;
 
 	// 管理员帐号
-	insertTableRow('coresystem_group',array(
+	insertTableRow('coresystem_user',array(
 			'uid' => 1 ,
 			'username' => $_REQUEST['adminName'] ,
 			'password' => md5( md5(md5($_REQUEST['adminName'])) . md5($_REQUEST['adminPswd']) ) ,

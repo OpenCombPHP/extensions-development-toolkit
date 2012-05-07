@@ -34,6 +34,7 @@ if(false){
 
 define('setup_folder',dirname(__FILE__)) ;
 define('install_root',dirname(setup_folder)) ;
+define('install_service',{=$arrPlatformInfo['sInstallServiceFolder']}) ;
 define('ROOT',install_root) ;
 $sOcConfigFile = {=$sFileOcConfig} ;
 $arrExtensionFolders = {=var_export($arrExtensionFolders,true)} ;
