@@ -3,6 +3,7 @@ return array(
 	'item:development' => array(
 		'title' => '开发' ,
 		'link' => '?c=org.opencomb.development.toolkit.platform.ClearCache' ,
+		'query' => 'c=org.opencomb.development.toolkit.platform.ClearCache' ,
 		
 		// items
 		'menu' => 1,
