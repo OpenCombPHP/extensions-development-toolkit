@@ -13,6 +13,7 @@ use org\jecat\framework\fs\FSIterator;
 use org\jecat\framework\io\OutputStreamBuffer;
 use org\jecat\framework\ui\xhtml\UIFactory;
 use org\opencomb\platform\service\Service;
+use org\jecat\framework\util\Version;
 
 class CreateDistribution extends ControlPanel
 {
@@ -97,10 +98,16 @@ class CreateDistribution extends ControlPanel
 		}
 		$this->params['arrExtensionFolders'] = $arrExtensionFolders ;
 		$this->params['arrLicenceList'] = $arrLicenceList ;
-
+		
+		// versions
+		$this->params['platform_version'] = Platform::singleton()->version();
+		$this->params['framework_version'] = Version::fromString( \org\jecat\framework\VERSION );
+		
 		// 打包系统文件
 		$sPlatformRoot = Platform::singleton()->installFolder(true) ;
 		$aDistributionZip->add($sPlatformRoot.'/index.php',PCLZIP_OPT_REMOVE_PATH,$sPlatformRoot) ;
+		$aDistributionZip->add($sPlatformRoot.'/Loader.php',PCLZIP_OPT_REMOVE_PATH,$sPlatformRoot) ;
+		$aDistributionZip->add($sPlatformRoot.'/config.php',PCLZIP_OPT_REMOVE_PATH,$sPlatformRoot) ;
 		$this->packFolder($sPlatformRoot.'/framework','framework',$aDistributionZip,$bIncludeRepos) ;
 		$this->packFolder($sPlatformRoot.'/platform','platform',$aDistributionZip,$bIncludeRepos) ;
 		
@@ -140,7 +147,6 @@ class CreateDistribution extends ControlPanel
 		}
 		
 		// 生成文件安装程序并打包
-		$this->packFileByTemplate(null,'oc.init.php','development-toolkit:platform/oc.init.php',$aDistributionZip) ;
 		$this->packFileByTemplate('/setup','setup.php','development-toolkit:platform/setup.php',$aDistributionZip) ;
 		$this->packFileByTemplate('/setup','setupCheckEnv.php','development-toolkit:platform/setupCheckEnv.php',$aDistributionZip) ;
 		$this->packFileByTemplate('/setup','setupLicence.php','development-toolkit:platform/setupLicence.php',$aDistributionZip) ;

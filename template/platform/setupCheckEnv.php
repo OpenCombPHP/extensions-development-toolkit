@@ -152,7 +152,7 @@ if($bMysql){
 }
 
 <if $bCheckRootWritable>
-$bWritable = is_writable('.');
+$bWritable = is_writable('../');
 if( false === $bWritable){
 	$bHasNext = false;
 }

@@ -220,12 +220,9 @@ function install()
 	}
 	
 	// 启动系统
-	$aService = include install_root.'/oc.init.php' ;
-	if( !($aService instanceof \org\opencomb\platform\service\Service) )
-	{
-		output("无法启动系统，安装失败。",'error') ;
-		return false ;
-	}
+	include install_root.'/Loader.php';
+	$aLoader = new \org\opencomb\loader\Loader;
+	$aLoader->startup();
 	
 	// 安装扩展
 	if(!installExtensions())
