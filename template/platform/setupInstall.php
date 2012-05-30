@@ -1,5 +1,6 @@
 <?php 
 
+{= isset($arrPlatformInfo['sSetupCodes'])? $arrPlatformInfo['sSetupCodes']: '' }
 
 $arrMessageQueue = array() ;
 function output($sMessage,$nType='success')
