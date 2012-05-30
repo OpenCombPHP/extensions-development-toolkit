@@ -255,6 +255,49 @@ class CreateDistribution extends ControlPanel
 				'sInstallServiceFolder' => "install_root.'/services'" ,
 			) ,
 			
+			'sae' => array(
+				'title' => '新浪云计算平台(SAE)应用包' ,
+				'essential-extensions' => array('coresystem','saeadapter') ,
+		
+				// 检查根目录的可写权限
+				'bCheckRootWritable' => false ,
+				
+				// oc.config.php 文件的位置
+				'sFileOcConfig' => "'saestor://ocstor/oc.config.php'" ,
+					
+				// 安装程序上的默认输入
+				'installer-default-input' => array(
+						'sServicesFolder' => "'saestor://ocstor/services'" ,
+						'sPublicFilesFolder' => "'saestor://ocstor/public/files'" ,
+						'sPublicFileUrl' => "'http://{\$_SERVER['HTTP_APPNAME']}-ocstor.stor.sinaapp.com/public/files'" ,
+						'sDBServer' => "<?php echo SAE_MYSQL_HOST_M ?>:<?php echo SAE_MYSQL_PORT ?>" ,
+						'sDBUsername' => "<?php echo SAE_MYSQL_USER ?>" ,
+						'sDBPassword' => "<?php echo SAE_MYSQL_PASS ?>" ,
+						'sDBName' => "<?php echo SAE_MYSQL_DB ?>" ,
+				) ,
+			
+				// service 安装位置
+				'sInstallServiceFolder' => "'ocfs://oc/services'" ,
+				
+				'process-before-package' => array('org\\opencomb\\development\\toolkit\\platform\\CreateDistribution','packSaeAppWizard') ,
+				
+				// 插入到安装程序中的代码
+				'sSetupCodes' => "
+// 注册 SAE wrapper
+require_once __DIR__.'/../common.php';
+" ,
+				'finishSetupCheckCode' => " return false ",
+				// 插入到oc.init.php文件中的代码
+				'sOcInitCodes' => "
+// 加载 SAE平台所需的类
+require_once \\org\\jecat\\framework\\CLASSPATH.'/cache/SaeStorageCache.php' ;
+// 注册 SAE wrapper
+stream_wrapper_unregister('saestor') ;
+stream_wrapper_register('saestor','org\\opencomb\\saeadapter\\wrapper\\SaeStorageWrapper') ;
+// 注册 SaeServiceFactory
+service\ServiceFactory::setSingleton(new \\org\\opencomb\\saeadapter\\service\\SaeServiceFactory) ;
+" ,
+			),
 
 
 			'debug' => array(
@@ -286,6 +329,14 @@ class CreateDistribution extends ControlPanel
 		// 解压到 测试安装程序的目录内
 		Folder::createInstance('/local/d/project/otp/oc-setup')->deleteChild('*',true) ; ;
 		$aPackage->extract('/local/d/project/otp/oc-setup/') ;
+	}
+	
+	private function packSaeAppWizard(CreateDistribution $aDistributionMaker, PclZip $aPackage){	
+		// 生成 sae_app_wizard.xml
+		$aDistributionMaker->packFileByTemplate(
+				null, 'sae_app_wizard.xml', 'development-toolkit:platform/sae_app_wizard.xml', $aPackage
+		) ;
+		
 	}
 }
 
