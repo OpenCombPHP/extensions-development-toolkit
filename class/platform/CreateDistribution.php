@@ -110,6 +110,7 @@ class CreateDistribution extends ControlPanel
 		$aDistributionZip->add($sPlatformRoot.'/common.php',PCLZIP_OPT_REMOVE_PATH,$sPlatformRoot) ;
 		$this->packFolder($sPlatformRoot.'/framework','framework',$aDistributionZip,$bIncludeRepos) ;
 		$this->packFolder($sPlatformRoot.'/platform','platform',$aDistributionZip,$bIncludeRepos) ;
+		$this->packFolder($sPlatformRoot.'/vfs','vfs',$aDistributionZip,$bIncludeRepos) ;
 		
 		// 打包 setup ui fiels
 		foreach(Service::singleton()->publicFolders()->folderIterator('development-toolkit.oc.setup') as $aFolder)
