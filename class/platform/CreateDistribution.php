@@ -195,7 +195,11 @@ class CreateDistribution extends ControlPanel
 			$sLocalPath = $aFolder->path().'/'.$sPath;
 			if($aZip->add($sLocalPath,$sPackageFolder,$aFolder->path())===0)
 			{
-				$this->extensionPackages->createMessage(Message::error,'打包文件时出错:%s',$sPath);
+				$this->view->createMessage(
+					Message::error,
+					'打包文件时出错:%s',
+					$sLocalPath
+				);
 				return ;
 			}
 		}
