@@ -41,7 +41,7 @@
  
 	<div class="xy_check">
 		<label>
-			<input id="chkAgree" type="checkbox" onChange="agreeLicense(this.checked);" />
+			<input id="chkAgree" type="checkbox" onclick="agreeLicense(this.checked);" />
 			已阅读并同意以上全部内容
 		</label>
 	</div>
