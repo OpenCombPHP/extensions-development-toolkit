@@ -105,10 +105,11 @@ unset($arrLangMod);
 
 $sPhpVersion = PHP_MAJOR_VERSION.'.'.PHP_MINOR_VERSION.'.'.PHP_RELEASE_VERSION;
 $sPhpSuccess = '';
-if($bPhpSuccess){
+if(version_compare($sPhpVersion,'5.3.0')>=0){
 	$sPhpSuccess = "<em class='succeed'>通过</em>";
 }else{
 	$sPhpSuccess = "<em class='fail'>失败</em>";
+	$bHasNext = false;
 }
 
 $sLangMods = '';
