@@ -108,6 +108,7 @@ class CreateDistribution extends ControlPanel
 		$aDistributionZip->add($sPlatformRoot.'/index.php',PCLZIP_OPT_REMOVE_PATH,$sPlatformRoot) ;
 		$aDistributionZip->add($sPlatformRoot.'/Loader.php',PCLZIP_OPT_REMOVE_PATH,$sPlatformRoot) ;
 		$aDistributionZip->add($sPlatformRoot.'/common.php',PCLZIP_OPT_REMOVE_PATH,$sPlatformRoot) ;
+		$aDistributionZip->add($sPlatformRoot.'/PhpVersionError.php',PCLZIP_OPT_REMOVE_PATH,$sPlatformRoot) ;
 		$this->packFolder($sPlatformRoot.'/framework','framework',$aDistributionZip,$bIncludeRepos) ;
 		$this->packFolder($sPlatformRoot.'/platform','platform',$aDistributionZip,$bIncludeRepos) ;
 		$this->packFolder($sPlatformRoot.'/vfs','vfs',$aDistributionZip,$bIncludeRepos) ;
