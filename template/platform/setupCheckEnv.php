@@ -103,7 +103,7 @@ if(!empty($arrLangMods))
 }
 unset($arrLangMod);
 
-$sPhpVersion = PHP_MAJOR_VERSION.'.'.PHP_MINOR_VERSION.'.'.PHP_RELEASE_VERSION;
+$sPhpVersion = PHP_VERSION;
 $sPhpSuccess = '';
 if(version_compare($sPhpVersion,'5.3.0')>=0){
 	$sPhpSuccess = "<em class='succeed'>通过</em>";
