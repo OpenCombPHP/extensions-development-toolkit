@@ -221,8 +221,7 @@ function install()
 	}
 	
 	// 启动系统
-	include install_root.'/Loader.php';
-	$aLoader = new \org\opencomb\loader\Loader;
+	$aLoader = require_once install_root.'/common.php';
 	$aLoader->startup();
 	
 	// 安装扩展
