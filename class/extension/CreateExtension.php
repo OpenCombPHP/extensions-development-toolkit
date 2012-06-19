@@ -1,16 +1,15 @@
 <?php
 namespace org\opencomb\development\toolkit\extension ;
 
+use org\jecat\framework\fs\File;
 use org\opencomb\coresystem\auth\Id;
-
 use org\jecat\framework\fs\Folder;
-
 use org\jecat\framework\setting\Setting;
-
 use org\jecat\framework\lang\Exception;
 use org\jecat\framework\ui\xhtml\UIFactory;
 use org\jecat\framework\message\Message;
 use org\opencomb\coresystem\mvc\controller\ControlPanel;
+use org\opencomb\platform as oc;
 
 class CreateExtension extends ControlPanel
 {
@@ -111,11 +110,8 @@ class CreateExtension extends ControlPanel
 				break ;
 			}
 			
-			
-			$aFs = Folder::singleton() ;
-			$sInstallPath = "/extensions/{$sExtName}/{$sExtVersion}" ;
-			
-			if( $aFs->find($sInstallPath) )
+			$sInstallPath = oc\EXTENSIONS_FOLDER."/{$sExtName}/{$sExtVersion}" ;
+			if( file_exists('$sInstallPath') )
 			{
 				$this->viewExtension->messageQueue()->create(Message::error,"无法在路径上创建新扩展，目录已经存在：%s",$sInstallPath) ;
 				break ;
@@ -159,7 +155,7 @@ class CreateExtension extends ControlPanel
 				
 				// 安装
 				$arrInstalleds = $aSetting->item('/extensions','installeds',array()) ;
-				$arrInstalleds[] = $aFs->find($sInstallPath)->path() ;
+				$arrInstalleds[] = $sExtName.'/'.$sExtVersion ;
 				$aSetting->setItem('/extensions','installeds',$arrInstalleds) ;
 				
 				// 激活
@@ -177,16 +173,16 @@ class CreateExtension extends ControlPanel
 
 	private function createFolder($sPath)
 	{
-		Folder::singleton()->createChildFolder($sPath) ;
-		
+		Folder::createFolder($sPath) ;
 		$this->viewExtension->messageQueue()->create(Message::notice,"创建目录：%s",$sPath) ;
 	}
 	
 	private function createFile($sPath,$sTemplate,$arrVariables=null)
 	{
 		try{
-			$aFile = Folder::singleton()->createChildFile($sPath) ;
 			
+			$aFile = new File($sPath) ;
+			$aFile->create() ;			
 			UIFactory::singleton()->create()->display(
 				'development-toolkit:'.$sTemplate
 				, $arrVariables
@@ -210,5 +206,3 @@ class CreateExtension extends ControlPanel
 		return preg_match("/^[\\w\\-_]{".self::extname_minlen.",".self::extname_maxlen."}$/",$sName) ;
 	}
 }
-
-?>

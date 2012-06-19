@@ -1,16 +1,15 @@
 <?php
 namespace org\opencomb\development\toolkit\extension ;
 
+use net\phpconcept\pclzip\PclZip;
+use org\opencomb\platform\service\Service;
 use org\opencomb\coresystem\auth\Id;
-
 use org\opencomb\coresystem\mvc\controller\ControlPanel;
-use org\jecat\framework\message\Message ;
-use org\opencomb\platform\ext\ExtensionManager ;
-use org\opencomb\platform\ext\Extension ;
-use org\jecat\framework\fs\Folder ;
-use org\jecat\framework\fs\FSIterator ;
-use org\jecat\framework\fs\imp\LocalFSO ;
-use org\opencomb\platform\Platform ;
+use org\jecat\framework\message\Message;
+use org\opencomb\platform\ext\ExtensionManager;
+use org\opencomb\platform\ext\Extension;
+use org\jecat\framework\fs\Folder;
+use org\jecat\framework\fs\FSIterator;
 
 // /?c=org.opencomb.development.toolkit.extension.ExtensionPackages
 
@@ -52,72 +51,40 @@ class ExtensionPackages extends ControlPanel{
 		$packageList = $this->packageList();
 		$package = $packageList[$name];
 		$bSuccess = true;
-		if(!empty($package)){
+		if(!empty($package))
+		{
 			$aPackagedFSO = $this->getPackagedFSO($package['name'],$package['version'],$includeGit);
-			if(! $aPackagedFSO instanceof LocalFSO){
-				$this->extensionPackages->createMessage(Message::notice, '失败：扩展安装目录不在本地文件系统');
-				return;
-			}
-			$aZip = new \ZipArchive();
-			$filename = $aPackagedFSO->name();
-			$filePath = $aPackagedFSO->path();
-			if($debug){
-				$this->extensionPackages->createMessage(Message::notice,'即将创建压缩文件:%s : %s',array($aPackagedFSO->path(),$filePath));
-			}else{
-				$this->extensionPackages->createMessage(Message::notice,'创建扩展包，在:%s',$aPackagedFSO->path());
-			}
-			if($aZip->open($filePath,\ZIPARCHIVE::CREATE) !== TRUE){
-				$this->extensionPackages->createMessage(Message::notice,"can not open file <$filePath>");
-			}else{
-				$installFolder = Folder::singleton()->findFolder($package['installPath']);
-				if($debug){
-					$this->extensionPackages->createMessage(Message::notice,'扩展安装目录:%s',$installFolder->path());
-				}
-				if($debug){
-					if($includeGit){
-						$this->extensionPackages->createMessage(Message::notice,'包含git\svn\cvs目录');
-					}
-				}
-				foreach($installFolder->iterator(FSIterator::FILE | FSIterator::FOLDER | FSIterator::RECURSIVE_SEARCH | FSIterator::RETURN_FSO) as $it){
-					if(preg_match('`/\\.(git|svn|cvs)(/|$)`',$it->path())){
-						if(empty($includeGit)){
-							continue;
-						}
-					}
-					if($it instanceof Folder){
-						$path = $it->path();
-						$path = Folder::relativePath($installFolder,$it);
-						$bSuccess = $bSuccess and $aZip->addEmptyDir($path);
-						if($debug){
-							$this->extensionPackages->createMessage(Message::notice, '创建目录：%s : %s',array($path,$aZip->getStatusString()));
-						}
-					}else{
-						$path = $it->path();
-						$path = Folder::relativePath($installFolder,$it);
-						$bSuccess = $bSuccess and $aZip->addFile($it->path(),$path);
-						if($debug){
-							$this->extensionPackages->createMessage(Message::notice, '压缩文件 %s 来自 %s : %s',array($path,$it->path(),$aZip->getStatusString()));
-						}
-					}
-				}
-				$bSuccess = $bSuccess and $aZip->close();
-				if($debug){
-					$this->extensionPackages->createMessage(Message::notice,'关闭压缩文件:%s',array($aPackagedFSO->path()));
-				}
-				if($debug){
-					if($bSuccess){
-						$this->extensionPackages->createMessage(Message::notice,'%s打包成功',array($name));
-					}else{
-						$this->extensionPackages->createMessage(Message::notice,'%s打包失败',array($name));
-					}
-				}else{
-					if($bSuccess){
-						$this->extensionPackages->createMessage(Message::notice,'%s打包成功',array($name));
-					}else{
-						$this->extensionPackages->createMessage(Message::notice,'%s打包失败',array($name));
-					}
+			
+			if(file_exists($aPackagedFSO->path()))
+			{
+				if(!unlink($aPackagedFSO->path()))
+				{
+					$this->extensionPackages->createMessage(Message::error,'清除原有扩展包文件失败:%s',$aPackagedFSO->path());
+					return ;
 				}
 			}
+			
+			$aZip = new PclZip($aPackagedFSO->path()) ;
+			$installFolder = new Folder($package['installPath']);
+			foreach($installFolder->iterator(FSIterator::FILE|FSIterator::FOLDER|FSIterator::RECURSIVE_SEARCH) as $sSubPath)
+			{
+				if( empty($includeGit) and preg_match('`(^|/)\\.(git|svn|cvs)(/|$)`',$sSubPath) )
+				{
+					continue ;
+				}
+				$sPath = $package['installPath'].'/'.$sSubPath ;
+				if( $aZip->add($sPath,PCLZIP_OPT_REMOVE_PATH,$package['installPath'])===0 )
+				{
+					$this->extensionPackages->createMessage(Message::error,'打包文件时出错:%s',$sPath);
+					return ;
+				}
+				else
+				{
+					$this->extensionPackages->createMessage(Message::success,'打包文件:%s',$sPath);
+				}
+			}
+
+			$this->extensionPackages->createMessage(Message::notice,'%s打包成功',array($name));
 			
 			// disable tempsave
 			$this->arrPackageList = null;
@@ -147,18 +114,37 @@ class ExtensionPackages extends ControlPanel{
 								'downloadVl' => $this->createLink('download',$ext->name(),$ext->version(),1),
 							),
 					);
+				
+				$this->arrPackageList[$name]['link']['pkgbytes'] = self::formatBytes(self::getPackagedFSO($ext->name(),$ext->version(),0)->length()) ;
+				$this->arrPackageList[$name]['link']['pkgbytesVl'] = self::formatBytes(self::getPackagedFSO($ext->name(),$ext->version(),1)->length()) ;
 			}
 		}
 		return $this->arrPackageList;
 	}
 	
-	static private function getDebug(){
-		$aPlatform = Platform::singleton();
-		return $aPlatform->isDebugging();
+	static private function formatBytes($nBytes)
+	{
+		if( $nBytes>1024*1024 )
+		{
+			return round($nBytes/(1024*1024),2) . ' MB' ;
+		}
+		else if( $nBytes>1024 )
+		{
+			return round($nBytes/(1024),2) . ' KB' ;
+		}
+		else 
+		{
+			return $nBytes . ' Byte' ;
+		}
 	}
 	
-	static private function getPackageFolder(){
-		return Extension::flyweight('development-toolkit')->publicFolder()->findFolder('extensionPackages',Folder::FIND_AUTO_CREATE);
+	static private function getDebug(){
+		return Service::singleton()->isDebugging();
+	}
+	
+	static private function getPackageFolder()
+	{
+		return Extension::flyweight('development-toolkit')->filesFolder()->findFolder('extensionPackages',Folder::FIND_AUTO_CREATE) ;
 	}
 	
 	/**
@@ -168,14 +154,13 @@ class ExtensionPackages extends ControlPanel{
 	 * 2.包含版本库
 	 * <extension name>-<version>-repos.ocp.zip
 	 */
-	static public function getPackagedFSO($name,$version , $vl){
-		$sVl = '';
+	static public function getPackagedFSO($name,$version,$vl,$nFlag=Folder::FIND_AUTO_CREATE_OBJECT){
 		if(empty($vl)){
 			$sVl = '';
 		}else{
 			$sVl = '-repos';
 		}
-		return self::getPackageFolder()->findFile($name.'-'.$version.$sVl.'.ocp.zip',Folder::FIND_AUTO_CREATE_OBJECT);
+		return self::getPackageFolder()->findFile($name.'-'.$version.$sVl.'.zip',$nFlag);
 	}
 	
 	static public function hasPackaged($name,$version , $vl){
@@ -192,10 +177,11 @@ class ExtensionPackages extends ControlPanel{
 			}
 			break;
 		case 'download':
-			return self::getPackagedFSO($name,$version,$vl)->path();
+			return self::getPackagedFSO($name, $version, $vl)->httpUrl() ;
 			break;
 		}
 	}
 	
 	private $arrPackageList = null;
 }
+

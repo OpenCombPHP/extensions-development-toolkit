@@ -2,11 +2,10 @@
 namespace org\opencomb\development\toolkit\extension\createsetup ;
 
 use org\opencomb\coresystem\auth\Id;
-
 use org\opencomb\coresystem\mvc\controller\ControlPanel;
-use org\jecat\framework\db\DB ;
-use org\opencomb\platform\ext\Extension ;
-use org\jecat\framework\fs\Folder ;
+use org\jecat\framework\db\DB;
+use org\opencomb\platform\ext\Extension;
+use org\jecat\framework\fs\Folder;
 
 class SelectItem extends ControlPanel{
 	public function createBeanConfig(){
@@ -31,28 +30,26 @@ class SelectItem extends ControlPanel{
 		// input
 		$extName = $this->params['extName'] ;
 		// calc
-		$tableList = $this->getExtDBTableList($extName,'') ;
+		$tableList = $this->getExtDBTableList($extName,DB::singleton()->tableNamePrefix()) ;
 		$aExtension = Extension::flyweight($extName);
-		$sDataFileFolder = $aExtension->metainfo()->installPath().'/data/public';
-		$aDataFileFolderIterator = Folder::singleton()->findFolder($sDataFileFolder)->iterator();
+		$aDataFileFolder = new Folder($aExtension->metainfo()->installPath().'/data/public') ;
+		
 		// set to template
 		$this->selectItem->variables()->set('extName',$extName) ;
 		$this->selectItem->variables()->set('tableList',$tableList);
-		$this->selectItem->variables()->set('aDataFileFolderIterator',$aDataFileFolderIterator);
+		$this->selectItem->variables()->set('aDataFileFolder',$aDataFileFolder);
 	}
 	
 	public function getExtDBTableList($extName , $prefix){
 		$arrTableList = array();
-		
 		$aDB = DB::singleton() ;
 		$aReflecterFactory = $aDB->reflecterFactory() ;
-		$strDBName = $aDB->driver(true)->currentDBName();
+		$strDBName = $aDB->currentDBName();
 		$aDbReflecter = $aReflecterFactory->dbReflecter($strDBName);
 		$sKey = 'Tables_in_'.$strDBName ;
-		foreach( $aDbReflecter->tableNameIterator() as $value ){
-			$tableName = $value[$sKey] ;
+		foreach( $aDbReflecter->tableNameIterator() as $tableName ){
 			if( self::startsWith($tableName,$prefix.$extName.'_')){
-				$arrTableList [] = $tableName;
+				$arrTableList [] = substr($tableName,strlen($prefix)) ;
 			}
 		}
 		return $arrTableList ;
@@ -63,3 +60,4 @@ class SelectItem extends ControlPanel{
 		return (substr($haystack, 0, $length) === $needle);
 	}
 }
+

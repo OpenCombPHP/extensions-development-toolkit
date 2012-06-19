@@ -3,7 +3,7 @@ namespace org\opencomb\development\toolkit\compile ;
 
 use org\jecat\framework\io\IInputStream;
 use org\jecat\framework\io\IOutputStream;
-use org\jecat\framework\lang\Object ;
+use org\jecat\framework\lang\Object;
 
 class SourceCodeTidy extends Object{
 	/**
@@ -16,7 +16,7 @@ class SourceCodeTidy extends Object{
 							);
 	 */
 	public function tidy(IInputStream $aInputStream , IOutputStream $aOutputStream,array $arrConf = array() ){
-		$sContent = $aInputStream->read();
+		$sContent = $aInputStream->read(-1);
 		if( isset($arrConf['tidyUse']) and $arrConf['tidyUse'] ){
 			$sContent = $this->tidyUse($sContent);
 		}
@@ -52,7 +52,7 @@ class SourceCodeTidy extends Object{
 			$arrUseMap = $this->getUseMap($sUseArea);
 			
 			// words
-			preg_match_all('`(?:[ :(){}\\\\]|\n|\r|\t)([a-zA-Z][a-zA-Z0-9]*)`',$sCleanContent,$arrMatch,PREG_OFFSET_CAPTURE,$iOffset + strlen($sUseArea) );
+			preg_match_all('`(?:[^a-zA-Z])([a-zA-Z][a-zA-Z0-9]*)`',$sCleanContent,$arrMatch,PREG_OFFSET_CAPTURE,$iOffset + strlen($sUseArea) );
 			$arrWords = $arrMatch[1];
 			
 			foreach($arrWords as $arrWord){
@@ -69,31 +69,38 @@ class SourceCodeTidy extends Object{
 			foreach($arrUseMap as $key=>$arrUse){
 				if(isset($arrUse['useful'])){
 					if($arrUse['as']){
-						$sUseContent .= 'use '.$arrUse['word'].' as '.$key.";\n";
+						$sUseContent .= 'use '.$arrUse['word'].' as '.$key.";\r\n";
 					}else{
-						$sUseContent .= 'use '.$arrUse['word'].";\n";
+						$sUseContent .= 'use '.$arrUse['word'].";\r\n";
 					}
 				}
 			}
 			
 			// insert use after namespace
 			$sSlash = preg_replace('`\\\\`','\\\\\\\\',$sUseArea);
-			$sContentTidyUse = preg_replace("`(\\n|\\r|\\s)*$sSlash(\\n|\\r|\\s)*`","\n\n$sUseContent\n",$sContentTidyUse);
+			$sContentTidyUse = preg_replace("`(\\n|\\r|\\s)*$sSlash(\\n|\\r|\\s)*`","\r\n\r\n$sUseContent\r\n",$sContentTidyUse);
 		}
 		
 		$sContent = '';
-		$sContent .= $sContentTidyUse."\n";
+		$sContent .= $sContentTidyUse."\r\n";
 		
 		return $sContent ;
 	}
 	
 	private function tidyCloseTag($sContent){
-		$sContent = preg_replace('`(\n|\r|\s)*\?>(\n|\r|\s)*$`','',$sContent);
+		$sContent = preg_replace('`(\n|\r|\s)*\?>(\n|\r|\s)*$`',"\r\n",$sContent);
 		return $sContent ;
 	}
 	
+	const COPY_RIGHT_MARK = '/*-- Project Introduce --*/';
 	private function addCopyRight($sContent,$sCopyRight){
-		$sContent = preg_replace('`(<\?php)`',"\\1\n/*\n$sCopyRight\n*/",$sContent);
+		$sPregMark = "`^\\s*(<\?php)(\n|\r)*.*\n".preg_quote(self::COPY_RIGHT_MARK).'`s';
+		$sMark = self::COPY_RIGHT_MARK ;
+		if(preg_match($sPregMark,$sContent)){
+			$sContent = preg_replace($sPregMark,"\\1\r\n$sCopyRight\r\n$sMark",$sContent);
+		}else{
+			$sContent = preg_replace('`^\\s*(<\?php)`',"\\1\r\n$sCopyRight\r\n$sMark",$sContent);
+		}
 		return $sContent ;
 	}
 	
@@ -134,7 +141,7 @@ class SourceCodeTidy extends Object{
 		$sContent = preg_replace_callback(
 			$sPreg,
 			function($arrMatch){
-				return '<<<'.$arrMatch[1].$arrMatch[2].base64_encode($arrMatch[3])."\n".$arrMatch[1];
+				return '<<<'.$arrMatch[1].$arrMatch[2].base64_encode($arrMatch[3])."\r\n".$arrMatch[1];
 			},
 			$sContent
 		);
@@ -144,7 +151,7 @@ class SourceCodeTidy extends Object{
 		$sContent = preg_replace_callback(
 			'`//(.*)($|\r|\n)`',
 			function($arrMatch){
-				return '//'.base64_encode($arrMatch[1])."\n";
+				return '//'.base64_encode($arrMatch[1])."\r\n";
 			},
 			$sContent
 		);
@@ -196,3 +203,4 @@ class SourceCodeTidy extends Object{
 		return $arrUseMap ;
 	}
 }
+

@@ -1,0 +1,123 @@
+<h1>制作发行版本</h1>
+
+
+<msgqueue />
+
+<form method='post' action="?c=org.opencomb.development.toolkit.platform.CreateDistribution" >
+
+	<h2>发行版本信息</h2>
+	<div>
+		产品标题：<input type="text" name="sDistributionTitle" value="蜂巢平台发行版" />
+	</div>
+	<div>
+		产品名称：<input type="text" name="sDistributionName" value="oc-platform-distr" /> 建议：避免使用中文
+	</div>
+	<div>
+		版　　本：<input type="text" name="sDistributionVersion" value="1.0.0.0"  />
+	</div>
+
+	<br />
+	<h2>基础系统</h2>
+	<li style="width:600px">
+		JeCat框架(framework)
+		version: {= \org\jecat\framework\VERSION }
+	</li>
+	
+	<li style="width:600px">
+		蜂巢平台(OpenComb Platform)
+		version: {= \org\opencomb\platform\Platform::singleton()->version() }
+	</li>
+	
+	<br />
+	<h2>选择扩展</h2>
+	<script>
+	var mapExtensionDependences = {} ;
+	var mapExtensionRevertDependences = {} ;
+	<foreach for='$arrExtension' item='ext'>
+	mapExtensionRevertDependences['{=$ext->name()}'] = {} ;
+	</foreach>
+	
+	function onClickExtension(sExtName,wndInput)
+	{
+		if(wndInput.checked)
+		{
+			// 检查并自动选择依赖扩展
+			for(var idx in mapExtensionDependences[sExtName])
+			{
+				var sDepenExtName = mapExtensionDependences[sExtName][idx] ;
+				if( jquery('#chk-'+sDepenExtName).size()>0 )
+				{
+					jquery('#chk-'+sDepenExtName).attr('checked',true) ;
+					// 递归
+					onClickExtension(sDepenExtName,jquery('#chk-'+sDepenExtName).get(0)) ;
+				}
+			}
+		}
+		
+		else
+		{
+			// 禁止取消 coresystem
+			if( sExtName==='coresystem' )
+			{
+				wndInput.checked = true ;
+				alert('不能取消扩展 coresystem ') ;
+				return ;
+			}
+			
+			// 反向取消扩展
+			for(var sRevertDepenExtName in mapExtensionRevertDependences[sExtName])
+			{
+				if( jquery('#chk-'+sRevertDepenExtName).size()>0 )
+				{
+					jquery('#chk-'+sRevertDepenExtName).attr('checked',false) ;
+					onClickExtension(sDepenExtName,jquery('#chk-'+sRevertDepenExtName).get(0)) ;
+				}
+			}
+			
+		}
+		
+	}
+	</script>
+	<foreach for='$arrExtension' item='ext'>
+	<li style="width:600px">
+		
+		<label>
+			<input type='checkbox' id="chk-{=$ext->name()}" name='arrExtensions[{=$ext->name()}]' value='{=$ext->name()}' onclick="onClickExtension('{=$ext->name()}',this) ;" />
+			{=$ext->title()} ({=$ext->name()}:{=$ext->version()})
+		</label>
+		
+		<script>
+		mapExtensionDependences['{=$ext->name()}'] = [] ;
+		<foreach for="$ext->dependence()->iterator()" item="aRequire">
+			<if "$aRequire->type()==\org\opencomb\platform\ext\dependence\RequireItem::TYPE_EXTENSION">
+		mapExtensionDependences['{=$ext->name()}'].push('{=$aRequire->itemName()}') ;
+		mapExtensionRevertDependences['{=$aRequire->itemName()}']['{=$ext->name()}'] = '{=$ext->name()}' ;
+			</if>
+		</foreach>
+		</script>
+	</li>
+	</foreach>
+	<script>
+	jquery('#chk-coresystem').attr('checked',true) ;
+	</script>
+
+
+	<br />
+	<h2>安装包选项</h2>
+	<div>
+		<foreach for="$arrPlatforms" item="arrPlatformInfo" key="sPlatformName" idx='nPlatformIdx'>
+			<label style="display:block">
+				<input type='radio' name='platform' value='{=$sPlatformName}' {#? if($nPlatformIdx===0){ #} checked {#? } #}/>
+				{=$arrPlatformInfo['title']}
+			</label>
+		</foreach>
+			
+		<label style="display:block">
+			<input type=checkbox name="debug-version" value='1' />
+			使用开发版本（携带.git/.svn/.cvs 等版本库）
+		</label>
+	</div>
+
+	<input type='submit' value='生成安装程序' class="coresystem-form-button" />
+	
+</form>

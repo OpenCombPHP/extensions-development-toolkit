@@ -46,4 +46,3 @@ class Toolkit extends Extension
 	}
 	
 }
-

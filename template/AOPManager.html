@@ -14,6 +14,9 @@
 	<div id="class-{=$nClassIdx}-jointpoint-{=$nJointPointIdx}">
 		<div style="margin-left:20px">
 			<span style="color: #0000AC">切入点(连接点)：{=$sJointPointDeclare}</span>
+			<if "$arrOneJointPoint['derived']">
+				<span style="color: #AC0000">(derived: 对所有子类均有效)</span>
+			</if>
 			<foreach for="$arrOneJointPoint['advices']" item='aAdvice' idx='nAdviceIdx'>
 				<div style="margin-left:20px">
 					<div>

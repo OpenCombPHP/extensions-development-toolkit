@@ -1,19 +1,9 @@
 <?php
 namespace org\opencomb\development\toolkit\aspect ;
 
-use org\jecat\framework\lang\aop\jointpoint\JointPointMethodDefine;
 
 class ModelDataUsefulDetecter
 {
-	/**
-	 * @pointcut
-	 */
-	public function pointcutModelData()
-	{
-		return array(
-			new JointPointMethodDefine('org\\jecat\\framework\\mvc\\model\\db\\Model','data') ,
-		) ;
-	}
 	/**
 	 * 在 Model 中记录被访问过的data
 	 * 
@@ -40,17 +30,6 @@ class ModelDataUsefulDetecter
 		}
 	}
 	
-	
-	
-	/**
-	 * @pointcut
-	 */
-	public function pointcutModelPrintStructData()
-	{
-		return array(
-				new JointPointMethodDefine('org\\jecat\\framework\\mvc\\model\\db\\Model','printStructData') ,
-		) ;
-	}
 	/**
 	 * 在 Model::printStruct() 时 打印被访问过的data
 	 *
@@ -70,5 +49,3 @@ class ModelDataUsefulDetecter
 		$aOutput->write ( str_repeat ( "\t", $nDepth+1 ) . "[unuseful datas] : 'columns' => array({$sUnusefulDatas})\r\n\r\n" );
 	}
 }
-
-?>

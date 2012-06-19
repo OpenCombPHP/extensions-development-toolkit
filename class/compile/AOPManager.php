@@ -1,22 +1,12 @@
 <?php
 namespace org\opencomb\development\toolkit\compile ;
 
+use org\opencomb\platform\lang\compile\OcCompilerFactory;
 use org\jecat\framework\lang\oop\Package;
-
-use org\opencomb\platform\system\PlatformSerializer;
-
-use org\opencomb\platform\Platform;
-
-use org\opencomb\platform\system\PlatformFactory;
-
 use org\opencomb\coresystem\auth\Id;
-
 use org\jecat\framework\lang\oop\ClassLoader;
-
 use org\jecat\framework\message\Message;
-
 use org\jecat\framework\lang\aop\Pointcut;
-
 use org\jecat\framework\lang\aop\jointpoint\JointPoint;
 use org\jecat\framework\lang\aop\AOP;
 use org\opencomb\coresystem\mvc\controller\ControlPanel;
@@ -75,10 +65,13 @@ class AOPManager extends ControlPanel
 							$arrAopDetail[$sClass][$sDeclare]['aspects'][] = $aAspect ;
 						}
 					}
+					
+					$arrAopDetail[$sClass][$sDeclare]['derived'] = $aJointPoint->isMatchDerivedClass() ;
 				} 
 			}
 		}
 		
+		//print_r($arrAopDetail) ;
 		$this->aopManager->variables()->set('arrAopDetail',$arrAopDetail) ;
 	}
 	
@@ -90,27 +83,24 @@ class AOPManager extends ControlPanel
 			return ;
 		}
 		
-		if( !$aCompiledFile = ClassLoader::singleton()->searchClass($this->params['class'],Package::compiled) )
+		if( !$sCompiledFile = ClassLoader::singleton()->searchClass($this->params['class'],Package::compiled) )
 		{
 			$this->aopManager->createMessage(Message::failed,'没有在系统中找到 class %s 的编译缓存',$this->params['class']) ;
 		}
-		
+	
 		else
 		{
-			if( $aCompiledFile->delete() )
+			if( unlink($sCompiledFile) )
 			{
-				$this->aopManager->createMessage(Message::success,'class %s 的编译缓存:%s已经删除',array($this->params['class'],$aCompiledFile->path())) ;
+				$this->aopManager->createMessage(Message::success,'class %s 的编译缓存:%s已经删除',array($this->params['class'],$sCompiledFile)) ;
 			}
 			else
 			{
-				$this->aopManager->createMessage(Message::failed,'无法删除class %s 的编译缓存:%s',array($this->params['class'],$aCompiledFile->path())) ;
+				$this->aopManager->createMessage(Message::failed,'无法删除class %s 的编译缓存:%s',array($this->params['class'],$sCompiledFile)) ;
 			}
 		}
 		
-		PlatformSerializer::singleton()->clearRestoreCache() ;
-		$this->aopManager->createMessage(Message::success,'已经情况系统缓存。') ;
+		OcCompilerFactory::singleton()->create()->compileClass($this->params['class']) ;
+		$this->aopManager->createMessage(Message::success,'重新编译 class %s ',array($this->params['class'])) ;
 	}
 }
-
-
-?>

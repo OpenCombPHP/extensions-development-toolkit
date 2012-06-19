@@ -2,7 +2,6 @@
 namespace org\opencomb\development\toolkit\platform ;
 
 use org\opencomb\coresystem\auth\Id;
-
 use org\jecat\framework\fs\Folder;
 use org\jecat\framework\message\Message;
 use org\opencomb\coresystem\mvc\controller\ControlPanel;
@@ -69,5 +68,30 @@ class ClearCache extends ControlPanel
 				$this->form->createMessage(Message::failed,'清除模板编译缓存失败') ;
 			}
 		}
+		
+		if( $this->params->has('clear_model_compiled') )
+		{
+			if( Folder::singleton()->deleteChild('/data/cache/platform/db',true,true) )
+			{
+				$this->form->createMessage(Message::success,'数据库结构缓存 已经被清除') ;	
+			}
+			else
+			{
+				$this->form->createMessage(Message::failed,'数据库结构编译缓存失败') ;
+			}
+		}
+		
+		if( $this->params->has('clear_shadow_compiled') )
+		{
+			if( Folder::singleton()->deleteChild('/data/class',true,true) )
+			{
+				$this->form->createMessage(Message::success,'“影子类”缓存 已经被清除') ;	
+			}
+			else
+			{
+				$this->form->createMessage(Message::failed,'“影子类”编译缓存失败') ;
+			}
+		}
 	}
 }
+

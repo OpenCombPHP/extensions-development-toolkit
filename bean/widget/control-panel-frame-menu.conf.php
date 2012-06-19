@@ -3,11 +3,12 @@ return array(
 	'item:development' => array(
 		'title' => '开发' ,
 		'link' => '?c=org.opencomb.development.toolkit.platform.ClearCache' ,
+		'query' => 'c=org.opencomb.development.toolkit.platform.ClearCache' ,
 		
 		// items
 		'menu' => 1,
 		'item:extension' => array(
-			'title' => '扩展' ,
+			'title' => '发布' ,
 			'link' => '?c=org.opencomb.development.toolkit.extension.ExtensionPackages' ,
 			
 			// items
@@ -22,28 +23,11 @@ return array(
 					'link' => '?c=org.opencomb.development.toolkit.extension.ExtensionPackages' ,
 					'query' => 'c=org.opencomb.development.toolkit.extension.ExtensionPackages' ,
 			) ,
-			'item:createsetup' => array(
-					'title'=>'生成setup' ,
-					'link' => '?c=org.opencomb.development.toolkit.extension.createsetup.SelectExtension' ,
-					'query' => array(
-							'c=org.opencomb.development.toolkit.extension.createsetup.SelectExtension' ,
-							'c=org.opencomb.development.toolkit.extension.createsetup.SelectItem' ,
-							'c=org.opencomb.development.toolkit.extension.createsetup.CreateSetup',
-						),
-			) ,
-		),
-		'item:platform' => array(
-			'title' => '平台' ,
-			'link' => '?c=org.opencomb.development.toolkit.platform.createpackage.SelectItem' ,
-			'query' => 'c=org.opencomb.development.toolkit.platform.createpackage.SelectItem' ,
-			'menu' => 1 ,
 			'item:create-package' => array(
-				'title' => '二次发布' ,
-				'link' => '?c=org.opencomb.development.toolkit.platform.createpackage.SelectItem' ,
+				'title' => '制作发行版本' ,
+				'link' => '?c=org.opencomb.development.toolkit.platform.CreateDistribution' ,
 				'query' => array(
-						'c=org.opencomb.development.toolkit.platform.createpackage.SelectItem' ,
-						'c=org.opencomb.development.toolkit.platform.createpackage.ShowVersion' ,
-						'c=org.opencomb.development.toolkit.platform.createpackage.CreatePackage' ,
+						'c=org.opencomb.development.toolkit.platform.CreateDistribution' ,
 				),
 			),
 		),
@@ -67,6 +51,11 @@ return array(
 					'link' => '?c=org.opencomb.development.toolkit.compile.AOPManager' ,
 					'query' => 'c=org.opencomb.development.toolkit.compile.AOPManager' ,
 			) ,
+			'item:codeTidy' => array(
+					'title' => '源代码格式化' ,
+					'link' => '?c=org.opencomb.development.toolkit.compile.CodeTidyView' ,
+					'query' => 'c=org.opencomb.development.toolkit.compile.CodeTidyView' ,
+			),
 		) ,
 	) ,
 ) ;

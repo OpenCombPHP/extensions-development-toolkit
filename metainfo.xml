@@ -1,8 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
 <Extension>
 
 	<name>development-toolkit</name>
 	<version>0.1</version>
 	<title>开发工具箱</title>
+	<description>
+为蜂巢的扩展开发和发行版本制作提供一系列的工具：
+* 创建新扩展
+* 将指定扩展打包成可用于发布的安装包
+* 制作蜂巢的发行版本
+* 清空系统缓存
+* AOP规则浏览器
+* 模板编织规则浏览器
+* PHP Class 源代码格式化
+	</description>
 	
 	<package folder="/class" namespace="org.opencomb.development.toolkit" >
 		</package>
