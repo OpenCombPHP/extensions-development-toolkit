@@ -1,14 +1,4 @@
 <?php
-<<<<<<< Updated upstream
-namespace org\opencomb\development\toolkit ;
-
-use org\jecat\framework\bean\BeanFactory;
-use org\opencomb\platform\Platform;
-use org\jecat\framework\lang\aop\AOP;
-use org\opencomb\platform\ext\Extension;
-use org\opencomb\development\toolkit\aspect\SysteExecuteTimeLog ;
-
-=======
 namespace org\opencomb\development\toolkit ;
 
 use org\opencomb\coresystem\mvc\controller\ControlPanel;
@@ -17,38 +7,43 @@ use org\jecat\framework\bean\BeanFactory;
 use org\jecat\framework\lang\aop\AOP;
 use org\opencomb\platform\ext\Extension;
 
->>>>>>> Stashed changes
 class Toolkit extends Extension
 {
 	public function load()
 	{
-<<<<<<< Updated upstream
-		$aAop = AOP::singleton() ;
-		$aAop->register('org\\opencomb\\development\\toolkit\\aspect\\ControlPanelFrameAspect') ;
-		
-		if(Platform::singleton()->isDebugging())
-=======
+		// 注册菜单build事件的处理函数
 		ControlPanel::registerMenuHandler( array(__CLASS__,'buildControlPanelMenu') ) ;
-		
+
 		if(Service::singleton()->isDebugging())
->>>>>>> Stashed changes
 		{
-			$aAop->register('org\\opencomb\\development\\toolkit\\aspect\\ModelDataUsefulDetecter') ;
-			
-			$aAop->registerBean(array(
-					// jointponts
-					'org\\jecat\\framework\\mvc\\controller\\Controller::__construct' ,
-					'org\\jecat\\framework\\mvc\\controller\\Controller::process[derived]' ,
-					// advices
-					array('org\\opencomb\\development\\toolkit\\aspect\\SysteExecuteTimeLog','executeTimeLogger') ,
-			),__FILE__) ;
-			
-			// 
-			
-			
+			AOP::singleton()
+				->registerBean(array(
+						// jointpoint
+						'org\\jecat\\framework\\mvc\\model\\db\\Model::data()' ,
+						// advice
+						array('org\\opencomb\\development\\toolkit\\aspect\\ModelDataUsefulDetecter','data')						
+				),__FILE__)
+				
+				->registerBean(array(
+						// jointpoint
+						'org\\jecat\\framework\\mvc\\model\\db\\Model::printStructData()' ,
+						// advice
+						array('org\\opencomb\\development\\toolkit\\aspect\\ModelDataUsefulDetecter','printStructData')
+				),__FILE__) ;
+				
+			$aAop = AOP::singleton() ;
 		}
+	}
+	
+	static public function buildControlPanelMenu(array & $arrConfig)
+	{
+		// 合并配置数组，增加菜单
+		BeanFactory::mergeConfig(
+				$arrConfig
+				, BeanFactory::singleton()->findConfig('widget/control-panel-frame-menu','development-toolkit')
+		) ;
+		
 	}
 	
 }
 
-?>
