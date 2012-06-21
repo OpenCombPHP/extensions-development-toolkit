@@ -8,10 +8,9 @@ use org\opencomb\platform\ext\Extension;
 use org\jecat\framework\fs\Folder;
 
 class SelectItem extends ControlPanel{
-	public function createBeanConfig(){
-		return array(
+	protected $arrConfig = array(
 			'title'=>'选择安装程序内容',
-			'view:selectItem' => array(
+			'view' => array(
 				'template' => 'SelectItem.html' ,
 			),
 			'perms' => array(
@@ -22,7 +21,6 @@ class SelectItem extends ControlPanel{
 				) ,
 			) ,
 		) ;
-	}
 
 	public function process()
 	{
@@ -35,9 +33,9 @@ class SelectItem extends ControlPanel{
 		$aDataFileFolder = new Folder($aExtension->metainfo()->installPath().'/data/public') ;
 		
 		// set to template
-		$this->selectItem->variables()->set('extName',$extName) ;
-		$this->selectItem->variables()->set('tableList',$tableList);
-		$this->selectItem->variables()->set('aDataFileFolder',$aDataFileFolder);
+		$this->view()->variables()->set('extName',$extName) ;
+		$this->view()->variables()->set('tableList',$tableList);
+		$this->view()->variables()->set('aDataFileFolder',$aDataFileFolder);
 	}
 	
 	public function getExtDBTableList($extName , $prefix){

@@ -2,7 +2,7 @@
 <Extension>
 
 	<name>development-toolkit</name>
-	<version>0.1</version>
+	<version>0.2</version>
 	<title>开发工具箱</title>
 	<description>
 为蜂巢的扩展开发和发行版本制作提供一系列的工具：
@@ -24,6 +24,6 @@
 	
 	<publicFolder folder="/public.oc.setup" for="development-toolkit.oc.setup" />
 	
-	<require type="extension" item='coresystem'><![CDATA[ >=0.1 ]]></require>
+	<require type="extension" item='coresystem'><![CDATA[ =0.2 ]]></require>
 	
 </Extension>

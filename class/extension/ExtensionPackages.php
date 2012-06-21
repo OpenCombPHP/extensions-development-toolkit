@@ -14,11 +14,9 @@ use org\jecat\framework\fs\FSIterator;
 // /?c=org.opencomb.development.toolkit.extension.ExtensionPackages
 
 class ExtensionPackages extends ControlPanel{
-	public function createBeanConfig()
-	{
-		return array(
+	protected $arrConfig = array(
 			'title'=>'扩展打包',
-			'view:extensionPackages' => array(
+			'view' => array(
 				'template' => 'ExtensionPackages.html' ,
 			),
 			'perms' => array(
@@ -29,7 +27,6 @@ class ExtensionPackages extends ControlPanel{
 				) ,
 			) ,
 		) ;
-	}
 
 	public function process()
 	{
@@ -39,8 +36,8 @@ class ExtensionPackages extends ControlPanel{
 		
 		$aPackageFolder = $this->getPackageFolder();
 		
-		$this->extensionPackages->variables()->set('packageFolder',$aPackageFolder->path());
-		$this->extensionPackages->variables()->set('packageList',$this->packageList()) ;
+		$this->view()->variables()->set('packageFolder',$aPackageFolder->path());
+		$this->view()->variables()->set('packageList',$this->packageList()) ;
 	}
 	
 	protected function actionPackage(){

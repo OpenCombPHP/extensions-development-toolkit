@@ -13,10 +13,9 @@ use org\jecat\framework\fs\Folder;
 use org\jecat\framework\message\Message;
 
 class CreateSetup extends ControlPanel{
-	public function createBeanConfig(){
-		return array(
+	protected $arrConfig = array(
 			'title'=>'生成安装程序',
-			'view:createSetup' => array(
+			'view' => array(
 				'template' => 'CreateSetup.html' ,
 			),
 			'perms' => array(
@@ -27,7 +26,6 @@ class CreateSetup extends ControlPanel{
 				) ,
 			) ,
 		) ;
-	}
 
 	public function process()
 	{
@@ -107,11 +105,11 @@ class CreateSetup extends ControlPanel{
 			$this->createMessage(Message::success,"更型了扩展 %s 的 metainfo 文件：%s",array($extName,$sMetainfoFilePath)) ;
 		}
 		// template
-		$this->createSetup->variables()->set('extName',$extName);
-		$this->createSetup->variables()->set('arrTableInfoList',$this->arrTableInfoList);
-		$this->createSetup->variables()->set('setting',$this->setting);
-		$this->createSetup->variables()->set('dataFolder',$this->sDataFolder);
-		$this->createSetup->variables()->set('setupCode',$strSetupCode);
+		$this->view()->variables()->set('extName',$extName);
+		$this->view()->variables()->set('arrTableInfoList',$this->arrTableInfoList);
+		$this->view()->variables()->set('setting',$this->setting);
+		$this->view()->variables()->set('dataFolder',$this->sDataFolder);
+		$this->view()->variables()->set('setupCode',$strSetupCode);
 		
 		$this->createMessage(Message::success,"生成了扩展 %s 的数据安装类：%s",array($extName,$aCodeFile->path())) ;
 	}
