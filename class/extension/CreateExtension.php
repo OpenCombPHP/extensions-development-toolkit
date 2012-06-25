@@ -3,12 +3,14 @@ namespace org\opencomb\development\toolkit\extension ;
 
 use org\jecat\framework\fs\File;
 use org\opencomb\coresystem\auth\Id;
+use org\opencomb\platform\Platform;
 use org\jecat\framework\fs\Folder;
 use org\jecat\framework\setting\Setting;
 use org\jecat\framework\lang\Exception;
 use org\jecat\framework\ui\xhtml\UIFactory;
 use org\jecat\framework\message\Message;
 use org\opencomb\coresystem\mvc\controller\ControlPanel;
+use org\opencomb\coresystem\system\ExtensionSetupFunctions ;
 use org\opencomb\platform as oc;
 
 class CreateExtension extends ControlPanel
@@ -28,13 +30,10 @@ class CreateExtension extends ControlPanel
 	 * @example /校验器/字符长度校验器(Length):Bean格式演示[2]
 	 * @forwiki /校验器/字符长度校验器(Length)
 	 */
-	public function createBeanConfig()
-	{
-		return array(
+	protected $arrConfig = array(
 			'title'=>'创建扩展',
-			'view:Extension' => array(
+			'view' => array(
 				'template' => 'CreateExtension.html' ,
-				'class' => 'form' ,
 				'widgets' => array(
 					'extName' => array(
 						'class' => 'text' ,
@@ -74,30 +73,32 @@ class CreateExtension extends ControlPanel
 				) ,
 			) ,
 		) ;
-	}
 
 	public function process()
 	{
 		$this->checkPermissions('您没有使用这个功能的权限,无法继续浏览',array()) ;
 		
-		if( $this->viewExtension->isSubmit( $this->params ) )
-		{do{
-			$this->viewExtension->loadWidgets( $this->params ) ;
+		$this->doActions();
+	}
+	
+	public function form(){
+		do{
+			$this->view()->loadWidgets( $this->params ) ;
 			
-			if( !$this->viewExtension->verifyWidgets() )
+			if( !$this->view()->verifyWidgets() )
 			{
 				break ;
 			}
 			
-			$sExtName = trim($this->viewExtension->widget('extName')->value()) ;
-			$sExtVersion = $this->viewExtension->widget('extVersion')->value() ;
-			$sExtTitle = trim($this->viewExtension->widget('extTitle')->value()) ;
-			$sClassNamespace = $this->viewExtension->widget('extClassNamespace')->value() ;
+			$sExtName = trim($this->view()->widget('extName')->value()) ;
+			$sExtVersion = $this->view()->widget('extVersion')->value() ;
+			$sExtTitle = trim($this->view()->widget('extTitle')->value()) ;
+			$sClassNamespace = $this->view()->widget('extClassNamespace')->value() ;
 			
 			// 检查扩展名称中的非法字符
 			if( !self::isExtensionNameValid($sExtName) )
 			{
-				$this->viewExtension->messageQueue()->create(Message::error,"扩展名称存在不合法的字符") ;
+				$this->view()->messageQueue()->create(Message::error,"扩展名称存在不合法的字符") ;
 				break ;
 			}
 			
@@ -106,14 +107,14 @@ class CreateExtension extends ControlPanel
 			// 检查扩展是否存在
 			if( $aExtMgr->extensionMetainfo($sExtName) )
 			{
-				$this->viewExtension->messageQueue()->create(Message::error,"无法创建新扩展，系统中已经安装了名为%s的扩展",$sExtName) ;
+				$this->view()->messageQueue()->create(Message::error,"无法创建新扩展，系统中已经安装了名为%s的扩展",$sExtName) ;
 				break ;
 			}
 			
 			$sInstallPath = oc\EXTENSIONS_FOLDER."/{$sExtName}/{$sExtVersion}" ;
 			if( file_exists('$sInstallPath') )
 			{
-				$this->viewExtension->messageQueue()->create(Message::error,"无法在路径上创建新扩展，目录已经存在：%s",$sInstallPath) ;
+				$this->view()->messageQueue()->create(Message::error,"无法在路径上创建新扩展，目录已经存在：%s",$sInstallPath) ;
 				break ;
 			}
 			
@@ -146,35 +147,24 @@ class CreateExtension extends ControlPanel
 				)) ;
 			}
 			
-			$this->viewExtension->messageQueue()->create(Message::success,"创建了新扩展：%s",$sInstallPath) ;
+			$this->view()->messageQueue()->create(Message::success,"创建了新扩展：%s",$sInstallPath) ;
 			
 			// 立即安装
-			if( $this->viewExtension->widget('extInstallAtOnce')->value() )
+			if( $this->view()->widget('extInstallAtOnce')->value() )
 			{
-				$aSetting = Setting::singleton() ;
+				$aExtFolder = Platform::singleton()->installFolder()->findFolder( 'extensions/'.$sExtName.'/'.$sExtVersion );
 				
-				// 安装
-				$arrInstalleds = $aSetting->item('/extensions','installeds',array()) ;
-				$arrInstalleds[] = $sExtName.'/'.$sExtVersion ;
-				$aSetting->setItem('/extensions','installeds',$arrInstalleds) ;
-				
-				// 激活
-				$arrEnable = $aSetting->item('/extensions','enable',array()) ;
-				$arrEnable[3][] = $sExtName ;
-				$aSetting->setItem('/extensions','enable',$arrEnable) ;
-				
-				$aSetting->saveKey('/extensions') ;
-				
-				$this->viewExtension->messageQueue()->create(Message::success,"新扩展 %s 已经安装到系统中",$sExtName) ;
+				$aExtSetupFun = new ExtensionSetupFunctions($this->view()->messageQueue() );
+				$aExtSetupFun->installAndEnableExtension( $aExtFolder );
 			}
 
-		}while(0) ;}
+		}while(0) ;
 	}
 
 	private function createFolder($sPath)
 	{
 		Folder::createFolder($sPath) ;
-		$this->viewExtension->messageQueue()->create(Message::notice,"创建目录：%s",$sPath) ;
+		$this->view()->messageQueue()->create(Message::notice,"创建目录：%s",$sPath) ;
 	}
 	
 	private function createFile($sPath,$sTemplate,$arrVariables=null)
@@ -191,14 +181,14 @@ class CreateExtension extends ControlPanel
 		}
 		catch (Exception $e)
 		{
-			$this->viewExtension->messageQueue()->create(
+			$this->view()->messageQueue()->create(
 				Message::failed
 				, "创建文件失败，".$e->getMessage()
 				, $e->messageArgvs()
 			) ;
 		}
 		
-		$this->viewExtension->messageQueue()->create(Message::notice,"创建文件：%s",$sPath) ;
+		$this->view()->messageQueue()->create(Message::notice,"创建文件：%s",$sPath) ;
 	}
 	
 	static public function isExtensionNameValid($sName)

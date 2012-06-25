@@ -5,15 +5,14 @@ use org\jecat\framework\message\Message;
 use org\opencomb\platform\lang\compile\OcCompilerFactory;
 use org\opencomb\coresystem\auth\Id;
 use org\jecat\framework\lang\oop\ClassLoader;
+use org\jecat\framework\lang\oop\Package;
 use org\opencomb\coresystem\mvc\controller\ControlPanel;
 
 class RemoveCache extends ControlPanel
 {
-	public function createBeanConfig()
-	{
-		return array(
+	protected $arrConfig = array(
 			'title'=>'清理缓存',
-			'view:form' => array(
+			'view' => array(
 				'template' => 'RemoveCache.html' ,
 			),
 			'perms' => array(
@@ -24,7 +23,6 @@ class RemoveCache extends ControlPanel
 					) ,
 			) ,
 		) ;
-	}
 
 	public function process()
 	{
@@ -58,10 +56,10 @@ class RemoveCache extends ControlPanel
 				$sMessage .=  '编译类 :'.$sClassName . "<br/>";
 				
 			}
-			$this->viewForm->createMessage(Message::success,$sMessage) ;
+			$this->view()->createMessage(Message::success,$sMessage) ;
 		}
 		
-		$this->viewForm->variables()->set('classJson',json_encode( $this->getTree(ClassLoader::singleton()->packageIterator()) )) ;
+		$this->view()->variables()->set('classJson',json_encode( $this->getTree(ClassLoader::singleton()->packageIterator(Package::source)) )) ;
 	}
 	
 	private function getTree($aPackageIterator){

@@ -13,12 +13,10 @@ use org\opencomb\coresystem\mvc\controller\ControlPanel;
 
 class AOPManager extends ControlPanel
 {
-	public function createBeanConfig()
-	{
-		return array(
+	protected $arrConfig = array(
 			'title'=>'AOP管理',
-			'view:aopManager' => array(
-				'template' => 'AOPManager.html' ,
+			'view' => array(
+				'template' => 'compile/AOPManager.html' ,
 			),
 			'perms' => array(
 				// 权限类型的许可
@@ -28,7 +26,6 @@ class AOPManager extends ControlPanel
 				) ,
 			) ,
 		) ;
-	}
 
 	public function process()
 	{
@@ -72,7 +69,7 @@ class AOPManager extends ControlPanel
 		}
 		
 		//print_r($arrAopDetail) ;
-		$this->aopManager->variables()->set('arrAopDetail',$arrAopDetail) ;
+		$this->view()->variables()->set('arrAopDetail',$arrAopDetail) ;
 	}
 	
 	protected function actionClearClassCompliled()

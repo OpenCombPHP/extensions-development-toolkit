@@ -12,13 +12,11 @@ use org\opencomb\platform\ext\ExtensionManager;
 use org\jecat\framework\message\Message;
 
 class CodeTidyView extends ControlPanel{
-	public function createBeanConfig(){
-		return array(
-			'view:view' => array(
-				'template' => 'CodeTidyView.html' ,
+	protected $arrConfig = array(
+			'view' => array(
+				'template' => 'compile/CodeTidyView.html' ,
 			)
 		);
-	}
 	
 	public function process(){
 		$this->doActions() ;
@@ -48,8 +46,8 @@ class CodeTidyView extends ControlPanel{
 			
 			$arrPackages = array() ;
 			foreach($aExtMeta->packageIterator() as $arrPackage){
-				$sNs = str_replace('\\','.',$arrPackage[0]);
-				$sPackagePath = $aExtMeta->installPath().$arrPackage[1] ;
+				$sNs = str_replace('\\','.',$arrPackage[1]);
+				$sPackagePath = $aExtMeta->installPath().$arrPackage[0] ;
 				$aFolder = Folder::singleton()->findFolder($sPackagePath);
 				$arrPackages [] = array(
 					'ns' => $sNs,
@@ -62,7 +60,7 @@ class CodeTidyView extends ControlPanel{
 		$this->view->variables()->set('arrExtPackageList',$arrExtPackageList);
 	}
 	
-	public function actionTidy(){
+	public function form(){
 		$arrConf = $this->params['arrConf'] ;
 		if( !is_array($arrConf) ){
 			$arrConf = array() ;

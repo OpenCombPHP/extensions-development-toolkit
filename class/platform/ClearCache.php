@@ -8,12 +8,9 @@ use org\opencomb\coresystem\mvc\controller\ControlPanel;
 
 class ClearCache extends ControlPanel
 {
-
-	public function createBeanConfig()
-	{
-		return array(
-			'view:form' => array(
-				'template' => 'ClearCache.html' ,
+	protected $arrConfig = array(
+			'view' => array(
+				'template' => 'platform/ClearCache.html' ,
 			),
 			'controller:removeCache' => array(
 					'class' => 'org\\opencomb\\development\\toolkit\\platform\\RemoveCache' ,
@@ -27,7 +24,6 @@ class ClearCache extends ControlPanel
 					) ,
 			) ,
 		) ;
-	}
 
 	public function process()
 	{
@@ -37,11 +33,11 @@ class ClearCache extends ControlPanel
 		{
 			if( Folder::singleton()->deleteChild('/data/cache/platform/system/objects',true,true) )
 			{
-				$this->form->createMessage(Message::success,'系统缓存 已经被清除') ;				
+				$this->view()->createMessage(Message::success,'系统缓存 已经被清除') ;				
 			}
 			else
 			{
-				$this->form->createMessage(Message::failed,'系统缓存失败') ;
+				$this->view()->createMessage(Message::failed,'系统缓存失败') ;
 			}
 		}
 		
@@ -49,11 +45,11 @@ class ClearCache extends ControlPanel
 		{
 			if( Folder::singleton()->deleteChild('/data/compiled/class',true,true) )
 			{
-				$this->form->createMessage(Message::success,'类编译缓存 已经被清除') ;
+				$this->view()->createMessage(Message::success,'类编译缓存 已经被清除') ;
 			}
 			else
 			{
-				$this->form->createMessage(Message::failed,'清除类编译缓存失败') ;
+				$this->view()->createMessage(Message::failed,'清除类编译缓存失败') ;
 			}	
 		}
 		
@@ -61,11 +57,11 @@ class ClearCache extends ControlPanel
 		{
 			if( Folder::singleton()->deleteChild('/data/compiled/template',true,true) )
 			{
-				$this->form->createMessage(Message::success,'模板编译缓存 已经被清除') ;	
+				$this->view()->createMessage(Message::success,'模板编译缓存 已经被清除') ;	
 			}
 			else
 			{
-				$this->form->createMessage(Message::failed,'清除模板编译缓存失败') ;
+				$this->view()->createMessage(Message::failed,'清除模板编译缓存失败') ;
 			}
 		}
 		
@@ -73,11 +69,11 @@ class ClearCache extends ControlPanel
 		{
 			if( Folder::singleton()->deleteChild('/data/cache/platform/db',true,true) )
 			{
-				$this->form->createMessage(Message::success,'数据库结构缓存 已经被清除') ;	
+				$this->view()->createMessage(Message::success,'数据库结构缓存 已经被清除') ;	
 			}
 			else
 			{
-				$this->form->createMessage(Message::failed,'数据库结构编译缓存失败') ;
+				$this->view()->createMessage(Message::failed,'数据库结构编译缓存失败') ;
 			}
 		}
 		
@@ -85,11 +81,11 @@ class ClearCache extends ControlPanel
 		{
 			if( Folder::singleton()->deleteChild('/data/class',true,true) )
 			{
-				$this->form->createMessage(Message::success,'“影子类”缓存 已经被清除') ;	
+				$this->view()->createMessage(Message::success,'“影子类”缓存 已经被清除') ;	
 			}
 			else
 			{
-				$this->form->createMessage(Message::failed,'“影子类”编译缓存失败') ;
+				$this->view()->createMessage(Message::failed,'“影子类”编译缓存失败') ;
 			}
 		}
 	}

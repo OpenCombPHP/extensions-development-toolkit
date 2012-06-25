@@ -17,12 +17,10 @@ use org\jecat\framework\util\Version;
 
 class CreateDistribution extends ControlPanel
 {
-	public function createBeanConfig(){
-		return array(
+	protected $arrConfig = array(
 			'title'=>'创建发行版本',
-			'view:view' => array(
+			'view' => array(
 				'template' => 'platform/CreateDistribution.html' ,
-				'class' => 'form' ,
 			),
 			'perms' => array(
 					// 权限类型的许可
@@ -31,7 +29,6 @@ class CreateDistribution extends ControlPanel
 					) ,
 			) ,
 		) ;
-	}
 	
 	public function process()
 	{
@@ -48,7 +45,7 @@ class CreateDistribution extends ControlPanel
 		$this->view->variables()->set('arrExtension',ExtensionManager::singleton()->metainfoIterator());
 	}
 	
-	protected function actionSubmit()
+	protected function form()
 	{
 		if(empty($this->params['platform']) or !isset(self::$arrPlatforms[$this->params['platform']]))
 		{

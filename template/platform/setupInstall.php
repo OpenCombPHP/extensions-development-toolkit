@@ -39,6 +39,7 @@ function checkDbSetting()
 
 function setupSetting($sService,$sDbTablePrefix)
 {
+	global $framework_version,$platform_version;
 	// 写入 setting -----------------------------
 	$name = $_REQUEST['websiteName'];
 	$arrSettings = array(
@@ -74,9 +75,13 @@ function setupSetting($sService,$sDbTablePrefix)
 	$sServiceSetting = '{='<?php'} return '.var_export(array(
 			'default' => array(
 					'domains' => array('*',$_REQUEST['websiteHost']) ,
+					'framework_version' => $framework_version,
+					'platform_version' => $platform_version,
 			) ,
 			'safemode' => array(
 					'domains' => array('safemode') ,
+					'framework_version' => $framework_version,
+					'platform_version' => $platform_version,
 			) ,
 	),true).';' ;
 	if( !file_put_contents(install_service.'/settings.inc.php',$sServiceSetting) )
@@ -146,13 +151,13 @@ function insertAdminUser()
 	$aDB = \org\jecat\framework\db\DB::singleton() ;
 	
 	// 管理员用户组
-	insertTableRow('coresystem_group',array(
+	insertTableRow($aDB->transTableName('coresystem:group'),array(
 			'gid' => 1 ,
 			'name' => '系统管理员组' ,
 			'lft' => 1 ,
 			'rgt' => 2 ,
 	)) ;
-	insertTableRow('coresystem_purview',array(
+	insertTableRow($aDB->transTableName('coresystem:purview'),array(
 			'type' => 'group' ,
 			'id' => 1 ,
 			'extension' => 'coresystem' ,
@@ -160,14 +165,14 @@ function insertAdminUser()
 	)) ;
 
 	// 管理员帐号
-	insertTableRow('coresystem_user',array(
+	insertTableRow($aDB->transTableName('coresystem:user'),array(
 			'uid' => 1 ,
 			'username' => $_REQUEST['adminName'] ,
 			'password' => md5( md5(md5($_REQUEST['adminName'])) . md5($_REQUEST['adminPswd']) ) ,
 			'registerTime' => time() ,
 			'registerIp' => $_SERVER['REMOTE_ADDR'] ,
 	)) ;
-	insertTableRow('coresystem_group_user_link',array(
+	insertTableRow($aDB->transTableName('coresystem:group_user_link'),array(
 			'uid' => 1 ,
 			'gid' => 1 ,
 	)) ;

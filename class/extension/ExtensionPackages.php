@@ -17,7 +17,7 @@ class ExtensionPackages extends ControlPanel{
 	protected $arrConfig = array(
 			'title'=>'扩展打包',
 			'view' => array(
-				'template' => 'ExtensionPackages.html' ,
+				'template' => 'extension/ExtensionPackages.html' ,
 			),
 			'perms' => array(
 				// 权限类型的许可
@@ -40,7 +40,7 @@ class ExtensionPackages extends ControlPanel{
 		$this->view()->variables()->set('packageList',$this->packageList()) ;
 	}
 	
-	protected function actionPackage(){
+	protected function package(){
 		$name = $this->params['name'];
 		$includeGit = $this->params['includeGit'];
 		
@@ -56,7 +56,7 @@ class ExtensionPackages extends ControlPanel{
 			{
 				if(!unlink($aPackagedFSO->path()))
 				{
-					$this->extensionPackages->createMessage(Message::error,'清除原有扩展包文件失败:%s',$aPackagedFSO->path());
+					$this->view()->createMessage(Message::error,'清除原有扩展包文件失败:%s',$aPackagedFSO->path());
 					return ;
 				}
 			}
@@ -72,16 +72,16 @@ class ExtensionPackages extends ControlPanel{
 				$sPath = $package['installPath'].'/'.$sSubPath ;
 				if( $aZip->add($sPath,PCLZIP_OPT_REMOVE_PATH,$package['installPath'])===0 )
 				{
-					$this->extensionPackages->createMessage(Message::error,'打包文件时出错:%s',$sPath);
+					$this->view()->createMessage(Message::error,'打包文件时出错:%s',$sPath);
 					return ;
 				}
 				else
 				{
-					$this->extensionPackages->createMessage(Message::success,'打包文件:%s',$sPath);
+					$this->view()->createMessage(Message::success,'打包文件:%s',$sPath);
 				}
 			}
 
-			$this->extensionPackages->createMessage(Message::notice,'%s打包成功',array($name));
+			$this->view()->createMessage(Message::notice,'%s打包成功',array($name));
 			
 			// disable tempsave
 			$this->arrPackageList = null;
@@ -164,13 +164,13 @@ class ExtensionPackages extends ControlPanel{
 		return self::getPackagedFSO($name,$version , $vl)->exists();
 	}
 	
-	static public function createLink($type,$name,$version='',$vl=''){
+	public function createLink($type,$name,$version='',$vl=''){
 		switch($type){
 		case 'package':
 			if(empty($vl)){
-				return '/?c=org.opencomb.development.toolkit.extension.ExtensionPackages&act=package&name='.$name;
+				return '/?c=org.opencomb.development.toolkit.extension.ExtensionPackages&a='.$this->makeActionQuery("package",false).'&name='.$name;
 			}else{
-				return '/?c=org.opencomb.development.toolkit.extension.ExtensionPackages&act=package&name='.$name.'&includeGit=on';
+				return '/?c=org.opencomb.development.toolkit.extension.ExtensionPackages&a='.$this->makeActionQuery("package",false).'&name='.$name.'&includeGit=on';
 			}
 			break;
 		case 'download':

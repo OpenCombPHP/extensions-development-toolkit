@@ -37,6 +37,8 @@ define('install_root',dirname(setup_folder)) ;
 define('install_service',{=$arrPlatformInfo['sInstallServiceFolder']}) ;
 define('ROOT',install_root) ;
 $arrExtensionFolders = {=var_export($arrExtensionFolders,true)} ;
+$framework_version = '{=$framework_version}';
+$platform_version = '{=$platform_version}';
 
 function isFinishedSetup(){
 	{=$finishSetupCheckCode}

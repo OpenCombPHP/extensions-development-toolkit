@@ -21,7 +21,11 @@ return array(
 			'item:extensionpackage' => array(
 					'title'=>'扩展打包' ,
 					'link' => '?c=org.opencomb.development.toolkit.extension.ExtensionPackages' ,
-					'query' => 'c=org.opencomb.development.toolkit.extension.ExtensionPackages' ,
+					'query' => array(
+						'c=org.opencomb.development.toolkit.extension.ExtensionPackages' ,
+						'c=org.opencomb.development.toolkit.extension.createsetup.SelectItem',
+						'c=org.opencomb.development.toolkit.extension.createsetup.CreateSetup',
+					)
 			) ,
 			'item:create-package' => array(
 				'title' => '制作发行版本' ,
@@ -48,8 +52,6 @@ return array(
 			) ,
 			'item:template-weave-manager' => array(
 					'title'=>'模板编织管理' ,
-					'link' => '?c=org.opencomb.development.toolkit.compile.AOPManager' ,
-					'query' => 'c=org.opencomb.development.toolkit.compile.AOPManager' ,
 			) ,
 			'item:codeTidy' => array(
 					'title' => '源代码格式化' ,
