@@ -25,5 +25,6 @@
 	<publicFolder folder="/public.oc.setup" for="development-toolkit.oc.setup" />
 	
 	<require type="extension" item='coresystem'><![CDATA[ =0.2 ]]></require>
+	<require type="extension" item='advancedcomponent'><![CDATA[ =0.2 ]]></require>
 	
 </Extension>

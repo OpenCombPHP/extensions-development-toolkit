@@ -151,13 +151,13 @@ function insertAdminUser()
 	$aDB = \org\jecat\framework\db\DB::singleton() ;
 	
 	// 管理员用户组
-	insertTableRow($aDB->transTableName('coresystem:group'),array(
+	insertTableRow('coresystem:group',array(
 			'gid' => 1 ,
 			'name' => '系统管理员组' ,
 			'lft' => 1 ,
 			'rgt' => 2 ,
 	)) ;
-	insertTableRow($aDB->transTableName('coresystem:purview'),array(
+	insertTableRow('coresystem:purview',array(
 			'type' => 'group' ,
 			'id' => 1 ,
 			'extension' => 'coresystem' ,
@@ -165,14 +165,14 @@ function insertAdminUser()
 	)) ;
 
 	// 管理员帐号
-	insertTableRow($aDB->transTableName('coresystem:user'),array(
+	insertTableRow('coresystem:user',array(
 			'uid' => 1 ,
 			'username' => $_REQUEST['adminName'] ,
 			'password' => md5( md5(md5($_REQUEST['adminName'])) . md5($_REQUEST['adminPswd']) ) ,
 			'registerTime' => time() ,
 			'registerIp' => $_SERVER['REMOTE_ADDR'] ,
 	)) ;
-	insertTableRow($aDB->transTableName('coresystem:group_user_link'),array(
+	insertTableRow('coresystem:group_user_link',array(
 			'uid' => 1 ,
 			'gid' => 1 ,
 	)) ;
@@ -181,17 +181,14 @@ function insertAdminUser()
 }
 function insertTableRow($sTable,$arrData)
 {
+	$aInsert = new \org\jecat\framework\db\sql\Insert ( $sTable );
 	foreach($arrData as $sColumn=>&$value)
 	{
-		if(is_string($value))
-		{
-			$value = "'" . addslashes($value) . "'" ;
-		}
+		$aInsert->setData ( $sColumn , $value );
 	}
-	$sSql = "insert into `{$sTable}` (" .implode(',',array_keys($arrData)) .') values (' . implode(',',$arrData). ") ;" ;
 
 	try{
-		if(!\org\jecat\framework\db\DB::singleton()->execute($sSql))
+		if(!\org\jecat\framework\db\DB::singleton()->execute($aInsert))
 		{
 			output('向数据库导入数据时遇到了错误:'.$sSQL,'error') ;
 			return false ;
@@ -200,6 +197,9 @@ function insertTableRow($sTable,$arrData)
 		if( $e->isDuplicate() )
 		{
 			output('写入数据时遇到重复数据:'.$sSql,'error') ;
+			return false ;
+		}else{
+			output($e->message()) ;
 			return false ;
 		}
 	}
