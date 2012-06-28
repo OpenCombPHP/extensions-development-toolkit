@@ -15,9 +15,10 @@ class DataInstaller implements IExtensionDataInstaller
 		$aExtension = new Extension($aMetainfo);
 		
 		// 1 . create data table
+		$aDB = DB::singleton();
 		<foreach for="$arrTableInfoList" item="tableinfo" key="sTableName">
-		DB::singleton()->execute( "{=$tableinfo['Create Table']}" );
-		$aMessageQueue->create(Message::success,'新建数据表： %s',"{=$sTableName}");
+		$aDB->execute( "{=$tableinfo['Create Table']}" );
+		$aMessageQueue->create(Message::success,'新建数据表： `%s` 成功',"{=$sTableName}");
 		
 		</foreach>
 		

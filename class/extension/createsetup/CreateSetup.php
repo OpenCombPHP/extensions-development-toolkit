@@ -65,7 +65,7 @@ class CreateSetup extends ControlPanel{
 		// namespace 
 		$aPackageIterator = $this->aExtension->metainfo()->packageIterator();
 		$arrPackage = $aPackageIterator->current();
-		$this->ns = $arrPackage[0] ;
+		$this->ns = $arrPackage[1] ;
 		// conf
 		if($bContainConf){
 			$this->setting = $this->getSettings();
@@ -74,13 +74,17 @@ class CreateSetup extends ControlPanel{
 		if($bContainFile and $this->aExtension->filesFolder()->exists() ){
 			$this->sDataFolder = $this->aExtension->metainfo()->installPath().'/data/public';
 			try{
-				$aToFolder = Folder::singleton()->findFolder($this->sDataFolder);
+				$aToFolder = Folder::singleton()->findFolder($this->sDataFolder,Folder::FIND_AUTO_CREATE_OBJECT );
 				if($aToFolder->exists()){
 					$aToFolder->delete(true);
 				}
-				$this->aExtension->filesFolder()->copy($this->sDataFolder);
+				//$this->aExtension->filesFolder()->copy($this->sDataFolder);
+				$this->createMessage(
+					Message::notice,
+					'由于 FSO 中的 copy() 方法被删除，暂时不提供打包文件功能'
+				);
 			}catch(\Exception $e){
-				$this->createSetup->createMessage(Message::error,'copy folder error :%s',$e->message());
+				$this->createMessage(Message::error,'copy folder error :%s',$e->message());
 			}
 		}
 		$strSetupCode = $this->createSetup() ;
@@ -91,18 +95,40 @@ class CreateSetup extends ControlPanel{
 				break;
 			}
 		}
+		
 		$aCodeFile = $aPackage->folder()->findFile('setup/DataInstaller.php',Folder::CREATE_RECURSE_DIR | Folder::FIND_AUTO_CREATE );
-		$aWriter = $aCodeFile->openWriter();
-		$aWriter->write($strSetupCode);
-		$aWriter->flush();
+		try{
+			@$aWriter = $aCodeFile->openWriter();
+			$aWriter->write($strSetupCode);
+			$aWriter->flush();
+			$this->createMessage(Message::success,"生成了扩展 %s 的数据安装类：%s",array($extName,$aCodeFile->path())) ;
+		}catch(\org\jecat\framework\lang\Exception $e){
+			$this->createMessage(
+				Message::error,
+				"无法写入文件：%s ， 请检查是否有写入权限",
+				array(
+					$aCodeFile->path()
+				)
+			) ;
+		}
 		// update meta info
 		if($bUpdateMetainfo){
 			$sMetainfoFilePath = $this->aExtension->metainfo()->installPath().'/metainfo.xml';
 			$aSimpleXML = simplexml_load_file($sMetainfoFilePath) ;
 			$aSimpleXML->data->installer = $this->ns.'\setup\DataInstaller';
-			$aSimpleXML->asXML($sMetainfoFilePath);
-			
-			$this->createMessage(Message::success,"更型了扩展 %s 的 metainfo 文件：%s",array($extName,$sMetainfoFilePath)) ;
+			@$SaveResult = $aSimpleXML->asXML($sMetainfoFilePath);
+			if( $SaveResult ){
+				$this->createMessage(Message::success,"更型了扩展 %s 的 metainfo 文件：%s",array($extName,$sMetainfoFilePath)) ;
+			}else{
+				$this->createMessage(
+					Message::error,
+					"无法更新扩展 %s 的 metainfo 文件：%s ， 请检查是否有写入权限",
+					array(
+						$extName,
+						$sMetainfoFilePath
+					)
+				) ;
+			}
 		}
 		// template
 		$this->view()->variables()->set('extName',$extName);
@@ -110,14 +136,12 @@ class CreateSetup extends ControlPanel{
 		$this->view()->variables()->set('setting',$this->setting);
 		$this->view()->variables()->set('dataFolder',$this->sDataFolder);
 		$this->view()->variables()->set('setupCode',$strSetupCode);
-		
-		$this->createMessage(Message::success,"生成了扩展 %s 的数据安装类：%s",array($extName,$aCodeFile->path())) ;
 	}
 	
 	private function getShowCreateTable($tableName){
 		
 		$aDB = DB::singleton() ;
-		$arrRes = $aDB->query("SHOW CREATE TABLE `$tableName`")->fetch() ;
+		$arrRes = $aDB->query("SHOW CREATE TABLE `".$aDB->transTableName($tableName)."`")->fetch() ;
 		
 		// 去掉数据表前缀
 		if($sTablePrefix=$aDB->tableNamePrefix())
@@ -125,6 +149,12 @@ class CreateSetup extends ControlPanel{
 			$sRealTablename = $sTablePrefix.$tableName ;
 			$arrRes['Create Table'] = str_replace($sRealTablename,$tableName,$arrRes['Create Table']) ;
 		}
+		
+		// 加上transTableName
+		$arrRes['Create Table'] = str_replace(
+			'`'.$tableName.'`'
+			,'`".$aDB->transTableName("'.$tableName.'")."`'
+			,$arrRes['Create Table']) ;
 		
 		// 加入 "if not exists"
 		$arrRes['Create Table'] = str_replace('CREATE TABLE','CREATE TABLE IF NOT EXISTS',$arrRes['Create Table']) ;
