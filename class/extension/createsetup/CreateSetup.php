@@ -188,9 +188,11 @@ class CreateSetup extends ControlPanel{
 		$arrSetting = array();
 		if( null === $aKey ){
 			$aKey = $this->aExtension->setting()->key('/');
+			$path = $parentPath.'/';
+		}else{
+			$path = $parentPath.$aKey->name().'/';
 		}
 		if( $aKey ){
-			$path = $parentPath.'/'.$aKey->name();
 			$arrSeting[$path] = array();
 			// sub keys
 			foreach($aKey->keyIterator() as $aSubKey){
