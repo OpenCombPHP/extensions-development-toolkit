@@ -18,18 +18,18 @@ class DataInstaller implements IExtensionDataInstaller
 		$aDB = DB::singleton();
 		<foreach for="$arrTableInfoList" item="tableinfo" key="sTableName">
 		$aDB->execute( "{=$tableinfo['Create Table']}" );
-		$aMessageQueue->create(Message::success,'新建数据表： `%s` 成功',"{=$sTableName}");
+		$aMessageQueue->create(Message::success,'新建数据表： `%s` 成功',$aDB->transTableName('{=$sTableName}') );
 		
 		</foreach>
 		
-		// 2. insert table data<clear />
+		// 2. insert table data
 		<foreach for="$arrTableInfoList" item="tableinfo" key="sTableName"><clear />
 			<if "!empty($tableinfo['keys'])"><clear />
 		$nDataRows = 0 ;<clear />
 				<foreach for="$tableinfo['data']" item='arrRowData'>
-		$nDataRows+= DB::singleton()->execute( "REPLACE INTO `{=$tableinfo['Table']}` ({=implode(',',$tableinfo['keys'])}) VALUES ({=implode(',',$tableinfo['factors'])}) ", array({=implode(',',$arrRowData)}) ) ;<clear />
+		$nDataRows+= $aDB->execute( 'REPLACE INTO `' . $aDB->transTableName("{=$sTableName}") . '` ({=implode(',',$tableinfo['keys'])}) VALUES ({=implode(',',$arrRowData)}) ') ;<clear />
 				</foreach>
-		$aMessageQueue->create(Message::success,'向数据表%s插入了%d行记录。',array("{=$sTableName}",$nDataRows));
+		$aMessageQueue->create(Message::success,'向数据表%s插入了%d行记录。',array($aDB->transTableName("{=$sTableName}"),$nDataRows));
 			</if>
 		</foreach>
 		

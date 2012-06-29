@@ -164,8 +164,9 @@ class CreateSetup extends ControlPanel{
 	
 	private function getTableData($tableName)
 	{
-		$arrData = $arrCols = array() ;		
-		$aRecordset = DB::singleton()->query("select * from `$tableName`");
+		$arrData = $arrCols = array() ;
+		$aDB = DB::singleton() ;
+		$aRecordset = $aDB->query("select * from `" . $aDB->transTableName( $tableName )."`");
 		
 		foreach($aRecordset as $row)
 		{

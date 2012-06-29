@@ -31,7 +31,7 @@
 			</td>
 		</tr>
 		<foreach for='$tableList' item='tableName' >
-			<tr>
+			<tr onmouseover= "this.bgColor= '#EFEF99';" onmouseout= "this.bgColor= ''; ">
 				<td>{=$tableName}</td>
 				<td><input class='struct' type='checkbox' name="struct[]" value='{=$tableName}' /></td>
 				<td><input class='data' type='checkbox' name='data[]' value='{=$tableName}' /></td>

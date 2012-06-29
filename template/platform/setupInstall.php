@@ -93,6 +93,15 @@ function setupSetting($sService,$sDbTablePrefix)
 	return true ;
 }
 
+function upgradePlatform(){
+	// 检查 service 升级
+	$aDataUpgrader = \org\opencomb\platform\service\upgrader\PlatformDataUpgrader::singleton() ; 
+	if(TRUE === $aDataUpgrader->process()){
+		$aDataUpgrader->messageQueue()->display();
+	}
+	return true;
+}
+
 function installExtensions()
 {
 	global $arrExtensionFolders ;
@@ -190,13 +199,13 @@ function insertTableRow($sTable,$arrData)
 	try{
 		if(!\org\jecat\framework\db\DB::singleton()->execute($aInsert))
 		{
-			output('向数据库导入数据时遇到了错误:'.$sSQL,'error') ;
+			output('向数据库导入数据时遇到了错误','error') ;
 			return false ;
 		}
 	}catch(\org\jecat\framework\db\ExecuteException $e){
 		if( $e->isDuplicate() )
 		{
-			output('写入数据时遇到重复数据:'.$sSql,'error') ;
+			output('写入数据时遇到重复数据:','error') ;
 			return false ;
 		}else{
 			output($e->message()) ;
@@ -228,6 +237,11 @@ function install()
 	// 启动系统
 	$aLoader = require_once install_root.'/common.php';
 	$aLoader->startup();
+	
+	// 执行平台升级程序
+	if(!upgradePlatform()){
+		return false;
+	}
 	
 	// 安装扩展
 	if(!installExtensions())

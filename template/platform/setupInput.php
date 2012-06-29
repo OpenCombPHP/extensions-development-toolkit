@@ -7,6 +7,11 @@ function checkInput(input)
 		div_check.html('不能为空');
 		div_check.addClass('check_error');
 		return false ;
+	}else if( ( input.id == 'adminPswdRepeat' || input.id == 'adminPswd' ) 
+		&& jQuery('#adminPswd').val() != ''
+		&& jQuery('#adminPswdRepeat').val() != ''
+	){
+		return verifyPasswordRepeat() ;
 	}else{
 		div_check.removeClass('check_error');
 		div_check.html('');
@@ -86,14 +91,14 @@ jQuery(function(){
 				<tr>
 					<th></th>
 					<td class="tit">密码：</td>
-					<td><input type="password" name="adminPswd" id="adminPswd" value="111111" class="in" /></td>
+					<td><input type="password" name="adminPswd" id="adminPswd" class="in" /></td>
 					<td><div class="checkinput"></div></td>
 				</tr>
 				<tr>
 					<th></th>
 					<td class="tit">密码重复：</td>
 					<td>
-						<input type="password" name="adminPswdRepeat" id="adminPswdRepeat" value="111111" class="in" />
+						<input type="password" name="adminPswdRepeat" id="adminPswdRepeat" class="in" />
 						重复输入密码，以确保密码正确
 					</td>
 					<td><div class="checkinput"></div></td>
@@ -102,7 +107,7 @@ jQuery(function(){
 					<th></th>
 					<td class="tit">安全模式密码：</td>
 					<td>
-						<input type="password" name="safeAdminPswd" value="111111" class="in" />
+						<input type="password" name="safeAdminPswd" class="in" />
 						当系统遇到错误时用于恢复系统
 					</td>
 					<td><div class="checkinput"></div></td>
