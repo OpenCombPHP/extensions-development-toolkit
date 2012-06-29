@@ -177,7 +177,7 @@ class CreateSetup extends ControlPanel{
 			
 			foreach($row as &$cell)
 			{
-				$cell = $cell===null? '': ('"'.addslashes($cell).'"') ;
+				$cell = $cell===null? 'NULL': ('"'.addslashes($cell).'"') ;
 			}
 			$arrData[] = $row ;
 		}

@@ -119,7 +119,7 @@ function installExtensions()
 		try{
 			$aExtMeta = \org\opencomb\platform\ext\ExtensionSetup::singleton()->install(new \org\jecat\framework\fs\Folder($sInstallFolder),$aMessageQueue) ;
 		}catch(\org\jecat\framework\db\ExecuteException $e){
-			output("无法连接到数据库，数据库设置错误。",'error') ;
+			output("数据库错误:".$e->message(),'error') ;
 			return false ;
 		}catch(\Exception $e){}
 		
