@@ -7,6 +7,7 @@ use org\jecat\framework\message\MessageQueue;
 use org\opencomb\platform\ext\Extension;
 use org\opencomb\platform\ext\ExtensionMetainfo ;
 use org\opencomb\platform\ext\IExtensionDataInstaller ;
+use org\jecat\framework\fs\Folder;
 
 class DataInstaller implements IExtensionDataInstaller
 {
@@ -46,10 +47,10 @@ class DataInstaller implements IExtensionDataInstaller
 		
 		// 4. files
 		<if '!empty($dataFolder)' >
-		// $sDataFolder = '{=$dataFolder}';
-		// $sToFolder = $aExtension ->filesFolder()->path();
-		// Folder::singleton()->copy($sDataFolder,$sToFolder);
-		// $aMessageQueue->create(Message::success,'复制文件夹： `%s` to `%s`',array($sDataFolder,$sToFolder));
+		$sFromPath = '{=$dataFolder}';
+		$sDestPath = $aExtension ->filesFolder()->path();
+		Folder::RecursiveCopy( $sFromPath , $sDestPath );
+		$aMessageQueue->create(Message::success,'复制文件夹： `%s` to `%s`',array($sFromPath,$sDestPath));
 		</if>
 	}
 }

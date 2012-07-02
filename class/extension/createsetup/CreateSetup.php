@@ -78,10 +78,16 @@ class CreateSetup extends ControlPanel{
 				if($aToFolder->exists()){
 					$aToFolder->delete(true);
 				}
-				//$this->aExtension->filesFolder()->copy($this->sDataFolder);
+				$sFromPath = $this->aExtension->filesFolder()->path();
+				$sDestPath = $this->sDataFolder;
+				Folder::RecursiveCopy( $sFromPath , $sDestPath );
 				$this->createMessage(
 					Message::notice,
-					'由于 FSO 中的 copy() 方法被删除，暂时不提供打包文件功能'
+					'debug : copy from `%s` to `%s`',
+					array(
+						$sFromPath,
+						$sDestPath
+					)
 				);
 			}catch(\Exception $e){
 				$this->createMessage(Message::error,'copy folder error :%s',$e->message());
