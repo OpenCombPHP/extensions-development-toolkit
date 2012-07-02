@@ -63,6 +63,7 @@ class ExtensionPackages extends ControlPanel{
 			
 			$aZip = new PclZip($aPackagedFSO->path()) ;
 			$installFolder = new Folder($package['installPath']);
+			$arrPackagedFileList = array() ;
 			foreach($installFolder->iterator(FSIterator::FILE|FSIterator::FOLDER|FSIterator::RECURSIVE_SEARCH) as $sSubPath)
 			{
 				if( empty($includeGit) and preg_match('`(^|/)\\.(git|svn|cvs)(/|$)`',$sSubPath) )
@@ -77,11 +78,18 @@ class ExtensionPackages extends ControlPanel{
 				}
 				else
 				{
-					$this->view()->createMessage(Message::success,'打包文件:%s',$sPath);
+					$arrPackagedFileList [] = $sPath ;
 				}
 			}
 
-			$this->view()->createMessage(Message::notice,'%s打包成功',array($name));
+			$this->view()->createMessage(
+				Message::success,
+				'%s打包成功<button onclick=\'showPackagedFileList(this,%s)\'>详细</button>',
+				array(
+					$name,
+					json_encode($arrPackagedFileList),
+				)
+			);
 			
 			// disable tempsave
 			$this->arrPackageList = null;

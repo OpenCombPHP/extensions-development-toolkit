@@ -1,6 +1,58 @@
 <lib name="jquery" />
 <h1>制作扩展安装包</h1>
 
+<style>
+.filelist{
+	max-width:500px;
+	max-height:300px;
+	word-break: break-all;
+	overflow: auto;
+	text-overflow:ellipsis;
+	background:#3AADCB ;
+	color:white;
+	border-style: solid;
+	border-color: gray;
+}
+</style>
+<script type="text/javascript">
+function showPackagedFileList(o,list){
+	var isListShow=true;
+	var objDiv = jQuery("<div>",{
+		'class' : 'filelist',
+	});
+	// </div>
+	
+	
+	for(var i in list){
+		jQuery("<div>",{
+			'class' : 'filepath',
+			text:list[i]
+		}).appendTo(objDiv);
+		// </div>
+	}
+	objDiv.appendTo('body');
+	
+	var offset = jQuery(o).offset() ;
+	offset.left += 100 ;
+	console.log( offset );
+	jQuery(objDiv).offset( offset );
+	console.log( objDiv.offset() );
+	
+	o.onclick=function(){
+		console.log(isListShow);
+		console.log(list.length);
+		if( isListShow ){
+			objDiv.css('display','block');
+			jQuery(o).text('收起');
+		}else{
+			objDiv.css('display','none');
+			jQuery(o).text('详细');
+		}
+		isListShow = !isListShow ;
+	}
+	o.onclick();
+}
+</script>
 <msgqueue />
 
 <table border='6' class="article-table">
