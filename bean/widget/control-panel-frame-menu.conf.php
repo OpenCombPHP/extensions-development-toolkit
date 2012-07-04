@@ -53,6 +53,10 @@ return array(
 			'item:template-weave-manager' => array(
 					'title'=>'模板编织管理' ,
 			) ,
+			'item:event-watcher' => array(
+					'title' => '事件管理' ,
+					'controller' => 'org.opencomb.development.toolkit.EventWatcher' ,
+			),
 			'item:codeTidy' => array(
 					'title' => '源代码格式化' ,
 					'link' => '?c=org.opencomb.development.toolkit.compile.CodeTidyView' ,

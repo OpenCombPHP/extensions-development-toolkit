@@ -1,0 +1,30 @@
+<foreach for="$aEventManager->registeredEventClasses()" item="sClass" >
+
+	<hr />
+	<h2>类：{=$sClass}</h2>
+	
+	<div style="padding-left:20px">
+	<foreach for="$aEventManager->registeredEventNames($sClass)" item="sEventName" >
+		<h3>事件::{=$sEventName}</h3>
+		
+		<div style="padding-left:20px">
+		<foreach for="$aEventManager->registeredEventObjectIds($sClass,$sEventName)" item="sObjectId" >
+		
+			<h4>对像:{=$sObjectId}</h4>
+			<div style="padding-left:20px; padding-bottom:10px">
+				处理函数：
+			<foreach for="$aEventManager->registeredHandleIterator($sClass,$sEventName,$sObjectId)" item="arrHanlder" >
+				
+				
+				<div>
+					{= $arrHanlder[0][0] }::{= $arrHanlder[0][1] }()
+				</div>
+	
+			</foreach>
+			</div>
+		</foreach>
+		</div>
+		
+	</foreach>
+	</div>
+</foreach>
