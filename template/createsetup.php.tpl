@@ -47,7 +47,8 @@ class DataInstaller implements IExtensionDataInstaller
 		
 		// 4. files
 		<if '!empty($dataFolder)' >
-		$sFromPath = '{=$dataFolder}';
+		//$sFromPath = '{=$dataFolder}';
+		$sFromPath = $aExtension->metainfo()->installPath().'/data/public';
 		$sDestPath = $aExtension ->filesFolder()->path();
 		Folder::RecursiveCopy( $sFromPath , $sDestPath );
 		$aMessageQueue->create(Message::success,'复制文件夹： `%s` to `%s`',array($sFromPath,$sDestPath));
