@@ -28,7 +28,7 @@ class CreateSetup extends ControlPanel{
 			) ,
 		) ;
 
-	const version = '1.0.7';
+	const version = '1.0.8';
 	public function process()
 	{
 		$this->checkPermissions('您没有使用这个功能的权限,无法继续浏览',array()) ;
@@ -74,23 +74,37 @@ class CreateSetup extends ControlPanel{
 		}
 		// file
 		if($bContainFile and $this->aExtension->filesFolder()->exists() ){
-			$this->sDataFolder = $this->aExtension->metainfo()->installPath().'/data/public';
+			$this->arrFiles = array(
+				array(
+					'fromFolder' => $this->aExtension->filesFolder(),
+					'packPath' => '/data/public',
+					'destPath' => '$aExtension ->filesFolder()->path()',
+				),
+				array(
+					'fromFolder' => $this->aExtension->dataFolder(),
+					'packPath' => '/data/setup',
+					'destPath' => '$aExtension->dataFolder()->path()',
+				),
+			);
 			try{
-				$aToFolder = Folder::singleton()->findFolder($this->sDataFolder,Folder::FIND_AUTO_CREATE_OBJECT );
-				if($aToFolder->exists()){
-					$aToFolder->delete(true);
+				foreach($this->arrFiles as $arrFile){
+					$aToFolder = new Folder($this->aExtension->metainfo()->installPath().$arrFile['packPath'],Folder::FIND_AUTO_CREATE_OBJECT );
+					if($aToFolder->exists()){
+						$aToFolder->delete(true);
+					}
+					
+					$sFromPath = $arrFile['fromFolder']->path();
+					$sDestPath = $this->aExtension->metainfo()->installPath().$arrFile['packPath'] ;
+					Folder::RecursiveCopy( $sFromPath , $sDestPath );
+					$this->createMessage(
+						Message::notice,
+						'debug : copy from `%s` to `%s`',
+						array(
+							$sFromPath,
+							$sDestPath
+						)
+					);
 				}
-				$sFromPath = $this->aExtension->filesFolder()->path();
-				$sDestPath = $this->sDataFolder;
-				Folder::RecursiveCopy( $sFromPath , $sDestPath );
-				$this->createMessage(
-					Message::notice,
-					'debug : copy from `%s` to `%s`',
-					array(
-						$sFromPath,
-						$sDestPath
-					)
-				);
 			}catch(\Exception $e){
 				$this->createMessage(Message::error,'copy folder error :%s',$e->message());
 			}
@@ -142,7 +156,6 @@ class CreateSetup extends ControlPanel{
 		$this->view()->variables()->set('extName',$extName);
 		$this->view()->variables()->set('arrTableInfoList',$this->arrTableInfoList);
 		$this->view()->variables()->set('setting',$this->setting);
-		$this->view()->variables()->set('dataFolder',$this->sDataFolder);
 		$this->view()->variables()->set('setupCode',$strSetupCode);
 	}
 	
@@ -224,7 +237,7 @@ class CreateSetup extends ControlPanel{
 			'className' => $className,
 			'namespace' => $this->ns,
 			'arrTableInfoList' => $this->arrTableInfoList,
-			'dataFolder' => $this->sDataFolder,
+			'arrFiles' => $this->arrFiles,
 			'setting' => $this->setting,
 			'createDataInstallerVersion' => Version::fromString(self::version),
 			'extDevVersion' => Extension::flyweight('development-toolkit')->metainfo()->version(),
@@ -237,7 +250,7 @@ class CreateSetup extends ControlPanel{
 	private $ns = '' ;
 	private $aExtension = null ;
 	private $arrTableInfoList = array();
-	private $sDataFolder = '';
 	private $setting = array();
+	private $arrFiles = null ;
 }
 
