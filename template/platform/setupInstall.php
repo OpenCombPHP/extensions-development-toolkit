@@ -205,7 +205,7 @@ function insertTableRow($sTable,$arrData)
 	}catch(\org\jecat\framework\db\ExecuteException $e){
 		if( $e->isDuplicate() )
 		{
-			output('写入数据时遇到重复数据:','error') ;
+			output('写入数据时遇到重复数据:'.$e->message(),'error') ;
 			return false ;
 		}else{
 			output($e->message()) ;
