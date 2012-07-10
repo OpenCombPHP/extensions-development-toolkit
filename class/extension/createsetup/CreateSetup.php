@@ -11,6 +11,7 @@ use org\jecat\framework\setting\IKey;
 use org\jecat\framework\lang\oop\ClassLoader;
 use org\jecat\framework\fs\Folder;
 use org\jecat\framework\message\Message;
+use org\jecat\framework\util\Version;
 
 class CreateSetup extends ControlPanel{
 	protected $arrConfig = array(
@@ -27,6 +28,7 @@ class CreateSetup extends ControlPanel{
 			) ,
 		) ;
 
+	const version = '1.0.7';
 	public function process()
 	{
 		$this->checkPermissions('您没有使用这个功能的权限,无法继续浏览',array()) ;
@@ -224,6 +226,8 @@ class CreateSetup extends ControlPanel{
 			'arrTableInfoList' => $this->arrTableInfoList,
 			'dataFolder' => $this->sDataFolder,
 			'setting' => $this->setting,
+			'createDataInstallerVersion' => Version::fromString(self::version),
+			'extDevVersion' => Extension::flyweight('development-toolkit')->metainfo()->version(),
 		);
 		$aUI->display('development-toolkit:createsetup.php.tpl',$variables,$aBuffer);
 		return (string)$aBuffer ;

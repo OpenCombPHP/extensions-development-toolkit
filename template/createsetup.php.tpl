@@ -9,6 +9,10 @@ use org\opencomb\platform\ext\ExtensionMetainfo ;
 use org\opencomb\platform\ext\IExtensionDataInstaller ;
 use org\jecat\framework\fs\Folder;
 
+// 这个 DataInstaller 程序是由扩展 development-toolkit 的 create data installer 模块自动生成
+// 扩展 development-toolkit 版本：{=$extDevVersion}
+// create data installer 模块版本：{=$createDataInstallerVersion}
+
 class DataInstaller implements IExtensionDataInstaller
 {
 	public function install(MessageQueue $aMessageQueue,ExtensionMetainfo $aMetainfo)
@@ -47,7 +51,6 @@ class DataInstaller implements IExtensionDataInstaller
 		
 		// 4. files
 		<if '!empty($dataFolder)' >
-		//$sFromPath = '{=$dataFolder}';
 		$sFromPath = $aExtension->metainfo()->installPath().'/data/public';
 		$sDestPath = $aExtension ->filesFolder()->path();
 		Folder::RecursiveCopy( $sFromPath , $sDestPath );
