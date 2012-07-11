@@ -121,7 +121,7 @@ class CreateDistribution extends ControlPanel
 					continue ;
 				}
 				$sSource = $aFolder->path().'/'.$sSubPath ;
-				$aDistributionZip->add($sSource,'/setup/ui/',$aFolder->path()) ;
+				$aDistributionZip->add($sSource,'setup/ui/',$aFolder->path()) ;
 			}
 		}
 		
@@ -146,11 +146,11 @@ class CreateDistribution extends ControlPanel
 		}
 		
 		// 生成文件安装程序并打包
-		$this->packFileByTemplate('/setup','setup.php','development-toolkit:platform/setup.php',$aDistributionZip) ;
-		$this->packFileByTemplate('/setup','setupCheckEnv.php','development-toolkit:platform/setupCheckEnv.php',$aDistributionZip) ;
-		$this->packFileByTemplate('/setup','setupLicence.php','development-toolkit:platform/setupLicence.php',$aDistributionZip) ;
-		$this->packFileByTemplate('/setup','setupInput.php','development-toolkit:platform/setupInput.php',$aDistributionZip) ;
-		$this->packFileByTemplate('/setup','setupInstall.php','development-toolkit:platform/setupInstall.php',$aDistributionZip) ;
+		$this->packFileByTemplate('setup','setup.php','development-toolkit:platform/setup.php',$aDistributionZip) ;
+		$this->packFileByTemplate('setup','setupCheckEnv.php','development-toolkit:platform/setupCheckEnv.php',$aDistributionZip) ;
+		$this->packFileByTemplate('setup','setupLicence.php','development-toolkit:platform/setupLicence.php',$aDistributionZip) ;
+		$this->packFileByTemplate('setup','setupInput.php','development-toolkit:platform/setupInput.php',$aDistributionZip) ;
+		$this->packFileByTemplate('setup','setupInstall.php','development-toolkit:platform/setupInstall.php',$aDistributionZip) ;
 
 		// 打包后 的处理程序
 		if(!empty($arrPlatformInfo['process-after-package']))
