@@ -1,12 +1,8 @@
 <?php 
 
 {= isset($arrPlatformInfo['sSetupCodes'])? $arrPlatformInfo['sSetupCodes']: '' }
-
-$arrMessageQueue = array() ;
 function output($sMessage,$nType='success')
 {
-	//global $arrMessageQueue ;
-	//$arrMessageQueue[] = "<div class='msg-{$nType}'>{$sMessage}</div>" ;
 	echo "<div class='msg-{$nType}'>{$sMessage}</div>\r\n" ;
 }
 
@@ -93,16 +89,15 @@ function setupSetting($sService,$sDbTablePrefix)
 	return true ;
 }
 
-function upgradePlatform(){
+function upgradePlatform(\org\jecat\framework\message\MessageQueue $aMsgQue){
 	// 检查 service 升级
 	$aDataUpgrader = \org\opencomb\platform\service\upgrader\PlatformDataUpgrader::singleton() ; 
-	if(TRUE === $aDataUpgrader->process()){
-		$aDataUpgrader->messageQueue()->display();
+	if(TRUE === $aDataUpgrader->process($aMsgQue)){
 	}
 	return true;
 }
 
-function installExtensions()
+function installExtensions(\org\jecat\framework\message\MessageQueue $aMessageQueue)
 {
 	global $arrExtensionFolders ;
 	foreach($arrExtensionFolders as $sExtName=>$sExtFolder)
@@ -110,43 +105,65 @@ function installExtensions()
 		$sInstallFolder = install_root.'/'.$sExtFolder ;
 		if( !$aDomMetainfo = simplexml_load_file($sInstallFolder.'/metainfo.xml') )
 		{
-			output("无法读取扩展包 {$sPackagePath} 中的 metainfo.xml 文件") ;
+			$aMessageQueue->create(
+				\org\jecat\framework\message\Message::error,
+				'无法读取扩展包 %s 中的 metainfo.xml 文件',
+				$sPackagePath
+			);
 			return false ;
 		}
 		
 		// 安装扩展
-		$aMessageQueue = new \org\jecat\framework\message\MessageQueue() ;
 		try{
 			$aExtMeta = \org\opencomb\platform\ext\ExtensionSetup::singleton()->install(new \org\jecat\framework\fs\Folder($sInstallFolder),$aMessageQueue) ;
 		}catch(\org\jecat\framework\db\ExecuteException $e){
-			output("数据库错误:".$e->message(),'error') ;
+			$aMessageQueue->create(
+				\org\jecat\framework\message\Message::error,
+				'数据库错误: %s',
+				$e->message()
+			);
 			return false ;
-		}catch(\Exception $e){}
-		
-		foreach($aMessageQueue->iterator() as $aMessage)
-		{
-			output($aMessage->message(),$aMessage->type()) ;
-		}
-		if(!empty($e))
-		{
-			output($e->getMessage(),'error') ;
+		}catch(\org\jecat\framework\lang\Exception $e){
+			$aMessageQueue->create(
+				\org\jecat\framework\message\Message::error,
+				'%s',
+				$e->message()
+			);
 			return false ;
 		}
 		
-		output('安装扩展：'.$aExtMeta->title().'('.$aExtMeta->name().':'.$aExtMeta->version().')','success') ;
+		$aMessageQueue->create(
+			\org\jecat\framework\message\Message::success,
+			'安装扩展: %s(%s:%s)',
+			array(
+				$aExtMeta->title(),
+				$aExtMeta->name(),
+				$aExtMeta->version()
+			)
+		);
 		
 		// 激活扩展
-		$aMessageQueue = new \org\jecat\framework\message\MessageQueue() ;
 		try{
 			\org\opencomb\platform\ext\ExtensionSetup::singleton()->enable($aExtMeta->name()) ;
 		}catch(\Exception $e)
 		{
-			output($e->getMessage(),'error') ;
+			$aMessageQueue->create(
+				\org\jecat\framework\message\Message::error,
+				'%s',
+				$e->message()
+			);
 			return false ;
 		}
 		
-		output('激活扩展：'.$aExtMeta->title().'('.$aExtMeta->name().':'.$aExtMeta->version().')','success') ;
-		
+		$aMessageQueue->create(
+			\org\jecat\framework\message\Message::success,
+			'激活扩展: %s(%s:%s)',
+			array(
+				$aExtMeta->title(),
+				$aExtMeta->name(),
+				$aExtMeta->version()
+			)
+		);
 	}
 
 	// 加载所有扩展
@@ -155,40 +172,56 @@ function installExtensions()
 	return true ;
 }
 
-function insertAdminUser()
+function insertAdminUser(\org\jecat\framework\message\MessageQueue $aMessageQueue)
 {
 	$aDB = \org\jecat\framework\db\DB::singleton() ;
 	
 	// 管理员用户组
-	insertTableRow('coresystem:group',array(
+	insertTableRow(
+		'coresystem:group',
+		array(
 			'gid' => 1 ,
 			'name' => '系统管理员组' ,
 			'lft' => 1 ,
 			'rgt' => 2 ,
-	)) ;
-	insertTableRow('coresystem:purview',array(
+		),
+		$aMessageQueue
+	) ;
+	insertTableRow(
+		'coresystem:purview',
+		array(
 			'type' => 'group' ,
 			'id' => 1 ,
 			'extension' => 'coresystem' ,
 			'name' => 'PLATFORM_ADMIN' ,
-	)) ;
-
+		),
+		$aMessageQueue
+	) ;
+	
 	// 管理员帐号
-	insertTableRow('coresystem:user',array(
-			'uid' => 1 ,
+	insertTableRow(
+		'coresystem:user',
+		array(
 			'username' => $_REQUEST['adminName'] ,
 			'password' => md5( md5(md5($_REQUEST['adminName'])) . md5($_REQUEST['adminPswd']) ) ,
 			'registerTime' => time() ,
 			'registerIp' => $_SERVER['REMOTE_ADDR'] ,
-	)) ;
-	insertTableRow('coresystem:group_user_link',array(
-			'uid' => 1 ,
+		),
+		$aMessageQueue
+	) ;
+	$uid = $aDB->lastInsertId();
+	insertTableRow(
+		'coresystem:group_user_link',
+		array(
+			'uid' => $uid ,
 			'gid' => 1 ,
-	)) ;
+		),
+		$aMessageQueue
+	) ;
 	
 	return true ;
 }
-function insertTableRow($sTable,$arrData)
+function insertTableRow($sTable,$arrData,\org\jecat\framework\message\MessageQueue $aMessageQueue)
 {
 	$aInsert = new \org\jecat\framework\db\sql\Insert ( $sTable );
 	foreach($arrData as $sColumn=>&$value)
@@ -199,16 +232,27 @@ function insertTableRow($sTable,$arrData)
 	try{
 		if(!\org\jecat\framework\db\DB::singleton()->execute($aInsert))
 		{
-			output('向数据库导入数据时遇到了错误','error') ;
+			$aMessageQueue->create(
+				\org\jecat\framework\message\Message::error,
+				'向数据库导入数据时遇到了错误'
+			);
 			return false ;
 		}
 	}catch(\org\jecat\framework\db\ExecuteException $e){
 		if( $e->isDuplicate() )
 		{
-			output('写入数据时遇到重复数据:'.$e->message(),'error') ;
+			$aMessageQueue->create(
+				\org\jecat\framework\message\Message::error,
+				'写入数据时遇到重复数据:%s',
+				$e->message()
+			);
 			return false ;
 		}else{
-			output($e->message()) ;
+			$aMessageQueue->create(
+				\org\jecat\framework\message\Message::error,
+				'%s',
+				$e->message()
+			);
 			return false ;
 		}
 	}
@@ -238,33 +282,44 @@ function install()
 	$aLoader = require_once install_root.'/common.php';
 	$aLoader->startup();
 	
-	// 执行平台升级程序
-	if(!upgradePlatform()){
-		return false;
-	}
+	$aMsgQue = new \org\jecat\framework\message\MessageQueue() ;
+	$rtn = true ;
+	do{
+		// 执行平台升级程序
+		if(!upgradePlatform($aMsgQue)){
+			$rtn = false ;
+			break;
+		}
+		
+		// 安装扩展
+		if(!installExtensions($aMsgQue))
+		{
+			$rtn = false ;
+			break;
+		}
+		
+		// 设置管理员用户
+		if(!insertAdminUser($aMsgQue))
+		{
+			$rtn = false ;
+			break;
+		}
+		
+		// 禁止写入缓存
+		\org\opencomb\platform\service\ServiceSerializer::singleton()->clearSystemObjects() ;
+		
+		$aMsgQue->create(
+			\org\jecat\framework\message\Message::success,
+			'系统安装完毕，感谢使用%s。',
+			'{=$sDistributionTitle}'
+		);
+		
+		$rtn = true ;
+	}while(false);
 	
-	// 安装扩展
-	if(!installExtensions())
-	{
-		return false ;
-	}
+	$aMsgQue->display();
 	
-	// 设置管理员用户
-	if(!insertAdminUser())
-	{
-		return false ;
-	}
-	
-	// 禁止写入缓存
-	\org\opencomb\platform\service\ServiceSerializer::singleton()->clearSystemObjects() ;
-
-	
-	output("系统安装完毕，感谢使用{=$sDistributionTitle}。") ;
-
-
-	// \org\jecat\framework\db\DB::singleton()->executeLog(true) ;
-	
-	return true ;
+	return $rtn ;
 }
 ?>
 
