@@ -307,6 +307,8 @@ function install()
 		
 		// 禁止写入缓存
 		\org\opencomb\platform\service\ServiceSerializer::singleton()->clearSystemObjects() ;
+		// 清空缓存
+		\org\opencomb\platform\service\ServiceSerializer::singleton()->clearRestoreCache();
 		
 		$aMsgQue->create(
 			\org\jecat\framework\message\Message::success,
