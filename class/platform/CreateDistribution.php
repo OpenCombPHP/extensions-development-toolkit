@@ -106,8 +106,8 @@ class CreateDistribution extends ControlPanel
 		$aDistributionZip->add($sPlatformRoot.'/Loader.php',PCLZIP_OPT_REMOVE_PATH,$sPlatformRoot) ;
 		$aDistributionZip->add($sPlatformRoot.'/common.php',PCLZIP_OPT_REMOVE_PATH,$sPlatformRoot) ;
 		$aDistributionZip->add($sPlatformRoot.'/PhpVersionError.php',PCLZIP_OPT_REMOVE_PATH,$sPlatformRoot) ;
-		$this->packFolder($sPlatformRoot.'/framework/'.$this->params['framework_version'],'framework/'.$this->params['framework_version'],$aDistributionZip,$bIncludeRepos) ;
-		$this->packFolder($sPlatformRoot.'/platform/'.$this->params['platform_version'],'platform/'.$this->params['platform_version'],$aDistributionZip,$bIncludeRepos) ;
+		$this->packFolder(\org\jecat\framework\PATH,'framework/'.$this->params['framework_version'],$aDistributionZip,$bIncludeRepos) ;
+		$this->packFolder(\org\opencomb\platform\PATH,'platform/'.$this->params['platform_version'],$aDistributionZip,$bIncludeRepos) ;
 		$this->packFolder($sPlatformRoot.'/vfs','vfs',$aDistributionZip,$bIncludeRepos) ;
 		
 		// 打包 setup ui fiels
