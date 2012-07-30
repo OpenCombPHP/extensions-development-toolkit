@@ -28,7 +28,7 @@ class CreateSetup extends ControlPanel{
 			) ,
 		) ;
 
-	const version = '1.0.8';
+	const version = '1.0.10';
 	public function process()
 	{
 		$this->checkPermissions('您没有使用这个功能的权限,无法继续浏览',array()) ;
@@ -163,6 +163,9 @@ class CreateSetup extends ControlPanel{
 		
 		$aDB = DB::singleton() ;
 		$arrRes = $aDB->query("SHOW CREATE TABLE `".$aDB->transTableName($tableName)."`")->fetch() ;
+		
+		// 转义双引号
+		$arrRes['Create Table'] = str_replace( '"' , '\"' , $arrRes['Create Table'] );
 		
 		// 去掉数据表前缀
 		if($sTablePrefix=$aDB->tableNamePrefix())
