@@ -118,25 +118,37 @@ class CreateSetup extends ControlPanel{
 			}
 		}
 		
-		$aCodeFile = $aPackage->folder()->findFile('setup/DataInstaller.php',Folder::CREATE_RECURSE_DIR | Folder::FIND_AUTO_CREATE );
 		try{
-			@$aWriter = $aCodeFile->openWriter();
-			$aWriter->write($strSetupCode);
-			$aWriter->flush();
-			$this->createMessage(Message::success,"生成了扩展 %s 的数据安装类：%s",array($extName,$aCodeFile->path())) ;
+			@$aCodeFile = $aPackage->folder()->findFile('setup/DataInstaller.php',Folder::CREATE_RECURSE_DIR | Folder::FIND_AUTO_CREATE );
+			try{
+				@$aWriter = $aCodeFile->openWriter();
+				$aWriter->write($strSetupCode);
+				$aWriter->flush();
+				$this->createMessage(Message::success,"生成了扩展 %s 的数据安装类：%s",array($extName,$aCodeFile->path())) ;
+			}catch(\org\jecat\framework\lang\Exception $e){
+				$this->createMessage(
+					Message::error,
+					"无法写入文件：%s ， 请检查是否有写入权限",
+					array(
+						$aCodeFile->path()
+					)
+				) ;
+			}
 		}catch(\org\jecat\framework\lang\Exception $e){
 			$this->createMessage(
 				Message::error,
-				"无法写入文件：%s ， 请检查是否有写入权限",
+				'无法创建文件:%s,请检查是否有写入权限',
 				array(
-					$aCodeFile->path()
+					$aPackage->folder()->path().'/setup/DataInstaller.php'
 				)
-			) ;
+			);
 		}
+		
 		// update meta info
 		if($bUpdateMetainfo){
 			$sMetainfoFilePath = $this->aExtension->metainfo()->installPath().'/metainfo.xml';
 			$aSimpleXML = simplexml_load_file($sMetainfoFilePath) ;
+			$aSimpleXML->data->version = (string)$this->aExtension->metainfo()->version();
 			$aSimpleXML->data->installer = $this->ns.'\setup\DataInstaller';
 			@$SaveResult = $aSimpleXML->asXML($sMetainfoFilePath);
 			if( $SaveResult ){
