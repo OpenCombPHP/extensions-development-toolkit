@@ -107,8 +107,8 @@ function installExtensions(\org\jecat\framework\message\MessageQueue $aMessageQu
 		{
 			$aMessageQueue->create(
 				\org\jecat\framework\message\Message::error,
-				'无法读取扩展包 %s 中的 metainfo.xml 文件',
-				$sPackagePath
+				'无法读取扩展包 `%s` 中的 metainfo.xml 文件',
+				$sInstallFolder
 			);
 			return false ;
 		}
