@@ -30,6 +30,7 @@ class CreateDistribution extends ControlPanel
 			) ,
 		) ;
 	
+	const version = '1.0.2';
 	public function process()
 	{
 		$this->checkPermissions('您没有使用这个功能的权限,无法继续浏览',array()) ;
@@ -145,6 +146,9 @@ class CreateDistribution extends ControlPanel
 			call_user_func($arrPlatformInfo['process-before-package'],$this,$aDistributionZip) ;
 		}
 		
+		$this->params['CreateDistributionVersion'] = Version::fromString(self::version);
+		$this->params['extDevVersion'] = Extension::flyweight('development-toolkit')->metainfo()->version();
+			
 		// 生成文件安装程序并打包
 		$this->packFileByTemplate('setup','setup.php','development-toolkit:platform/setup.php',$aDistributionZip) ;
 		$this->packFileByTemplate('setup','setupCheckEnv.php','development-toolkit:platform/setupCheckEnv.php',$aDistributionZip) ;
