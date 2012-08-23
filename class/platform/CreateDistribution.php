@@ -1,7 +1,7 @@
 <?php
 namespace org\opencomb\development\toolkit\platform ;
 
-use net\phpconcept\pclzip\PclZip;
+use org\opencomb\development\toolkit\zip\ZipAdapter;
 use org\jecat\framework\message\Message;
 use org\opencomb\platform\Platform;
 use org\opencomb\coresystem\auth\Id;
@@ -30,6 +30,7 @@ class CreateDistribution extends ControlPanel
 			) ,
 		) ;
 	
+	const version = '1.0.3';
 	public function process()
 	{
 		$this->checkPermissions('您没有使用这个功能的权限,无法继续浏览',array()) ;
@@ -64,11 +65,10 @@ class CreateDistribution extends ControlPanel
 		$aDistributionFolder = Extension::flyweight('development-toolkit')->filesFolder()->findFolder('distributions',Folder::FIND_AUTO_CREATE) ; 
 		$aPackageFile = $aDistributionFolder->findFile($sDistributionZipFilename,Folder::FIND_AUTO_CREATE_OBJECT) ;
 		$sPackagePath = $aPackageFile->path() ;
-		if(file_exists($sPackagePath))
-		{
-			unlink($sPackagePath) ;
-		}
-		$aDistributionZip = new PclZip($sPackagePath) ;
+		
+		$aDistributionZip = new ZipAdapter() ;
+		// $aDistributionZip = new ZipAdapter(ZipAdapter::Type_PclZip) ;
+		$aDistributionZip->open($sPackagePath, ZipAdapter::CREATE | ZipAdapter::OVERWRITE);
 		
 		// 打包扩展
 		$arrExtensionFolders = $arrLicenceList = array() ;
@@ -102,10 +102,10 @@ class CreateDistribution extends ControlPanel
 		
 		// 打包系统文件
 		$sPlatformRoot = Platform::singleton()->installFolder(true) ;
-		$aDistributionZip->add($sPlatformRoot.'/index.php',PCLZIP_OPT_REMOVE_PATH,$sPlatformRoot) ;
-		$aDistributionZip->add($sPlatformRoot.'/Loader.php',PCLZIP_OPT_REMOVE_PATH,$sPlatformRoot) ;
-		$aDistributionZip->add($sPlatformRoot.'/common.php',PCLZIP_OPT_REMOVE_PATH,$sPlatformRoot) ;
-		$aDistributionZip->add($sPlatformRoot.'/PhpVersionError.php',PCLZIP_OPT_REMOVE_PATH,$sPlatformRoot) ;
+		$aDistributionZip->addFile($sPlatformRoot.'/index.php','index.php') ;
+		$aDistributionZip->addFile($sPlatformRoot.'/Loader.php','Loader.php') ;
+		$aDistributionZip->addFile($sPlatformRoot.'/common.php','common.php') ;
+		$aDistributionZip->addFile($sPlatformRoot.'/PhpVersionError.php','PhpVersionError.php') ;
 		$this->packFolder(\org\jecat\framework\PATH,'framework/'.$this->params['framework_version'],$aDistributionZip,$bIncludeRepos) ;
 		$this->packFolder(\org\opencomb\platform\PATH,'platform/'.$this->params['platform_version'],$aDistributionZip,$bIncludeRepos) ;
 		$this->packFolder($sPlatformRoot.'/vfs','vfs',$aDistributionZip,$bIncludeRepos) ;
@@ -113,7 +113,8 @@ class CreateDistribution extends ControlPanel
 		// 打包 setup ui fiels
 		foreach(Service::singleton()->publicFolders()->folderIterator('development-toolkit.oc.setup') as $aFolder)
 		{
-			foreach($aFolder->iterator() as $sSubPath)
+			$aIterator = $aFolder->iterator() ;
+			foreach( $aIterator as $sSubPath)
 			{
 				// 过滤已知版本库
 				if( preg_match('`(^|/)(\\.svn|\\.git|\\.cvs)(/|$)`',$sSubPath) )
@@ -121,7 +122,12 @@ class CreateDistribution extends ControlPanel
 					continue ;
 				}
 				$sSource = $aFolder->path().'/'.$sSubPath ;
-				$aDistributionZip->add($sSource,'setup/ui/',$aFolder->path()) ;
+				$sTarget = 'setup/ui/'.$sSubPath;
+				if( $aIterator->isFile() ){
+					$aDistributionZip->addFile($sSource,$sTarget) ;
+				}else{
+					$aDistributionZip->addEmptyFolder($sSource,$sTarget) ;
+				}
 			}
 		}
 		
@@ -145,6 +151,9 @@ class CreateDistribution extends ControlPanel
 			call_user_func($arrPlatformInfo['process-before-package'],$this,$aDistributionZip) ;
 		}
 		
+		$this->params['CreateDistributionVersion'] = Version::fromString(self::version);
+		$this->params['extDevVersion'] = Extension::flyweight('development-toolkit')->metainfo()->version();
+			
 		// 生成文件安装程序并打包
 		$this->packFileByTemplate('setup','setup.php','development-toolkit:platform/setup.php',$aDistributionZip) ;
 		$this->packFileByTemplate('setup','setupCheckEnv.php','development-toolkit:platform/setupCheckEnv.php',$aDistributionZip) ;
@@ -158,30 +167,29 @@ class CreateDistribution extends ControlPanel
 			call_user_func($arrPlatformInfo['process-after-package'],$this,$aDistributionZip) ;
 		}
 		
+		$aDistributionZip->close();
+		
 		$this->createMessage(Message::success,"%s 安装程序制作完成 (<a href='%s'>下载</a>)",array($this->params['sDistributionTitle'],$aPackageFile->httpUrl())) ;
 		
 		return ;
 	}
 	
-	public function packFileByTemplate($sPackageFolder,$sFileName,$sTemplate,PclZip $aZip)
+	public function packFileByTemplate($sPackageFolder,$sFileName,$sTemplate,ZipAdapter $aZip)
 	{
 		$aStream = new OutputStreamBuffer() ;
 		UIFactory::singleton()->create()->display($sTemplate,$this->params(),$aStream) ;
 		$aSetupTmp = Extension::flyweight('development-toolkit')->tmpFolder()->createChildFile($sFileName) ;
 		$aSetupTmp->openWriter()->write($aStream) ;
-
-		$aZip->add($aSetupTmp->path(),$sPackageFolder,$aSetupTmp->dirPath()) ;
-		$aSetupTmp->delete() ;
+		
+		$sSourcePath = $aSetupTmp->path() ;
+		$sTargetPath = $sPackageFolder.'/'.$sFileName;
+		$aZip->addFile( $sSourcePath , $sTargetPath );
 	}
 
-	public function packFolder($sFolderPath,$sPackageFolder,PclZip $aZip,$bRepo)
+	public function packFolder($sFolderPath,$sPackageFolder,ZipAdapter $aZip,$bRepo)
 	{
 		$sPath = null ;
-		foreach( explode('/',ltrim($sPackageFolder,'/')) as $sFolderName )
-		{
-			$sPath.= $sFolderName . '/' ;
-			$aZip->add($sFolderPath,$sPath,$sFolderPath) ;
-		}
+		$aZip->addEmptyFolder($sFolderPath,$sPackageFolder) ;
 
 		$aFolder = new Folder($sFolderPath) ;
 		foreach($aIterator=$aFolder->iterator( FSIterator::FILE | FSIterator::FOLDER | FSIterator::RECURSIVE_SEARCH ) as $sPath)
@@ -191,14 +199,11 @@ class CreateDistribution extends ControlPanel
 				continue;
 			}
 			$sLocalPath = $aFolder->path().'/'.$sPath;
-			if($aZip->add($sLocalPath,$sPackageFolder,$aFolder->path())===0)
-			{
-				$this->view->createMessage(
-					Message::error,
-					'打包文件时出错:%s',
-					$sLocalPath
-				);
-				return ;
+			$sPackagePath=$sPackageFolder.'/'.$sPath;
+			if( $aIterator->isFile() ){
+				$aZip->addFile($sLocalPath,$sPackagePath);
+			}else{
+				$aZip->addEmptyFolder($sLocalPath,$sPackagePath);
 			}
 		}
 	}

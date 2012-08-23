@@ -1,3 +1,8 @@
+<?php
+// 这个文件是由扩展 development-toolkit 的 CreateDistribution 模块自动生成
+// 扩展 development-toolkit 版本：{=$extDevVersion}
+// CreateDistribution 模块版本：{=$CreateDistributionVersion}
+?>
 <div class="stepbar">
 	<ul>
 		<li>1. 检查运行环境</li>

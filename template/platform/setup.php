@@ -32,6 +32,10 @@ if(false){
 <?php } else {
 #################################################################################################################
 
+// 这个文件是由扩展 development-toolkit 的 CreateDistribution 模块自动生成
+// 扩展 development-toolkit 版本：{=$extDevVersion}
+// CreateDistribution 模块版本：{=$CreateDistributionVersion}
+
 define('setup_folder',dirname(__FILE__)) ;
 define('install_root',dirname(setup_folder)) ;
 define('install_service',{=$arrPlatformInfo['sInstallServiceFolder']}) ;
