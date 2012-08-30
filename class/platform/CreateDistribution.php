@@ -30,7 +30,7 @@ class CreateDistribution extends ControlPanel
 			) ,
 		) ;
 	
-	const version = '1.0.3';
+	const version = '1.0.4';
 	public function process()
 	{
 		$this->checkPermissions('您没有使用这个功能的权限,无法继续浏览',array()) ;
@@ -109,6 +109,10 @@ class CreateDistribution extends ControlPanel
 		$this->packFolder(\org\jecat\framework\PATH,'framework/'.$this->params['framework_version'],$aDistributionZip,$bIncludeRepos) ;
 		$this->packFolder(\org\opencomb\platform\PATH,'platform/'.$this->params['platform_version'],$aDistributionZip,$bIncludeRepos) ;
 		$this->packFolder($sPlatformRoot.'/vfs','vfs',$aDistributionZip,$bIncludeRepos) ;
+		if( $bIncludeRepos ){
+			$aDistributionZip->addFile($sPlatformRoot.'/.gitignore','.gitignore') ;
+			$this->packFolder($sPlatformRoot.'/.git','.git',$aDistributionZip,$bIncludeRepos) ;
+		}
 		
 		// 打包 setup ui fiels
 		foreach(Service::singleton()->publicFolders()->folderIterator('development-toolkit.oc.setup') as $aFolder)
