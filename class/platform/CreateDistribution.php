@@ -13,6 +13,7 @@ use org\jecat\framework\fs\FSIterator;
 use org\jecat\framework\io\OutputStreamBuffer;
 use org\jecat\framework\ui\xhtml\UIFactory;
 use org\opencomb\platform\service\Service;
+use org\opencomb\platform\service\ServiceFactory;
 use org\jecat\framework\util\Version;
 
 class CreateDistribution extends ControlPanel
@@ -30,7 +31,7 @@ class CreateDistribution extends ControlPanel
 			) ,
 		) ;
 	
-	const version = '1.0.5';
+	const version = '1.0.7';
 	public function process()
 	{
 		$this->checkPermissions('您没有使用这个功能的权限,无法继续浏览',array()) ;
@@ -240,6 +241,13 @@ class CreateDistribution extends ControlPanel
 				// service 安装位置
 				'sInstallServiceFolder' => "install_root.'/services'" ,
 				
+				// serviceSetting
+				'serviceSetting' => array(
+					'type' => ServiceFactory::SCALABLE_SETTING,
+					'innerSetting' => array(
+						'type' => ServiceFactory::FS_SETTING,
+					)
+				),
 			) ,
 			
 
@@ -310,6 +318,14 @@ stream_wrapper_register('saestor','org\\opencomb\\saeadapter\\wrapper\\SaeStorag
 // 注册 SaeServiceFactory
 service\ServiceFactory::setSingleton(new \\org\\opencomb\\saeadapter\\service\\SaeServiceFactory) ;
 " ,
+				
+				// serviceSetting
+				'serviceSetting' => array(
+					'type' => ServiceFactory::SCALABLE_SETTING,
+					'innerSetting' => array(
+						'type' => ServiceFactory::SAE_MEMCACHE_SETTING,
+					)
+				),
 			),
 
 

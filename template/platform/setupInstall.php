@@ -36,57 +36,60 @@ function checkDbSetting()
 	return true ;
 }
 
-function setupSetting($sService,$sDbTablePrefix)
-{
+function setupServiceSettings(){
 	global $framework_version,$platform_version;
-	// 写入 setting -----------------------------
-	$name = $_REQUEST['websiteName'];
-	$arrSettings = array(
-		'service/items.php'		=> array('name'=>$_REQUEST['websiteName']) ,
-		'service/db/items.php'		=> array('config'=>'www') ,
-		'service/db/www/items.php'	=> array(
-										'dsn' => "mysql:host={$_REQUEST['dbAddress']};dbname={$_REQUEST['dbName']}",
-										'username' => $_REQUEST['dbUsername'],
-										'password' => $_REQUEST['dbPswd'],
-										'options' => array (1002 => "SET NAMES 'utf8'",) ,												
-										'table_prefix' => $sDbTablePrefix ,
-				) ,
-	) ;
-	foreach($arrSettings as $sFile=>$arrValue)
-	{
-		$sItemPath = install_service.'/'.$sService.'/setting/'.$sFile ;
-		$sItemFolderPath = dirname($sItemPath) ;
-		if( !file_exists($sItemFolderPath) and !mkdir($sItemFolderPath,0775,true) )
-		{
-			output("无法创建目录：{$sItemFolderPath}/",'error') ;
-			return false ;
-		}
-		if( !file_put_contents($sItemPath,'{='<?php'} return '.var_export($arrValue,true).';') )
-		{
-			output("无法将配置写入文件：{$sItemPath}",'error') ;
-			return false ;
-		}
-
-		output("写入配置文件：{$sItemPath}",'error') ;
-	}
-	
 	// 写入 services setting --------------------------
 	$sServiceSetting = '{='<?php'} return '.var_export(array(
 			'default' => array(
 					'domains' => array('*',$_REQUEST['websiteHost']) ,
 					'framework_version' => $framework_version,
 					'platform_version' => $platform_version,
+					'serviceSetting' => {=var_export($arrPlatformInfo['serviceSetting'],true)},
 			) ,
 			'safemode' => array(
 					'domains' => array('safemode') ,
 					'framework_version' => $framework_version,
 					'platform_version' => $platform_version,
+					'serviceSetting' => {=var_export($arrPlatformInfo['serviceSetting'],true)},
 			) ,
 	),true).';' ;
-	if( !file_put_contents(install_service.'/settings.inc.php',$sServiceSetting) )
+	$sServicePath = install_service;
+	if( !file_exists($sServicePath) and !mkdir($sServicePath,0775,true) )
 	{
-		output("无法将配置写入文件：{install_service}/settings.inc.php",'error') ;
+		output("无法创建目录：{$sServicePath}",'error') ;
 		return false ;
+	}
+	output("创建目录：{$sServicePath}",'success') ;
+	
+	$sServiceSettingFilePath = install_service.'/settings.inc.php';
+	if( !file_put_contents($sServiceSettingFilePath,$sServiceSetting) )
+	{
+		output("无法将配置写入文件：{$sServiceSettingFilePath}",'error') ;
+		return false ;
+	}
+	output("将配置写入文件：{$sServiceSettingFilePath}",'success') ;
+	
+	return true;
+}
+
+function setupSetting($sService,$sDbTablePrefix)
+{
+	// 写入 setting -----------------------------
+	$arrSettings = array(
+		'service/name' => $_REQUEST['websiteName'] ,
+		'service/db/config' => 'www',
+		'service/db/www/dsn' => "mysql:host={$_REQUEST['dbAddress']};dbname={$_REQUEST['dbName']}",
+		'service/db/www/username' => $_REQUEST['dbUsername'],
+		'service/db/www/password' => $_REQUEST['dbPswd'],
+		'service/db/www/options' => array (1002 => "SET NAMES 'utf8'",) ,
+		'service/db/www/table_prefix' => $sDbTablePrefix ,
+	);
+	
+	$aSetting = \org\jecat\framework\setting\Setting::singleton();
+	foreach($arrSettings as $sKey=>$sValue)
+	{
+		$aSetting->setValue($sKey,$sValue);
+		output("写入配置：{$sKey} => {$sValue}",'error') ;
 	}
 	
 	return true ;
@@ -271,18 +274,30 @@ function install()
 		return false ;
 	}
 	
+	// 写入 settings.inc.php
+	if( !setupServiceSettings() ){
+		return false;
+	}
+	
+	// 启动系统
+	$aLoader = require_once install_root.'/common.php';
+	$aLoader->startBaseSystem();
+	
 	// 写入 setting
 	if( !setupSetting('default',$_REQUEST['dbPrefix']) )
 	{
 		return false ;
 	}
+	/*
+		safemode会造成BUG，暂时先删去
+	*/
+	/*
 	if( !setupSetting('safemode','ocsafe_') )
 	{
 		return false ;
 	}
+	*/
 	
-	// 启动系统
-	$aLoader = require_once install_root.'/common.php';
 	$aLoader->startup();
 	
 	$aMsgQue = new \org\jecat\framework\message\MessageQueue() ;
