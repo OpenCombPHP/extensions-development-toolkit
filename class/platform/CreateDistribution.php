@@ -13,6 +13,7 @@ use org\jecat\framework\fs\FSIterator;
 use org\jecat\framework\io\OutputStreamBuffer;
 use org\jecat\framework\ui\xhtml\UIFactory;
 use org\opencomb\platform\service\Service;
+use org\opencomb\platform\service\ServiceFactory;
 use org\jecat\framework\util\Version;
 
 class CreateDistribution extends ControlPanel
@@ -30,7 +31,7 @@ class CreateDistribution extends ControlPanel
 			) ,
 		) ;
 	
-	const version = '1.0.3';
+	const version = '1.0.7';
 	public function process()
 	{
 		$this->checkPermissions('您没有使用这个功能的权限,无法继续浏览',array()) ;
@@ -105,10 +106,15 @@ class CreateDistribution extends ControlPanel
 		$aDistributionZip->addFile($sPlatformRoot.'/index.php','index.php') ;
 		$aDistributionZip->addFile($sPlatformRoot.'/Loader.php','Loader.php') ;
 		$aDistributionZip->addFile($sPlatformRoot.'/common.php','common.php') ;
+		$aDistributionZip->addFile($sPlatformRoot.'/defines.php','defines.php') ;
 		$aDistributionZip->addFile($sPlatformRoot.'/PhpVersionError.php','PhpVersionError.php') ;
 		$this->packFolder(\org\jecat\framework\PATH,'framework/'.$this->params['framework_version'],$aDistributionZip,$bIncludeRepos) ;
 		$this->packFolder(\org\opencomb\platform\PATH,'platform/'.$this->params['platform_version'],$aDistributionZip,$bIncludeRepos) ;
 		$this->packFolder($sPlatformRoot.'/vfs','vfs',$aDistributionZip,$bIncludeRepos) ;
+		if( $bIncludeRepos ){
+			$aDistributionZip->addFile($sPlatformRoot.'/.gitignore','.gitignore') ;
+			$this->packFolder($sPlatformRoot.'/.git','.git',$aDistributionZip,$bIncludeRepos) ;
+		}
 		
 		// 打包 setup ui fiels
 		foreach(Service::singleton()->publicFolders()->folderIterator('development-toolkit.oc.setup') as $aFolder)
@@ -148,7 +154,7 @@ class CreateDistribution extends ControlPanel
 		// 打包前 的处理程序
 		if(!empty($arrPlatformInfo['process-before-package']))
 		{
-			call_user_func($arrPlatformInfo['process-before-package'],$this,$aDistributionZip) ;
+			call_user_func($arrPlatformInfo['process-before-package'],$aDistributionZip) ;
 		}
 		
 		$this->params['CreateDistributionVersion'] = Version::fromString(self::version);
@@ -235,6 +241,13 @@ class CreateDistribution extends ControlPanel
 				// service 安装位置
 				'sInstallServiceFolder' => "install_root.'/services'" ,
 				
+				// serviceSetting
+				'serviceSetting' => array(
+					'type' => ServiceFactory::SCALABLE_SETTING,
+					'innerSetting' => array(
+						'type' => ServiceFactory::FS_SETTING,
+					)
+				),
 			) ,
 			
 
@@ -292,7 +305,7 @@ class CreateDistribution extends ControlPanel
 				// 插入到安装程序中的代码
 				'sSetupCodes' => "
 // 注册 SAE wrapper
-require_once __DIR__.'/../common.php';
+require_once __DIR__.'/../defines.php';
 " ,
 				'finishSetupCheckCode' => " return false ",
 				// 插入到oc.init.php文件中的代码
@@ -305,6 +318,14 @@ stream_wrapper_register('saestor','org\\opencomb\\saeadapter\\wrapper\\SaeStorag
 // 注册 SaeServiceFactory
 service\ServiceFactory::setSingleton(new \\org\\opencomb\\saeadapter\\service\\SaeServiceFactory) ;
 " ,
+				
+				// serviceSetting
+				'serviceSetting' => array(
+					'type' => ServiceFactory::SCALABLE_SETTING,
+					'innerSetting' => array(
+						'type' => ServiceFactory::SAE_MEMCACHE_SETTING,
+					)
+				),
 			),
 
 
@@ -339,9 +360,9 @@ service\ServiceFactory::setSingleton(new \\org\\opencomb\\saeadapter\\service\\S
 		$aPackage->extract('/local/d/project/otp/oc-setup/') ;
 	}
 	
-	private function packSaeAppWizard(CreateDistribution $aDistributionMaker, PclZip $aPackage){	
+	private function packSaeAppWizard(ZipAdapter $aPackage){
 		// 生成 sae_app_wizard.xml
-		$aDistributionMaker->packFileByTemplate(
+		$this->packFileByTemplate(
 				null, 'sae_app_wizard.xml', 'development-toolkit:platform/sae_app_wizard.xml', $aPackage
 		) ;
 		
