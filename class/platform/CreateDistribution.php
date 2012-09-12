@@ -31,7 +31,7 @@ class CreateDistribution extends ControlPanel
 			) ,
 		) ;
 	
-	const version = '1.0.7';
+	const version = '1.0.8';
 	public function process()
 	{
 		$this->checkPermissions('您没有使用这个功能的权限,无法继续浏览',array()) ;

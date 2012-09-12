@@ -144,7 +144,7 @@ jQuery(function(){
 				<tr>
 					<th></th>
 					<td class="tit">数据表前缀：</td>
-					<td><input type="text" name="dbPrefix" value="oc_" class="in" /></td>
+					<td><input type="text" name="dbPrefix" value="oc{=$sDistributionName}_" class="in" /></td>
 					<td><div class="checkinput"></div></td>
 				</tr>
 				
