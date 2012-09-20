@@ -7,7 +7,7 @@ use org\opencomb\platform\ext\Extension;
 use org\jecat\framework\db\DB;
 use org\jecat\framework\ui\xhtml\UIFactory;
 use org\jecat\framework\io\OutputStreamBuffer;
-use org\jecat\framework\setting\IKey;
+use org\jecat\framework\setting\Setting;
 use org\jecat\framework\lang\oop\ClassLoader;
 use org\jecat\framework\fs\Folder;
 use org\jecat\framework\message\Message;
