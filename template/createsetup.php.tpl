@@ -42,11 +42,9 @@ class DataInstaller implements IExtensionDataInstaller
 		// 3. settings
 		<if '!empty($setting)' >
 		$aSetting = $aExtension->setting() ;
-			<foreach for="$setting" key='path' item="items">
-				<foreach for="$items" key='item' item='value'>
-		$aSetting->setItem('{=$path}','{=$item}',{=var_export($value,true)});
-				</foreach>
-		$aMessageQueue->create(Message::success,'保存配置：%s',"{=$path}");
+			<foreach for="$setting" key='key' item="value">
+		$aSetting->setValue('{=$key}',{=var_export($value,true)});
+		$aMessageQueue->create(Message::success,'保存配置：%s',"{=$key}");
 			</foreach>
 		</if>
 		

@@ -28,7 +28,7 @@ class CreateSetup extends ControlPanel{
 			) ,
 		) ;
 
-	const version = '1.0.10';
+	const version = '1.0.11';
 	public function process()
 	{
 		$this->checkPermissions('您没有使用这个功能的权限,无法继续浏览',array()) ;
@@ -70,7 +70,7 @@ class CreateSetup extends ControlPanel{
 		$this->ns = $arrPackage[1] ;
 		// conf
 		if($bContainConf){
-			$this->setting = $this->getSettings();
+			$this->setting = $this->getSettings($this->aExtension->setting());
 		}
 		// file
 		if($bContainFile and $this->aExtension->filesFolder()->exists() ){
@@ -220,27 +220,36 @@ class CreateSetup extends ControlPanel{
 		return array($arrCols,$arrData) ;
 	}
 	
-	private function getSettings(IKey $aKey = null,$parentPath=''){
+	private function getSettings(Setting $aSetting){
 		$arrSetting = array();
-		if( null === $aKey ){
-			$aKey = $this->aExtension->setting()->key('/');
-			$path = $parentPath.'/';
-		}else{
-			$path = $parentPath.$aKey->name().'/';
-		}
-		if( $aKey ){
-			$arrSeting[$path] = array();
-			// sub keys
-			foreach($aKey->keyIterator() as $aSubKey){
-				$arrSubSetting = $this->getSettings($aSubKey,$path);
-				$arrSetting = array_merge( $arrSetting, $arrSubSetting);
-			}
-			// items
-			foreach($aKey->itemIterator() as $itemName){
-				$arrSetting[$path][$itemName] = $aKey->item($itemName);
-			}
+		
+		$arrKeysArray = $aSetting->value('',array());
+		$arrKeyList = self::getSettingKeyList($arrKeysArray);
+		
+		foreach($arrKeyList as $sKey ){
+			$arrSetting [ $sKey ] = $aSetting->value($sKey,null);
 		}
 		return $arrSetting ;
+	}
+	
+	static private function getSettingKeyList(array $arrKeys,$sParentKey=''){
+		$arrKeyList = array();
+		foreach($arrKeys as $sKey => $value){
+			if( empty($sParentKey ) ){
+				$sNextParentKey = $sKey ;
+			}else{
+				$sNextParentKey = $sParentKey.'/'.$sKey ;
+			}
+			if( is_array( $value ) ){
+				$arrKeyList = array_merge(
+					$arrKeyList,
+					self::getSettingKeyList($value,$sNextParentKey)
+				);
+			}else{
+				$arrKeyList [] = $sNextParentKey ;
+			}
+		}
+		return $arrKeyList;
 	}
 	
 	private function createSetup(){
